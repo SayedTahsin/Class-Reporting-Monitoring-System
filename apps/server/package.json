@@ -1,0 +1,32 @@
+{
+	"name": "server",
+	"main": "src/index.ts",
+	"type": "module",
+	"scripts": {
+		"build": "tsc && tsc-alias",
+		"check-types": "tsc --noEmit",
+		"compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
+		"dev": "bun run --hot src/index.ts",
+		"start": "bun run dist/src/index.js",
+		"db:local": "turso dev --db-file local.db",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio"
+	},
+	"dependencies": {
+		"dotenv": "^16.4.7",
+		"zod": "^3.24.2",
+		"hono": "^4.7.6",
+		"@hono/trpc-server": "^0.3.4",
+		"drizzle-orm": "^0.38.4",
+		"@libsql/client": "^0.14.0",
+		"better-auth": "^1.2.6",
+		"@trpc/server": "^11.0.0",
+		"@trpc/client": "^11.0.0"
+	},
+	"devDependencies": {
+		"tsc-alias": "^1.8.11",
+		"typescript": "^5.8.2",
+		"@types/bun": "^1.2.6",
+		"drizzle-kit": "^0.30.5"
+	}
+}
