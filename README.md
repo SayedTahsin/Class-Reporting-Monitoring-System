@@ -71,7 +71,15 @@ DATABASE_URL=file:./local.db
 
 ```env
 VITE_SERVER_URL=http://localhost:3000
+# Optional: Comma-separated list of allowed hosts for Vite dev server
+# VITE_ALLOWED_HOSTS=example.com,127.0.0.1
 ```
+
+> **Note:** If you specify `VITE_ALLOWED_HOSTS`, you need to explicitly load the `.env` file when running the development server:
+>
+> ```bash
+> bun --env-file=apps/web/.env dev
+> ```
 
 ### Generating a secure `BETTER_AUTH_SECRET`
 
@@ -85,6 +93,34 @@ openssl rand -base64 32
 Copy the output and paste it into the `BETTER_AUTH_SECRET` entry in your backend `.env` file.
 
 > **Tip:** Regenerate the secret when deploying to a different environment (staging, production, etc.) to isolate sessions across environments.
+
+### Remote Server Setup (Example)
+
+When deploying to a remote server, update the environment variables accordingly.
+
+**Backend (`apps/server/.env`)**
+
+Replace `example-server.com` with your actual backend domain and `example-frontend.com` with your frontend domain.
+
+```env
+# Allow requests from your frontend domain
+CORS_ORIGIN=https://example-frontend.com
+# Use a secure, unique secret for production
+BETTER_AUTH_SECRET=YOUR_PRODUCTION_SECRET_HERE
+# The public URL of your backend server
+BETTER_AUTH_URL=https://example-server.com
+DATABASE_URL=your_production_database_url
+```
+
+**Frontend (`apps/web/.env`)**
+
+Replace `example-server.com` with your actual backend domain.
+
+```env
+# The public URL of your backend API
+VITE_SERVER_URL=https://example-server.com
+VITE_ALLOWED_HOSTS=example-frontend.com
+```
 
 ## Project Structure
 
