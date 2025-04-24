@@ -13,15 +13,16 @@
 		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
-		"dotenv": "^16.4.7",
-		"zod": "^3.24.2",
-		"hono": "^4.7.6",
 		"@hono/trpc-server": "^0.3.4",
-		"drizzle-orm": "^0.38.4",
 		"@libsql/client": "^0.14.0",
-		"better-auth": "^1.2.6",
+		"@trpc/client": "^11.0.0",
 		"@trpc/server": "^11.0.0",
-		"@trpc/client": "^11.0.0"
+		"better-auth": "^1.2.6",
+		"dotenv": "^16.4.7",
+		"drizzle-orm": "^0.38.4",
+		"hono": "^4.7.6",
+		"ulid": "^3.0.0",
+		"zod": "^3.24.2"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.2.6",
