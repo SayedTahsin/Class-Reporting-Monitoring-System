@@ -8,7 +8,7 @@ import { auditColumns } from './audit_column';
 
 
 export const classSchedule = sqliteTable("class_schedule", {
-  date: integer("date", { mode: "timestamp" }).notNull(),
+  date: integer("date", { mode: "timestamp_ms" }).notNull(),
   slotId: integer("slot_id").notNull().references(() => slot.id),
   batchId: text("batch_id").notNull().references(() => batch.id),
   subjectId: text("subject_id").notNull().references(() => subject.id),

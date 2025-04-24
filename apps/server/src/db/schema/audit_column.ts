@@ -2,13 +2,13 @@ import {  integer } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 
 export const auditColumns = {
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`(strftime('%s','now'))`), 
 
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`(strftime('%s','now'))`), 
 
-  deletedAt: integer("deleted_at", { mode: "timestamp" }), 
+  deletedAt: integer("deleted_at", { mode: "timestamp_ms" }), 
 };
