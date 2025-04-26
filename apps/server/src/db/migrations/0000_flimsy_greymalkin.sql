@@ -34,12 +34,13 @@ CREATE TABLE `user` (
 	`email` text NOT NULL,
 	`email_verified` integer NOT NULL,
 	`image` text,
-	`username` text NOT NULL,
-	`batch_id` text NOT NULL,
-	`phone` text NOT NULL,
-	`role` text NOT NULL,
+	`username` text,
+	`batch_id` text,
+	`phone` text,
+	`role` text,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
+	`deleted_at` integer,
 	FOREIGN KEY (`batch_id`) REFERENCES `batch`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
@@ -104,7 +105,12 @@ CREATE TABLE `slot` (
 	`end_time` text NOT NULL,
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`deleted_at` integer
+	`deleted_at` integer,
+	CONSTRAINT "time_format" CHECK(
+    "slot"."start_time" GLOB '[0-2][0-9]:[0-5][0-9]' 
+    AND "slot"."end_time" GLOB '[0-2][0-9]:[0-5][0-9]' 
+    AND "slot"."start_time" < "slot"."end_time"
+  )
 );
 --> statement-breakpoint
 CREATE TABLE `subject` (
