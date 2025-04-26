@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "80147031-63be-4e1e-9290-9743247b6628",
+  "id": "b8e1fbfa-c988-4cfd-903a-a1d8a3a54a3f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -249,28 +249,28 @@
           "name": "username",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "batch_id": {
           "name": "batch_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "phone": {
           "name": "phone",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "role": {
           "name": "role",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "created_at": {
@@ -285,6 +285,13 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         }
       },
@@ -747,7 +754,12 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {}
+      "checkConstraints": {
+        "time_format": {
+          "name": "time_format",
+          "value": "\n    \"slot\".\"start_time\" GLOB '[0-2][0-9]:[0-5][0-9]' \n    AND \"slot\".\"end_time\" GLOB '[0-2][0-9]:[0-5][0-9]' \n    AND \"slot\".\"start_time\" < \"slot\".\"end_time\"\n  "
+        }
+      }
     },
     "subject": {
       "name": "subject",

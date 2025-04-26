@@ -13,6 +13,8 @@ export const user = sqliteTable("user", {
   role: text("role"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  deletedAt: integer("deleted_at", { mode: "timestamp" }), 
+
 });
 
 export const session = sqliteTable("session", {
