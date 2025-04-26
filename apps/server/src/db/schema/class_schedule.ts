@@ -2,7 +2,7 @@ import { sqliteTable, text, integer, primaryKey, uniqueIndex, index } from "driz
 import { slot } from "./slot";
 import { batch } from "./batch";
 import { subject } from "./subject";
-import { user } from "./user";
+import { user } from "./auth";
 import { room } from "./room";
 import { auditColumns } from './audit_column';
 

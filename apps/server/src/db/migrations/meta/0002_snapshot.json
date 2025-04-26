@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "80147031-63be-4e1e-9290-9743247b6628",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "8b9af7c3-4dea-4869-b50f-41283f42c0b9",
+  "prevId": "7a0b2a72-6041-4136-ab66-4db0fa1ff833",
   "tables": {
     "account": {
       "name": "account",
@@ -249,28 +249,28 @@
           "name": "username",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "batch_id": {
           "name": "batch_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "phone": {
           "name": "phone",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "role": {
           "name": "role",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "created_at": {
