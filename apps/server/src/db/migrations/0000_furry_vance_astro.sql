@@ -107,20 +107,12 @@ CREATE TABLE `todo` (
 --> statement-breakpoint
 CREATE TABLE `user` (
 	`id` text PRIMARY KEY NOT NULL,
-	`username` text NOT NULL,
 	`name` text NOT NULL,
 	`email` text NOT NULL,
-	`email_verified` integer DEFAULT false NOT NULL,
+	`email_verified` integer NOT NULL,
 	`image` text,
-	`batch_id` text NOT NULL,
-	`phone` text NOT NULL,
-	`role` text NOT NULL,
-	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`deleted_at` integer,
-	FOREIGN KEY (`batch_id`) REFERENCES `batch`(`id`) ON UPDATE no action ON DELETE no action
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `user_username_unique` ON `user` (`username`);--> statement-breakpoint
-CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint
-CREATE INDEX `user_batch` ON `user` (`batch_id`);
+CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);
