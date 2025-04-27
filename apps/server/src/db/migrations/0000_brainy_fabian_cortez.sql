@@ -68,17 +68,17 @@ CREATE TABLE `class_schedule` (
 	`date` integer NOT NULL,
 	`slot_id` integer NOT NULL,
 	`batch_id` text NOT NULL,
-	`subject_id` text NOT NULL,
+	`course_id` text NOT NULL,
 	`teacher_id` text NOT NULL,
 	`room_id` text NOT NULL,
-	`status` text NOT NULL,
+	`status` text DEFAULT 'notdelivered' NOT NULL,
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`deleted_at` integer,
 	PRIMARY KEY(`date`, `slot_id`),
 	FOREIGN KEY (`slot_id`) REFERENCES `slot`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`batch_id`) REFERENCES `batch`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`subject_id`) REFERENCES `subject`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`course_id`) REFERENCES `course`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`teacher_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`room_id`) REFERENCES `room`(`id`) ON UPDATE no action ON DELETE no action
 );
@@ -86,10 +86,21 @@ CREATE TABLE `class_schedule` (
 CREATE UNIQUE INDEX `data_slot_room` ON `class_schedule` (`date`,`slot_id`,`room_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `date_slot_teacher` ON `class_schedule` (`date`,`slot_id`,`teacher_id`);--> statement-breakpoint
 CREATE INDEX `schedule_batch` ON `class_schedule` (`batch_id`);--> statement-breakpoint
-CREATE INDEX `schedule_subject` ON `class_schedule` (`subject_id`);--> statement-breakpoint
+CREATE INDEX `schedule_course` ON `class_schedule` (`course_id`);--> statement-breakpoint
 CREATE INDEX `schedule_teacher` ON `class_schedule` (`teacher_id`);--> statement-breakpoint
 CREATE INDEX `schedule_room` ON `class_schedule` (`room_id`);--> statement-breakpoint
 CREATE INDEX `schedule_slot` ON `class_schedule` (`slot_id`);--> statement-breakpoint
+CREATE TABLE `course` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`title` text NOT NULL,
+	`credits` integer NOT NULL,
+	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`deleted_at` integer
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `course_name_unique` ON `course` (`name`);--> statement-breakpoint
 CREATE TABLE `room` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
@@ -113,15 +124,6 @@ CREATE TABLE `slot` (
   )
 );
 --> statement-breakpoint
-CREATE TABLE `subject` (
-	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`deleted_at` integer
-);
---> statement-breakpoint
-CREATE UNIQUE INDEX `subject_name_unique` ON `subject` (`name`);--> statement-breakpoint
 CREATE TABLE `todo` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`text` text NOT NULL,

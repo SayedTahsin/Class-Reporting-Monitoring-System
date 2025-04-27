@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b8e1fbfa-c988-4cfd-903a-a1d8a3a54a3f",
+  "id": "5860c504-38a7-4e67-934f-a10c4199f849",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -461,8 +461,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "subject_id": {
-          "name": "subject_id",
+        "course_id": {
+          "name": "course_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -487,7 +487,8 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'notdelivered'"
         },
         "created_at": {
           "name": "created_at",
@@ -539,10 +540,10 @@
           ],
           "isUnique": false
         },
-        "schedule_subject": {
-          "name": "schedule_subject",
+        "schedule_course": {
+          "name": "schedule_course",
           "columns": [
-            "subject_id"
+            "course_id"
           ],
           "isUnique": false
         },
@@ -595,12 +596,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "class_schedule_subject_id_subject_id_fk": {
-          "name": "class_schedule_subject_id_subject_id_fk",
+        "class_schedule_course_id_course_id_fk": {
+          "name": "class_schedule_course_id_course_id_fk",
           "tableFrom": "class_schedule",
-          "tableTo": "subject",
+          "tableTo": "course",
           "columnsFrom": [
-            "subject_id"
+            "course_id"
           ],
           "columnsTo": [
             "id"
@@ -644,6 +645,75 @@
           "name": "class_schedule_date_slot_id_pk"
         }
       },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "course": {
+      "name": "course",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "credits": {
+          "name": "credits",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%s','now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%s','now'))"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "course_name_unique": {
+          "name": "course_name_unique",
+          "columns": [
+            "name"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
@@ -760,61 +830,6 @@
           "value": "\n    \"slot\".\"start_time\" GLOB '[0-2][0-9]:[0-5][0-9]' \n    AND \"slot\".\"end_time\" GLOB '[0-2][0-9]:[0-5][0-9]' \n    AND \"slot\".\"start_time\" < \"slot\".\"end_time\"\n  "
         }
       }
-    },
-    "subject": {
-      "name": "subject",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(strftime('%s','now'))"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(strftime('%s','now'))"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "subject_name_unique": {
-          "name": "subject_name_unique",
-          "columns": [
-            "name"
-          ],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
     },
     "todo": {
       "name": "todo",

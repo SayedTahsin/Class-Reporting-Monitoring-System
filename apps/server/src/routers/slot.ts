@@ -1,0 +1,77 @@
+import { eq , isNull} from 'drizzle-orm'
+import { z } from 'zod'
+import { db } from '../db'
+import { slot } from '../db/schema/slot'
+import { router, protectedProcedure } from '../lib/trpc'
+
+export const slotRouter = router({
+  getAll: protectedProcedure.query(async () => {
+    return await db.select().from(slot).where(isNull(slot.deletedAt)) 
+  }),
+
+  getById: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      return await db.select().from(slot).where(eq(slot.id, input.id))
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const now = new Date()
+      await db
+        .update(slot)
+        .set({
+          deletedAt: now,
+          updatedAt: now,
+        })
+        .where(eq(slot.id, input.id))
+      return { success: true }
+    }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        startTime: z.string().optional(),
+        endTime: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { id, ...updateData } = input
+      const now = new Date()
+
+      if (Object.keys(updateData).length === 0) {
+        throw new Error('No fields provided for update.')
+      }
+
+      await db
+        .update(slot)
+        .set({
+          ...updateData,
+          updatedAt: now,
+        })
+        .where(eq(slot.id, id))
+
+      return { success: true }
+    }),
+
+  create: protectedProcedure
+    .input(
+      z.object({
+        startTime: z.string(),
+        endTime: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const now = new Date()
+      const newSlot = await db.insert(slot).values({
+        startTime: input.startTime,
+        endTime: input.endTime,
+        createdAt: now,
+        updatedAt: now,
+      })
+
+      return { success: true, slot: newSlot }
+    }),
+})
