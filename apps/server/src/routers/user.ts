@@ -39,7 +39,7 @@ export const userRouter = router({
         image: z.string().optional(),
         username: z.string().optional(),
         batchId: z.string().optional(),
-        role: z.string().optional(), 
+        roleId: z.string().optional(), 
       })
     )
     .mutation(async ({ ctx, input }) => {

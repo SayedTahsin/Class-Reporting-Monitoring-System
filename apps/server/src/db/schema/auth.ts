@@ -1,5 +1,6 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { batch } from "./batch";
+import { role } from "./pbac";
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -10,7 +11,7 @@ export const user = sqliteTable("user", {
   username: text("username").unique(),
   batchId: text("batch_id").references(() => batch.id),
   phone: text("phone"),
-  role: text("role"),
+  roleId: text("role_id").references(() => role.id),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   deletedAt: integer("deleted_at", { mode: "timestamp" }), 
