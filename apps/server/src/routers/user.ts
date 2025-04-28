@@ -23,7 +23,9 @@ export const userRouter = router({
       .update(user)
       .set({
         deletedAt: now,
-        updatedAt: now
+        updatedAt: now,
+        updatedBy: ctx.session.user.id,
+        deletedBy: ctx.session.user.id
       })
       .where(eq(user.id, userID))
     return { success: true }
@@ -53,6 +55,8 @@ export const userRouter = router({
         .set({
           ...input,
           updatedAt: now,
+          updatedBy: ctx.session.user.id,
+
         })
         .where(eq(user.id, userID))
 

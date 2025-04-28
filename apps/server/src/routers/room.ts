@@ -17,13 +17,15 @@ export const roomRouter = router({
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const now = new Date()
       await db
         .update(room)
         .set({
           deletedAt: now,
           updatedAt: now,
+          updatedBy: ctx.session.user.id,
+          deletedBy: ctx.session.user.id
         })
         .where(eq(room.id, input.id))
       return { success: true }
@@ -36,7 +38,7 @@ export const roomRouter = router({
         name: z.string().optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -49,6 +51,8 @@ export const roomRouter = router({
         .set({
           ...updateData,
           updatedAt: now,
+          updatedBy: ctx.session.user.id,
+
         })
         .where(eq(room.id, id))
 
@@ -61,12 +65,14 @@ export const roomRouter = router({
         name: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const now = new Date()
       const newRoom = await db.insert(room).values({
         name: input.name,
         createdAt: now,
         updatedAt: now,
+        updatedBy: ctx.session.user.id,
+
       })
 
       return { success: true, room: newRoom }

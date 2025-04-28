@@ -17,13 +17,15 @@ export const slotRouter = router({
 
   delete: protectedProcedure
     .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const now = new Date()
       await db
         .update(slot)
         .set({
           deletedAt: now,
           updatedAt: now,
+          updatedBy: ctx.session.user.id,
+          deletedBy: ctx.session.user.id
         })
         .where(eq(slot.id, input.id))
       return { success: true }
@@ -37,7 +39,7 @@ export const slotRouter = router({
         endTime: z.string().optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -50,6 +52,8 @@ export const slotRouter = router({
         .set({
           ...updateData,
           updatedAt: now,
+          updatedBy: ctx.session.user.id,
+
         })
         .where(eq(slot.id, id))
 
@@ -63,13 +67,15 @@ export const slotRouter = router({
         endTime: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const now = new Date()
       const newSlot = await db.insert(slot).values({
         startTime: input.startTime,
         endTime: input.endTime,
         createdAt: now,
         updatedAt: now,
+        updatedBy: ctx.session.user.id,
+
       })
 
       return { success: true, slot: newSlot }

@@ -17,13 +17,15 @@ export const batchRouter = router({
   
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const now = new Date()
       await db
         .update(batch)
         .set({
           deletedAt: now,
           updatedAt: now,
+          updatedBy: ctx.session.user.id,
+          deletedBy: ctx.session.user.id
         })
         .where(eq(batch.id, input.id))
       return { success: true }
@@ -36,7 +38,7 @@ export const batchRouter = router({
         name: z.string().optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input , ctx}) => {
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -49,6 +51,8 @@ export const batchRouter = router({
         .set({
           ...updateData,
           updatedAt: now,
+          updatedBy: ctx.session.user.id,
+
         })
         .where(eq(batch.id, id))
 
@@ -61,12 +65,14 @@ export const batchRouter = router({
         name: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const now = new Date()
       const newBatch = await db.insert(batch).values({
         name: input.name,
         createdAt: now,
         updatedAt: now,
+        updatedBy: ctx.session.user.id,
+
       })
 
       return { success: true, batch: newBatch }

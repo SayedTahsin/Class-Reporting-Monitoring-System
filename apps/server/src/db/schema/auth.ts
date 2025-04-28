@@ -14,6 +14,8 @@ export const user = sqliteTable("user", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   deletedAt: integer("deleted_at", { mode: "timestamp" }), 
+  updatedBy: text("updated_by"),
+  deletedBy: text("deleted_by"),
 
 });
 

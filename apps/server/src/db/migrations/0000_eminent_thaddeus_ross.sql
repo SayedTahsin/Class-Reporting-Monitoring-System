@@ -41,6 +41,8 @@ CREATE TABLE `user` (
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
 	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text,
 	FOREIGN KEY (`batch_id`) REFERENCES `batch`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
@@ -60,7 +62,9 @@ CREATE TABLE `batch` (
 	`name` text NOT NULL,
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`deleted_at` integer
+	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `batch_name_unique` ON `batch` (`name`);--> statement-breakpoint
@@ -75,6 +79,8 @@ CREATE TABLE `class_schedule` (
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text,
 	PRIMARY KEY(`date`, `slot_id`),
 	FOREIGN KEY (`slot_id`) REFERENCES `slot`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`batch_id`) REFERENCES `batch`(`id`) ON UPDATE no action ON DELETE no action,
@@ -97,7 +103,9 @@ CREATE TABLE `course` (
 	`credits` integer NOT NULL,
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`deleted_at` integer
+	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `course_name_unique` ON `course` (`name`);--> statement-breakpoint
@@ -106,7 +114,9 @@ CREATE TABLE `room` (
 	`name` text NOT NULL,
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`deleted_at` integer
+	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `room_name_unique` ON `room` (`name`);--> statement-breakpoint
@@ -117,6 +127,8 @@ CREATE TABLE `slot` (
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text,
 	CONSTRAINT "time_format" CHECK(
     "slot"."start_time" GLOB '[0-2][0-9]:[0-5][0-9]' 
     AND "slot"."end_time" GLOB '[0-2][0-9]:[0-5][0-9]' 

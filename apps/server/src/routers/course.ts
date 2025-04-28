@@ -20,13 +20,15 @@ export const courseRouter = router({
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input,ctx }) => {
       const now = new Date()
       await db
         .update(course)
         .set({
           deletedAt: now,
           updatedAt: now,
+          updatedBy: ctx.session.user.id,
+          deletedBy: ctx.session.user.id
         })
         .where(eq(course.id, input.id))
       return { success: true }
@@ -41,7 +43,7 @@ export const courseRouter = router({
         credits: z.number().positive().optional(), 
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input,ctx }) => {
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -54,6 +56,8 @@ export const courseRouter = router({
         .set({
           ...updateData,
           updatedAt: now,
+          updatedBy: ctx.session.user.id,
+
         })
         .where(eq(course.id, id))
 
@@ -68,7 +72,7 @@ export const courseRouter = router({
         credits: z.number().positive(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input,ctx }) => {
       const now = new Date()
       const newCourse = await db.insert(course).values({
         code: input.code,
@@ -76,6 +80,8 @@ export const courseRouter = router({
         credits: input.credits,
         createdAt: now,
         updatedAt: now,
+        updatedBy: ctx.session.user.id,
+
       })
 
       return { success: true, course: newCourse }
