@@ -1,98 +1,109 @@
-import { eq, isNull } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { z } from 'zod'
 import { db } from '../db'
 import { classSchedule } from '../db/schema/class_schedule'
 import { router, protectedProcedure } from '../lib/trpc'
 
+const classScheduleKeySchema = z.object({
+  date: z.coerce.date(),
+  slotId: z.number(),
+})
+
 export const classScheduleRouter = router({
   getAll: protectedProcedure.query(async () => {
-    return await db
-      .select()
-      .from(classSchedule)
-      .where(isNull(classSchedule.deletedAt)) 
+    return await db.select().from(classSchedule).where(isNull(classSchedule.deletedAt))
   }),
 
-//   getById: protectedProcedure
-//     .input(z.object({ id: z.string() }))
-//     .mutation(async ({ input }) => {
-//       return await db
-//         .select()
-//         .from(classSchedule)
-//         .where(eq(classSchedule.id, input.id))
-//     }),
+  getById: protectedProcedure
+    .input(classScheduleKeySchema)
+    .mutation(async ({ input }) => {
+      return await db
+        .select()
+        .from(classSchedule)
+        .where(
+          and(
+            eq(classSchedule.date, input.date),
+            eq(classSchedule.slotId, input.slotId)
+          )
+        )
+    }),
 
-//   delete: protectedProcedure
-//     .input(z.object({ id: z.string() }))
-//     .mutation(async ({ input }) => {
-//       const now = new Date()
-//       await db
-//         .update(classSchedule)
-//         .set({
-//           deletedAt: now,
-//           updatedAt: now,
-//         })
-//         .where(eq(classSchedule.id, input.id))
-//       return { success: true }
-//     }),
+  delete: protectedProcedure
+    .input(classScheduleKeySchema)
+    .mutation(async ({ input, ctx }) => {
+      const now = new Date()
+      await db
+        .update(classSchedule)
+        .set({
+          deletedAt: now,
+          updatedAt: now,
+          updatedBy: ctx.session.user.id,
+          deletedBy: ctx.session.user.id,
+        })
+        .where(
+          and(
+            eq(classSchedule.date, input.date),
+            eq(classSchedule.slotId, input.slotId)
+          )
+        )
+      return { success: true }
+    }),
 
-//   update: protectedProcedure
-//     .input(
-//       z.object({
-//         id: z.string(),
-//         date: z.number().optional(),
-//         slotId: z.number().optional(),
-//         batchId: z.string().optional(),
-//         courseId: z.string().optional(),
-//         teacherId: z.string().optional(),
-//         roomId: z.string().optional(),
-//         status: z.enum(['delivered', 'notdelivered', 'rescheduled']).optional(),
-//       })
-//     )
-//     .mutation(async ({ input }) => {
-//       const { id, ...updateData } = input
-//       const now = new Date()
+  update: protectedProcedure
+    .input(
+      classScheduleKeySchema.extend({
+        batchId: z.string().optional(),
+        courseId: z.string().optional(),
+        teacherId: z.string().optional(),
+        roomId: z.string().optional(),
+        status: z.enum(['delivered', 'notdelivered', 'rescheduled']).optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { date, slotId, ...updateData } = input
+      const now = new Date()
 
-//       if (Object.keys(updateData).length === 0) {
-//         throw new Error('No fields provided for update.')
-//       }
+      if (Object.keys(updateData).length === 0) {
+        throw new Error('No fields provided for update.')
+      }
 
-//       await db
-//         .update(classSchedule)
-//         .set({
-//           ...updateData,
-//           updatedAt: now,
-//         })
-//         .where(eq(classSchedule.id, id))
+      await db
+        .update(classSchedule)
+        .set({
+          ...updateData,
+          updatedAt: now,
+          updatedBy: ctx.session.user.id,
+        })
+        .where(
+          and(eq(classSchedule.date, date), eq(classSchedule.slotId, slotId))
+        )
 
-//       return { success: true }
-//     }),
+      return { success: true }
+    }),
 
-//   create: protectedProcedure
-//     .input(
-//       z.object({
-//         date: z.number(),
-//         slotId: z.number(),
-//         batchId: z.string(),
-//         courseId: z.string(),
-//         teacherId: z.string(),
-//         roomId: z.string(),
-//         status: z.enum(['delivered', 'notdelivered', 'rescheduled']).default('notdelivered'),
-//       })
-//     )
-//     .mutation(async ({ input }) => {
-//       const now = new Date()
-//       const newClassSchedule = await db.insert(classSchedule).values({
-//         date: input.date,
-//         slotId: input.slotId,
-//         batchId: input.batchId,
-//         courseId: input.courseId,
-//         teacherId: input.teacherId,
-//         roomId: input.roomId,
-//         status: input.status,
-//         createdAt: now,
-//         updatedAt: now,
-//       })
+  create: protectedProcedure
+    .input(
+      z.object({
+        date: z.coerce.date(),
+        slotId: z.number(),
+        batchId: z.string(),
+        courseId: z.string(),
+        teacherId: z.string(),
+        roomId: z.string(),
+        status: z.enum(['delivered', 'notdelivered', 'rescheduled']).optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const now = new Date()
 
-//       return { success: true, classSchedule: newClassSchedule }
-//     }),
+      const newSchedule = await db.insert(classSchedule).values({
+        ...input,
+        status: input.status ?? 'notdelivered',
+        createdAt: now,
+        updatedAt: now,
+        updatedBy: ctx.session.user.id,
+      })
+
+      return { success: true, schedule: newSchedule }
+    }),
 })

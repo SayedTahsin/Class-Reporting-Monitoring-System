@@ -37,13 +37,14 @@ CREATE TABLE `user` (
 	`username` text,
 	`batch_id` text,
 	`phone` text,
-	`role` text,
+	`role_id` text,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
 	`deleted_at` integer,
 	`updated_by` text,
 	`deleted_by` text,
-	FOREIGN KEY (`batch_id`) REFERENCES `batch`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`batch_id`) REFERENCES `batch`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`role_id`) REFERENCES `role`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint
@@ -98,7 +99,7 @@ CREATE INDEX `schedule_room` ON `class_schedule` (`room_id`);--> statement-break
 CREATE INDEX `schedule_slot` ON `class_schedule` (`slot_id`);--> statement-breakpoint
 CREATE TABLE `course` (
 	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
+	`code` text NOT NULL,
 	`title` text NOT NULL,
 	`credits` integer NOT NULL,
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
@@ -108,7 +109,47 @@ CREATE TABLE `course` (
 	`deleted_by` text
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `course_name_unique` ON `course` (`name`);--> statement-breakpoint
+CREATE UNIQUE INDEX `course_code_unique` ON `course` (`code`);--> statement-breakpoint
+CREATE TABLE `permission` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`description` text,
+	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `permission_name_unique` ON `permission` (`name`);--> statement-breakpoint
+CREATE TABLE `role` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`description` text,
+	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `role_name_unique` ON `role` (`name`);--> statement-breakpoint
+CREATE TABLE `role_permission` (
+	`role_id` text NOT NULL,
+	`permission_id` text NOT NULL,
+	PRIMARY KEY(`role_id`, `permission_id`),
+	FOREIGN KEY (`role_id`) REFERENCES `role`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`permission_id`) REFERENCES `permission`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE TABLE `user_role` (
+	`user_id` text NOT NULL,
+	`role_id` text NOT NULL,
+	PRIMARY KEY(`user_id`, `role_id`),
+	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`role_id`) REFERENCES `role`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
 CREATE TABLE `room` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
@@ -134,10 +175,4 @@ CREATE TABLE `slot` (
     AND "slot"."end_time" GLOB '[0-2][0-9]:[0-5][0-9]' 
     AND "slot"."start_time" < "slot"."end_time"
   )
-);
---> statement-breakpoint
-CREATE TABLE `todo` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`text` text NOT NULL,
-	`completed` integer DEFAULT false NOT NULL
 );

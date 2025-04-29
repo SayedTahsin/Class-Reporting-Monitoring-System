@@ -11,7 +11,7 @@ export const roleRouter = router({
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       return await db.select().from(role).where(eq(role.id, input.id));
     }),
 

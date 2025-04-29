@@ -4,7 +4,7 @@ import { auditColumns } from './audit_column';
 
 export const course = sqliteTable("course", {
   id: text("id").primaryKey().$defaultFn(createId),
-  code: text("name").unique().notNull(),
+  code: text("code").unique().notNull(),
   title: text("title").notNull(),
   credits: integer("credits").notNull(),
  ...auditColumns
