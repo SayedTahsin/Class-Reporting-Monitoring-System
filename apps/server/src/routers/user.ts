@@ -2,17 +2,19 @@ import { eq, isNull } from 'drizzle-orm'
 import { z } from 'zod'
 import { db } from '../db'
 import { user } from '../db/schema/auth'
-import { router, protectedProcedure, publicProcedure } from '../lib/trpc'
+import { router, protectedProcedure } from '../lib/trpc'
 
 export const userRouter = router({
   getAll: protectedProcedure.query(async () => {
-    return await db.select().from(user)
+    return await db.select().from(user).where(isNull(user.deletedAt)) 
   }),
 
-  getById: protectedProcedure.query(async ({ ctx }) => {
-    const userID = ctx.session.user.id
-    return await db.select().from(user).where(eq(user.id, userID))
+  getById: protectedProcedure
+  .input(z.object({ id: z.string() }))
+  .mutation(async ({ input }) => {
+    return await db.select().from(user).where(eq(user.id, input.id))
   }),
+  
 
   delete: protectedProcedure.mutation(async ({ ctx }) => {
     const now = new Date()
@@ -21,7 +23,9 @@ export const userRouter = router({
       .update(user)
       .set({
         deletedAt: now,
-        updatedAt: now
+        updatedAt: now,
+        updatedBy: ctx.session.user.id,
+        deletedBy: ctx.session.user.id
       })
       .where(eq(user.id, userID))
     return { success: true }
@@ -35,7 +39,7 @@ export const userRouter = router({
         image: z.string().optional(),
         username: z.string().optional(),
         batchId: z.string().optional(),
-        role: z.string().optional(), 
+        roleId: z.string().optional(), 
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -51,6 +55,8 @@ export const userRouter = router({
         .set({
           ...input,
           updatedAt: now,
+          updatedBy: ctx.session.user.id,
+
         })
         .where(eq(user.id, userID))
 
