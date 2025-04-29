@@ -1,12 +1,12 @@
-import { eq, isNull } from 'drizzle-orm'
-import { z } from 'zod'
-import { db } from '../db'
-import { room } from '../db/schema/room'
-import { router, protectedProcedure } from '../lib/trpc'
+import { eq, isNull } from "drizzle-orm"
+import { z } from "zod"
+import { db } from "../db"
+import { room } from "../db/schema/room"
+import { protectedProcedure, router } from "../lib/trpc"
 
 export const roomRouter = router({
   getAll: protectedProcedure.query(async () => {
-    return await db.select().from(room).where(isNull(room.deletedAt)) 
+    return await db.select().from(room).where(isNull(room.deletedAt))
   }),
 
   getById: protectedProcedure
@@ -25,7 +25,7 @@ export const roomRouter = router({
           deletedAt: now,
           updatedAt: now,
           updatedBy: ctx.session.user.id,
-          deletedBy: ctx.session.user.id
+          deletedBy: ctx.session.user.id,
         })
         .where(eq(room.id, input.id))
       return { success: true }
@@ -36,14 +36,14 @@ export const roomRouter = router({
       z.object({
         id: z.string(),
         name: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const { id, ...updateData } = input
       const now = new Date()
 
       if (Object.keys(updateData).length === 0) {
-        throw new Error('No fields provided for update.')
+        throw new Error("No fields provided for update.")
       }
 
       await db
@@ -52,7 +52,6 @@ export const roomRouter = router({
           ...updateData,
           updatedAt: now,
           updatedBy: ctx.session.user.id,
-
         })
         .where(eq(room.id, id))
 
@@ -63,7 +62,7 @@ export const roomRouter = router({
     .input(
       z.object({
         name: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const now = new Date()
@@ -72,7 +71,6 @@ export const roomRouter = router({
         createdAt: now,
         updatedAt: now,
         updatedBy: ctx.session.user.id,
-
       })
 
       return { success: true, room: newRoom }

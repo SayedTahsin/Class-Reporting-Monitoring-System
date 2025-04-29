@@ -1,12 +1,12 @@
-import { eq , isNull} from 'drizzle-orm'
-import { z } from 'zod'
-import { db } from '../db'
-import { slot } from '../db/schema/slot'
-import { router, protectedProcedure } from '../lib/trpc'
+import { eq, isNull } from "drizzle-orm"
+import { z } from "zod"
+import { db } from "../db"
+import { slot } from "../db/schema/slot"
+import { protectedProcedure, router } from "../lib/trpc"
 
 export const slotRouter = router({
   getAll: protectedProcedure.query(async () => {
-    return await db.select().from(slot).where(isNull(slot.deletedAt)) 
+    return await db.select().from(slot).where(isNull(slot.deletedAt))
   }),
 
   getById: protectedProcedure
@@ -25,7 +25,7 @@ export const slotRouter = router({
           deletedAt: now,
           updatedAt: now,
           updatedBy: ctx.session.user.id,
-          deletedBy: ctx.session.user.id
+          deletedBy: ctx.session.user.id,
         })
         .where(eq(slot.id, input.id))
       return { success: true }
@@ -37,14 +37,14 @@ export const slotRouter = router({
         id: z.number(),
         startTime: z.string().optional(),
         endTime: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const { id, ...updateData } = input
       const now = new Date()
 
       if (Object.keys(updateData).length === 0) {
-        throw new Error('No fields provided for update.')
+        throw new Error("No fields provided for update.")
       }
 
       await db
@@ -53,7 +53,6 @@ export const slotRouter = router({
           ...updateData,
           updatedAt: now,
           updatedBy: ctx.session.user.id,
-
         })
         .where(eq(slot.id, id))
 
@@ -65,7 +64,7 @@ export const slotRouter = router({
       z.object({
         startTime: z.string(),
         endTime: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const now = new Date()
@@ -75,7 +74,6 @@ export const slotRouter = router({
         createdAt: now,
         updatedAt: now,
         updatedBy: ctx.session.user.id,
-
       })
 
       return { success: true, slot: newSlot }

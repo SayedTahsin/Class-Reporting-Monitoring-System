@@ -1,5 +1,5 @@
-import { sql } from "drizzle-orm";
-import { integer, text } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm"
+import { integer, text } from "drizzle-orm/sqlite-core"
 
 export const auditColumns = {
   createdAt: integer("created_at", { mode: "timestamp_ms" })
@@ -12,4 +12,4 @@ export const auditColumns = {
   deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
   updatedBy: text("updated_by"),
   deletedBy: text("deleted_by"),
-};
+}

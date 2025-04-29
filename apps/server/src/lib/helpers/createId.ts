@@ -1,5 +1,5 @@
-import { ulid } from 'ulid';
+import { ulid } from "ulid"
 
 export function createId(): string {
-  return ulid();
+  return ulid()
 }

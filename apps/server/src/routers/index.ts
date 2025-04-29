@@ -1,12 +1,12 @@
-import { router } from '../lib/trpc'
-import { userRouter } from './user'
-import { batchRouter } from './batch'
-import { roomRouter } from './room'
-import { slotRouter } from './slot'
-import { courseRouter } from './course'
-import { classScheduleRouter } from './class_schedule'
-import { roleRouter } from './role'
-import { permissionRouter } from './permission'
+import { router } from "../lib/trpc"
+import { batchRouter } from "./batch"
+import { classScheduleRouter } from "./class_schedule"
+import { courseRouter } from "./course"
+import { permissionRouter } from "./permission"
+import { roleRouter } from "./role"
+import { roomRouter } from "./room"
+import { slotRouter } from "./slot"
+import { userRouter } from "./user"
 
 export const appRouter = router({
   user: userRouter,
@@ -16,6 +16,6 @@ export const appRouter = router({
   course: courseRouter,
   role: roleRouter,
   permission: permissionRouter,
-  classSchedule: classScheduleRouter
+  classSchedule: classScheduleRouter,
 })
 export type AppRouter = typeof appRouter
