@@ -37,11 +37,14 @@ CREATE TABLE `user` (
 	`username` text,
 	`batch_id` text,
 	`phone` text,
-	`role` text,
+	`role_id` text,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
 	`deleted_at` integer,
-	FOREIGN KEY (`batch_id`) REFERENCES `batch`(`id`) ON UPDATE no action ON DELETE no action
+	`updated_by` text,
+	`deleted_by` text,
+	FOREIGN KEY (`batch_id`) REFERENCES `batch`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`role_id`) REFERENCES `role`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint
@@ -60,7 +63,9 @@ CREATE TABLE `batch` (
 	`name` text NOT NULL,
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`deleted_at` integer
+	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `batch_name_unique` ON `batch` (`name`);--> statement-breakpoint
@@ -68,17 +73,19 @@ CREATE TABLE `class_schedule` (
 	`date` integer NOT NULL,
 	`slot_id` integer NOT NULL,
 	`batch_id` text NOT NULL,
-	`subject_id` text NOT NULL,
+	`course_id` text NOT NULL,
 	`teacher_id` text NOT NULL,
 	`room_id` text NOT NULL,
-	`status` text NOT NULL,
+	`status` text DEFAULT 'notdelivered' NOT NULL,
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text,
 	PRIMARY KEY(`date`, `slot_id`),
 	FOREIGN KEY (`slot_id`) REFERENCES `slot`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`batch_id`) REFERENCES `batch`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`subject_id`) REFERENCES `subject`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`course_id`) REFERENCES `course`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`teacher_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`room_id`) REFERENCES `room`(`id`) ON UPDATE no action ON DELETE no action
 );
@@ -86,16 +93,71 @@ CREATE TABLE `class_schedule` (
 CREATE UNIQUE INDEX `data_slot_room` ON `class_schedule` (`date`,`slot_id`,`room_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `date_slot_teacher` ON `class_schedule` (`date`,`slot_id`,`teacher_id`);--> statement-breakpoint
 CREATE INDEX `schedule_batch` ON `class_schedule` (`batch_id`);--> statement-breakpoint
-CREATE INDEX `schedule_subject` ON `class_schedule` (`subject_id`);--> statement-breakpoint
+CREATE INDEX `schedule_course` ON `class_schedule` (`course_id`);--> statement-breakpoint
 CREATE INDEX `schedule_teacher` ON `class_schedule` (`teacher_id`);--> statement-breakpoint
 CREATE INDEX `schedule_room` ON `class_schedule` (`room_id`);--> statement-breakpoint
 CREATE INDEX `schedule_slot` ON `class_schedule` (`slot_id`);--> statement-breakpoint
+CREATE TABLE `course` (
+	`id` text PRIMARY KEY NOT NULL,
+	`code` text NOT NULL,
+	`title` text NOT NULL,
+	`credits` integer NOT NULL,
+	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `course_code_unique` ON `course` (`code`);--> statement-breakpoint
+CREATE TABLE `permission` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`description` text,
+	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `permission_name_unique` ON `permission` (`name`);--> statement-breakpoint
+CREATE TABLE `role` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`description` text,
+	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `role_name_unique` ON `role` (`name`);--> statement-breakpoint
+CREATE TABLE `role_permission` (
+	`role_id` text NOT NULL,
+	`permission_id` text NOT NULL,
+	PRIMARY KEY(`role_id`, `permission_id`),
+	FOREIGN KEY (`role_id`) REFERENCES `role`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`permission_id`) REFERENCES `permission`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE TABLE `user_role` (
+	`user_id` text NOT NULL,
+	`role_id` text NOT NULL,
+	PRIMARY KEY(`user_id`, `role_id`),
+	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`role_id`) REFERENCES `role`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
 CREATE TABLE `room` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`deleted_at` integer
+	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `room_name_unique` ON `room` (`name`);--> statement-breakpoint
@@ -106,24 +168,11 @@ CREATE TABLE `slot` (
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text,
 	CONSTRAINT "time_format" CHECK(
     "slot"."start_time" GLOB '[0-2][0-9]:[0-5][0-9]' 
     AND "slot"."end_time" GLOB '[0-2][0-9]:[0-5][0-9]' 
     AND "slot"."start_time" < "slot"."end_time"
   )
-);
---> statement-breakpoint
-CREATE TABLE `subject` (
-	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`deleted_at` integer
-);
---> statement-breakpoint
-CREATE UNIQUE INDEX `subject_name_unique` ON `subject` (`name`);--> statement-breakpoint
-CREATE TABLE `todo` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`text` text NOT NULL,
-	`completed` integer DEFAULT false NOT NULL
 );
