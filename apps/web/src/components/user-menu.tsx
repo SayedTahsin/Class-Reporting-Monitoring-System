@@ -34,9 +34,15 @@ export default function UserMenu() {
         <Button variant="outline">{session.user.name}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-card">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>{session.user.email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>{session.user.email}</DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={() => {
+            navigate({ to: "/dashboard" })
+          }}
+        >
+          Dashboard
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Button
             variant="destructive"

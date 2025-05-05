@@ -24,11 +24,12 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
     meta: [
       {
-        title: "My App",
+        title: "Class Monitoring System",
       },
       {
         name: "description",
-        content: "My App is a web application",
+        content:
+          "This is System for monitoring and Analysing of class data. Will be used by Teachers and Students.",
       },
     ],
     links: [
@@ -47,7 +48,7 @@ function RootComponent() {
   return (
     <>
       <HeadContent />
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <div className="grid h-svh grid-rows-[auto_1fr]">
           <Header />
           {isFetching ? <Loader /> : <Outlet />}
