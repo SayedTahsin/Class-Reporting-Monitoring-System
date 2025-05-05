@@ -1,8 +1,8 @@
 import { authClient } from "@/lib/auth-client"
 import { trpc } from "@/utils/trpc"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
@@ -13,7 +13,13 @@ function RouteComponent() {
 
   const navigate = Route.useNavigate()
 
-  const privateData = useQuery(trpc.privateData.queryOptions())
+  // const privateData = useMutation(trpc.user.getById({ id: session?.user.id }))
+
+  const {
+    data: users,
+    isFetching,
+    isError,
+  } = useQuery(trpc.user.getById.queryOptions())
 
   useEffect(() => {
     if (!session && !isPending) {
@@ -29,9 +35,11 @@ function RouteComponent() {
 
   return (
     <div>
+      {users?.map((user) => {
+        return <p key={user.id}>{user.name}</p>
+      })}
       <h1>Dashboard</h1>
       <p>Welcome {session?.user.name}</p>
-      <p>privateData: {privateData.data?.message}</p>
     </div>
   )
 }
