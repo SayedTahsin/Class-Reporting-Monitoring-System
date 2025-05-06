@@ -38,10 +38,10 @@ export default function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={() => {
-            navigate({ to: "/dashboard" })
+            navigate({ to: "/profile" })
           }}
         >
-          Dashboard
+          Profile
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Button
