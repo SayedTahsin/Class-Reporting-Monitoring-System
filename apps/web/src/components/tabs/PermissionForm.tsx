@@ -32,7 +32,7 @@ const PermissionForm = () => {
   })
 
   const { data: permissions = [], refetch } = useQuery(
-    trpc.permission.getAll.queryOptions(),
+    trpc.permission.getAll.queryOptions()
   )
 
   const createPermission = useMutation(
@@ -43,7 +43,7 @@ const PermissionForm = () => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const updatePermission = useMutation(
@@ -53,7 +53,7 @@ const PermissionForm = () => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const deletePermission = useMutation(
@@ -63,7 +63,7 @@ const PermissionForm = () => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const [editingCell, setEditingCell] = useState<{
@@ -82,7 +82,7 @@ const PermissionForm = () => {
 
   const handleDoubleClick = (
     perm: Permission,
-    field: "name" | "description",
+    field: "name" | "description"
   ) => {
     setEditingCell({ id: perm.id, field })
     setEditValue(perm[field] ?? "") // Normalize null to ""

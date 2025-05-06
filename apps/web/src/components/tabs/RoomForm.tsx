@@ -79,7 +79,7 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const updateRoom = useMutation(
@@ -89,7 +89,7 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const deleteRoom = useMutation(
@@ -99,7 +99,7 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const [editingCell, setEditingCell] = useState<{
@@ -129,7 +129,7 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
 
   const handleDelete = (id: string) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this room?",
+      "Are you sure you want to delete this room?"
     )
     if (confirmDelete) {
       deleteRoom.mutate({ id })

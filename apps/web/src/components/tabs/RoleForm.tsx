@@ -32,7 +32,7 @@ const RoleForm = () => {
   })
 
   const { data: roles = [], refetch } = useQuery(
-    trpc.role.getAll.queryOptions(),
+    trpc.role.getAll.queryOptions()
   )
 
   const createRole = useMutation(
@@ -43,7 +43,7 @@ const RoleForm = () => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const updateRole = useMutation(
@@ -53,7 +53,7 @@ const RoleForm = () => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const deleteRole = useMutation(
@@ -63,7 +63,7 @@ const RoleForm = () => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const [editingCell, setEditingCell] = useState<{

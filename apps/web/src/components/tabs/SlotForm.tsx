@@ -40,7 +40,7 @@ const SlotForm = ({ userRoleName }: AdminTabProps) => {
         reset()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const updateSlot = useMutation(
@@ -50,7 +50,7 @@ const SlotForm = ({ userRoleName }: AdminTabProps) => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const deleteSlot = useMutation(
@@ -60,7 +60,7 @@ const SlotForm = ({ userRoleName }: AdminTabProps) => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const [editing, setEditing] = useState<{
@@ -72,7 +72,7 @@ const SlotForm = ({ userRoleName }: AdminTabProps) => {
   const handleEdit = (
     id: string,
     field: "slotNumber" | "startTime" | "endTime",
-    value: string | number,
+    value: string | number
   ) => {
     if (!isChairman && !isSuperAdmin) return
     setEditing({ id, field })
