@@ -50,7 +50,8 @@
 			"indentWidth": 2,
 			"indentStyle": "space",
 			"lineWidth": 80,
-			"trailingCommas": "all"
+			"trailingCommas": "all",
+			"semicolons": "asNeeded"
 		}
 	}
 }
