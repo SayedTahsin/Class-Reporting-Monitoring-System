@@ -55,6 +55,16 @@ const RoomForm = () => {
     }),
   )
 
+  const deleteRoom = useMutation(
+    trpc.room.delete.mutationOptions({
+      onSuccess: () => {
+        toast.success("Room deleted!")
+        refetch()
+      },
+      onError: (err) => toast.error(err.message),
+    }),
+  )
+
   const [editingCell, setEditingCell] = useState<{
     id: string
     field: "name" | "description"
@@ -62,7 +72,6 @@ const RoomForm = () => {
   const [editValue, setEditValue] = useState("")
 
   const onSubmit = handleSubmit((data) => {
-    console.log(data)
     createRoom.mutate(data)
   })
 
@@ -77,6 +86,15 @@ const RoomForm = () => {
     }
     setEditingCell(null)
     setEditValue("")
+  }
+
+  const handleDelete = (id: string) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this room?",
+    )
+    if (confirmDelete) {
+      deleteRoom.mutate({ id })
+    }
   }
 
   return (
@@ -103,6 +121,7 @@ const RoomForm = () => {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Description</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -145,6 +164,15 @@ const RoomForm = () => {
                     ) : (
                       (room.description ?? "-")
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(room.id)}
+                    >
+                      Delete
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

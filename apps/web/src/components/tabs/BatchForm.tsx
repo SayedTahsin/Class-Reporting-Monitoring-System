@@ -63,6 +63,21 @@ const BatchForm = () => {
     }),
   )
 
+  const deleteBatch = useMutation(
+    trpc.batch.delete.mutationOptions({
+      onSuccess: () => {
+        toast.success("Batch deleted successfully!")
+        setSelectedBatchId("")
+        setSelectedBatchName("")
+        setUserList([])
+        refetch()
+      },
+      onError: (err) => {
+        toast.error(err.message)
+      },
+    }),
+  )
+
   const getuserListByBatch = useMutation(
     trpc.user.getByBatch.mutationOptions({
       onError: (err) => {
@@ -95,6 +110,16 @@ const BatchForm = () => {
   const handleBatchRename = () => {
     if (!selectedBatchId || !selectedBatchName.trim()) return
     updateBatch.mutate({ id: selectedBatchId, name: selectedBatchName })
+  }
+
+  const handleBatchDelete = () => {
+    if (!selectedBatchId) return
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this batch?",
+    )
+    if (confirmDelete) {
+      deleteBatch.mutate({ id: selectedBatchId })
+    }
   }
 
   return (
@@ -135,7 +160,12 @@ const BatchForm = () => {
                 onChange={(e) => setSelectedBatchName(e.target.value)}
               />
             </div>
-            <Button onClick={handleBatchRename}>Update</Button>
+            <div className="flex gap-2">
+              <Button onClick={handleBatchRename}>Update</Button>
+              <Button variant="destructive" onClick={handleBatchDelete}>
+                Delete
+              </Button>
+            </div>
           </div>
         )}
 
