@@ -1,8 +1,8 @@
-import { eq, isNull } from 'drizzle-orm'
-import { z } from 'zod'
-import { db } from '../db'
-import { user } from '../db/schema/auth'
-import { protectedProcedure, router } from '../lib/trpc'
+import { eq, isNull } from "drizzle-orm"
+import { z } from "zod"
+import { db } from "../db"
+import { user } from "../db/schema/auth"
+import { protectedProcedure, router } from "../lib/trpc"
 
 export const userRouter = router({
   getAll: protectedProcedure.query(async () => {
@@ -22,7 +22,7 @@ export const userRouter = router({
         deletedAt: now,
         updatedAt: now,
         updatedBy: ctx.session.user.id,
-        deletedBy: ctx.session.user.id
+        deletedBy: ctx.session.user.id,
       })
       .where(eq(user.id, userID))
     return { success: true }
@@ -31,8 +31,8 @@ export const userRouter = router({
   getByBatch: protectedProcedure
     .input(
       z.object({
-        batchId: z.string()
-      })
+        batchId: z.string(),
+      }),
     )
     .mutation(async ({ input }) => {
       return await db.select().from(user).where(eq(user.batchId, input.batchId))
@@ -46,15 +46,15 @@ export const userRouter = router({
         image: z.string().optional(),
         username: z.string().optional(),
         batchId: z.string().optional(),
-        roleId: z.string().optional()
-      })
+        roleId: z.string().optional(),
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const userID = ctx.session.user.id
       const now = new Date()
 
       if (Object.keys(input).length === 0) {
-        throw new Error('No fields provided for update.')
+        throw new Error("No fields provided for update.")
       }
 
       await db
@@ -62,10 +62,10 @@ export const userRouter = router({
         .set({
           ...input,
           updatedAt: now,
-          updatedBy: ctx.session.user.id
+          updatedBy: ctx.session.user.id,
         })
         .where(eq(user.id, userID))
 
       return { success: true }
-    })
+    }),
 })
