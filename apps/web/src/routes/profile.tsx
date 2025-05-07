@@ -172,8 +172,7 @@ function ProfilePage() {
           </CardContent>
         </Card>
       </TabsContent>
-
-      {isAdmin && <AdminTab />}
+      <TabsContent value="admin">{isAdmin && <AdminTab />}</TabsContent>
     </Tabs>
   )
 }

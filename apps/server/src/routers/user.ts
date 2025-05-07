@@ -28,6 +28,16 @@ export const userRouter = router({
     return { success: true }
   }),
 
+  getByBatch: protectedProcedure
+    .input(
+      z.object({
+        batchId: z.string()
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await db.select().from(user).where(eq(user.batchId, input.batchId))
+    }),
+
   update: protectedProcedure
     .input(
       z.object({
