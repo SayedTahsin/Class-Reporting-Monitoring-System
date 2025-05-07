@@ -102,6 +102,16 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
     })
   )
 
+  const deleteRoom = useMutation(
+    trpc.room.delete.mutationOptions({
+      onSuccess: () => {
+        toast.success("Room deleted!")
+        refetch()
+      },
+      onError: (err) => toast.error(err.message),
+    })
+  )
+
   const [editingCell, setEditingCell] = useState<{
     id: string
     field: "name" | "description"

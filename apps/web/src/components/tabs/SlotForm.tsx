@@ -179,7 +179,6 @@ const SlotForm = ({ userRoleName }: AdminTabProps) => {
                       slot.startTime
                     )}
                   </TableCell>
-
                   <TableCell
                     onDoubleClick={() =>
                       handleEdit(slot.id, "endTime", slot.endTime)
