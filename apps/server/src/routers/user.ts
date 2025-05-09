@@ -47,10 +47,11 @@ export const userRouter = router({
         username: z.string().optional(),
         batchId: z.string().optional(),
         roleId: z.string().optional(),
+        id: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const userID = ctx.session.user.id
+      const userID = input.id
       const now = new Date()
 
       if (Object.keys(input).length === 0) {
