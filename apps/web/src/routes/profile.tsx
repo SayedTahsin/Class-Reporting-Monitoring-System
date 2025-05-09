@@ -25,6 +25,8 @@ function ProfilePage() {
   const isAdmin = true
 
   const { data: user, isFetching } = useQuery(trpc.user.getById.queryOptions())
+  const { data: batches } = useQuery(trpc.batch.getAll.queryOptions())
+  const { data: roles } = useQuery(trpc.role.getAll.queryOptions())
 
   const { register, handleSubmit, reset, watch } = useForm({
     defaultValues: {
@@ -35,6 +37,7 @@ function ProfilePage() {
       batchId: "",
       phone: "",
       roleId: "",
+      id: "",
     },
   })
 
@@ -55,6 +58,7 @@ function ProfilePage() {
         batchId: u.batchId || "",
         phone: u.phone || "",
         roleId: u.roleId || "",
+        id: u.id || "",
       })
     }
   }, [user, reset])
@@ -71,7 +75,7 @@ function ProfilePage() {
   )
 
   const onSubmit = handleSubmit((data) => {
-    updateUser.mutate(data)
+    updateUser.mutate({ ...data, id: session?.user.id || "" })
   })
 
   const handleSendVerification = () => {
@@ -101,8 +105,16 @@ function ProfilePage() {
                   <Input id="name" {...register("name")} />
                 </div>
                 <div className="w-[20%]">
-                  <Label htmlFor="roleId">Role ID</Label>
-                  <Input id="roleId" {...register("roleId")} />
+                  <Label htmlFor="roleId">Role</Label>
+                  <Input
+                    id="roleId"
+                    value={
+                      roles?.find((role) => role.id === user[0].roleId)?.name ??
+                      "Unknown"
+                    }
+                    disabled
+                    className="bg-muted text-muted-foreground"
+                  />
                 </div>
               </div>
 
@@ -148,8 +160,19 @@ function ProfilePage() {
               </div>
 
               <div>
-                <Label htmlFor="batchId">Batch ID</Label>
-                <Input id="batchId" {...register("batchId")} />
+                <Label htmlFor="batchId">Batch</Label>
+                <select
+                  id="batchId"
+                  {...register("batchId")}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground"
+                >
+                  <option value="">Select batch</option>
+                  {batches?.map((batch) => (
+                    <option key={batch.id} value={batch.id}>
+                      {batch.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <Button type="submit" className="mt-2">

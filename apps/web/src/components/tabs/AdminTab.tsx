@@ -6,11 +6,13 @@ import PermissionForm from "./PermissionForm"
 import RoleForm from "./RoleForm"
 import RoomForm from "./RoomForm"
 import SlotForm from "./SlotForm"
+import UserForm from "./UserForm"
 
 const AdminTab = () => {
   return (
-    <Tabs defaultValue="batch" className="w-full">
-      <TabsList className="grid w-full grid-cols-6">
+    <Tabs defaultValue="user" className="w-full">
+      <TabsList className="grid w-full grid-cols-7">
+        <TabsTrigger value="user">User</TabsTrigger>
         <TabsTrigger value="batch">Batch</TabsTrigger>
         <TabsTrigger value="course">Course</TabsTrigger>
         <TabsTrigger value="room">Room</TabsTrigger>
@@ -19,6 +21,9 @@ const AdminTab = () => {
         <TabsTrigger value="permission">Permission</TabsTrigger>
       </TabsList>
 
+      <TabsContent value="user">
+        <UserForm />
+      </TabsContent>
       <TabsContent value="batch">
         <BatchForm />
       </TabsContent>
