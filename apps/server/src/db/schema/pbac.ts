@@ -22,10 +22,10 @@ export const userRole = sqliteTable(
   {
     userId: text("user_id")
       .notNull()
-      .references(() => user.id),
+      .references(() => user.id, { onDelete: "set null" }),
     roleId: text("role_id")
       .notNull()
-      .references(() => role.id),
+      .references(() => role.id, { onDelete: "set null" }),
   },
   (table) => {
     return [primaryKey({ columns: [table.userId, table.roleId] })]
@@ -37,10 +37,10 @@ export const rolePermission = sqliteTable(
   {
     roleId: text("role_id")
       .notNull()
-      .references(() => role.id),
+      .references(() => role.id, { onDelete: "set null" }),
     permissionId: text("permission_id")
       .notNull()
-      .references(() => permission.id),
+      .references(() => permission.id, { onDelete: "set null" }),
   },
   (table) => {
     return [primaryKey({ columns: [table.roleId, table.permissionId] })]

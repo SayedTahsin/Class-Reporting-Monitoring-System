@@ -1,60 +1,60 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { trpc } from "@/utils/trpc";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { Loader2, Trash2 } from "lucide-react";
-import { useState } from "react";
+} from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+import { trpc } from "@/utils/trpc"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
+import { Loader2, Trash2 } from "lucide-react"
+import { useState } from "react"
 
 export const Route = createFileRoute("/todos")({
   component: TodosRoute,
-});
+})
 
 function TodosRoute() {
-  const [newTodoText, setNewTodoText] = useState("");
+  const [newTodoText, setNewTodoText] = useState("")
 
-  const todos = useQuery(trpc.todo.getAll.queryOptions());
+  const todos = useQuery(trpc.todo.getAll.queryOptions())
   const createMutation = useMutation(
     trpc.todo.create.mutationOptions({
       onSuccess: () => {
-        todos.refetch();
-        setNewTodoText("");
+        todos.refetch()
+        setNewTodoText("")
       },
     }),
-  );
+  )
   const toggleMutation = useMutation(
     trpc.todo.toggle.mutationOptions({
       onSuccess: () => todos.refetch(),
     }),
-  );
+  )
   const deleteMutation = useMutation(
     trpc.todo.delete.mutationOptions({
       onSuccess: () => todos.refetch(),
     }),
-  );
+  )
 
   const handleAddTodo = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (newTodoText.trim()) {
-      createMutation.mutate({ text: newTodoText });
+      createMutation.mutate({ text: newTodoText })
     }
-  };
+  }
 
   const handleToggleTodo = (id: number, completed: boolean) => {
-    toggleMutation.mutate({ id, completed: !completed });
-  };
+    toggleMutation.mutate({ id, completed: !completed })
+  }
 
   const handleDeleteTodo = (id: number) => {
-    deleteMutation.mutate({ id });
-  };
+    deleteMutation.mutate({ id })
+  }
 
   return (
     <div className="mx-auto w-full max-w-md py-10">
@@ -129,5 +129,5 @@ function TodosRoute() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

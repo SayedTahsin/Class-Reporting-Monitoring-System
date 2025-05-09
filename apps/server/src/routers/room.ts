@@ -36,6 +36,7 @@ export const roomRouter = router({
       z.object({
         id: z.string(),
         name: z.string().optional(),
+        description: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -62,12 +63,14 @@ export const roomRouter = router({
     .input(
       z.object({
         name: z.string(),
+        description: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
       const now = new Date()
       const newRoom = await db.insert(room).values({
         name: input.name,
+        description: input.description,
         createdAt: now,
         updatedAt: now,
         updatedBy: ctx.session.user.id,

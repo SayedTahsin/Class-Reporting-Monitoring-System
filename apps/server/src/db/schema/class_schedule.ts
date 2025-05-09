@@ -19,19 +19,19 @@ export const classSchedule = sqliteTable(
     date: integer("date", { mode: "timestamp_ms" }).notNull(),
     slotId: integer("slot_id")
       .notNull()
-      .references(() => slot.id),
+      .references(() => slot.id, { onDelete: "set null" }),
     batchId: text("batch_id")
       .notNull()
-      .references(() => batch.id),
+      .references(() => batch.id, { onDelete: "set null" }),
     courseId: text("course_id")
       .notNull()
-      .references(() => course.id),
+      .references(() => course.id, { onDelete: "set null" }),
     teacherId: text("teacher_id")
       .notNull()
-      .references(() => user.id),
+      .references(() => user.id, { onDelete: "set null" }),
     roomId: text("room_id")
       .notNull()
-      .references(() => room.id),
+      .references(() => room.id, { onDelete: "set null" }),
     status: text("status", {
       enum: ["delivered", "notdelivered", "rescheduled"],
     })
