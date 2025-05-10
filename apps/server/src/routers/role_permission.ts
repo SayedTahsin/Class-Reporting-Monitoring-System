@@ -5,6 +5,10 @@ import { permission, role, rolePermission } from "../db/schema/pbac"
 import { protectedProcedure, router } from "../lib/trpc"
 
 export const rolePermissionRouter = router({
+  getAll: protectedProcedure.query(async () => {
+    return await db.select().from(rolePermission)
+  }),
+
   getPermissionsByRoleId: protectedProcedure
     .input(z.object({ roleId: z.string() }))
     .query(async ({ input }) => {

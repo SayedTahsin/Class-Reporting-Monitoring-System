@@ -1,11 +1,15 @@
 import { user } from "@/db/schema/auth"
-import { and, eq } from "drizzle-orm"
+import { and, eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
 import { role, userRole } from "../db/schema/pbac"
 import { protectedProcedure, router } from "../lib/trpc"
 
 export const userRoleRouter = router({
+  getAll: protectedProcedure.query(async () => {
+    return await db.select().from(userRole)
+  }),
+
   getRolesByUserId: protectedProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ input }) => {
