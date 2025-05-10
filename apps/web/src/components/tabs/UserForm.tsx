@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import {
@@ -9,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-
 import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useState } from "react"
@@ -30,9 +28,7 @@ const UserForm = () => {
     field: keyof FormData
   } | null>(null)
 
-  const { data: users, refetch: refetchUsers } = useQuery(
-    trpc.user.getAll.queryOptions(),
-  )
+  const { data: users, refetch } = useQuery(trpc.user.getAll.queryOptions())
   const { data: batches } = useQuery(trpc.batch.getAll.queryOptions())
   const { data: roles } = useQuery(trpc.role.getAll.queryOptions())
 
@@ -40,7 +36,7 @@ const UserForm = () => {
     trpc.user.update.mutationOptions({
       onSuccess: () => {
         toast.success("User updated successfully")
-        refetchUsers()
+        refetch()
         setEditingCell(null)
       },
       onError: (err) => toast.error(err.message),
@@ -57,11 +53,12 @@ const UserForm = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-6 py-6">
+      <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
               <TableHead>Username</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Batch</TableHead>
@@ -81,9 +78,9 @@ const UserForm = () => {
                   editingCell.field === "name" ? (
                     <Input
                       defaultValue={user.name ?? ""}
-                      onBlur={(e) => {
+                      onBlur={(e) =>
                         handleUpdate(user.id, "name", e.target.value)
-                      }}
+                      }
                       autoFocus
                     />
                   ) : (
@@ -91,8 +88,8 @@ const UserForm = () => {
                   )}
                 </TableCell>
 
+                <TableCell>{user.email}</TableCell>
                 <TableCell>{user.username ?? "-"}</TableCell>
-
                 <TableCell>{user.phone ?? "-"}</TableCell>
 
                 <TableCell
@@ -108,9 +105,8 @@ const UserForm = () => {
                       onBlur={(e) =>
                         handleUpdate(user.id, "batchId", e.target.value)
                       }
-                      className="w-full rounded border border-gray-300 px-2 py-1 dark:border-gray-700 dark:bg-gray-800"
+                      className="w-full rounded bg-background p-1 text-foreground"
                     >
-                      <option value="">Select batch</option>
                       {batches?.map((batch) => (
                         <option key={batch.id} value={batch.id}>
                           {batch.name}
@@ -122,7 +118,6 @@ const UserForm = () => {
                   )}
                 </TableCell>
 
-                {/* Role cell */}
                 <TableCell
                   onDoubleClick={() =>
                     setEditingCell({ userId: user.id, field: "roleId" })
@@ -136,9 +131,8 @@ const UserForm = () => {
                       onBlur={(e) =>
                         handleUpdate(user.id, "roleId", e.target.value)
                       }
-                      className="w-full rounded border border-gray-300 px-2 py-1 dark:border-gray-700 dark:bg-gray-800"
+                      className="w-full rounded bg-background p-1 text-foreground"
                     >
-                      <option value="">Select role</option>
                       {roles?.map((role) => (
                         <option key={role.id} value={role.id}>
                           {role.name}

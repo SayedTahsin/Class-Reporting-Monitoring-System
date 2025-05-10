@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table"
 import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
+import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -99,9 +100,9 @@ const RoomForm = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-6 py-6">
+      <CardContent className="space-y-6">
         <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2">
             <div>
               <Label htmlFor="name">Room Name</Label>
               <Input id="name" {...register("name", { required: true })} />
@@ -115,13 +116,13 @@ const RoomForm = () => {
         </form>
 
         <div>
-          <Label className="mb-2 block">Existing Rooms</Label>
+          <Label className="mb-2">Existing Rooms</Label>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -165,13 +166,13 @@ const RoomForm = () => {
                       (room.description ?? "-")
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-right">
                     <Button
-                      variant="destructive"
+                      variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(room.id)}
                     >
-                      Delete
+                      <Trash2 className=" text-red-500" />
                     </Button>
                   </TableCell>
                 </TableRow>

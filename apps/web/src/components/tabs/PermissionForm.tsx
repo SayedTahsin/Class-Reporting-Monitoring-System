@@ -102,9 +102,9 @@ const PermissionForm = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-6 py-6">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+      <CardContent className="space-y-6">
+        <form onSubmit={onSubmit} className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
             <div>
               <Label htmlFor="name">Permission Name</Label>
               <Input id="name" {...register("name", { required: true })} />
@@ -118,7 +118,7 @@ const PermissionForm = () => {
         </form>
 
         <div>
-          <Label className="mb-2 block">Existing Permissions</Label>
+          <Label className="mb-2">Existing Permissions</Label>
           <Table>
             <TableHeader>
               <TableRow>
@@ -171,10 +171,10 @@ const PermissionForm = () => {
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="sm"
                       onClick={() => deletePermission.mutate({ id: perm.id })}
                     >
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                      <Trash2 className=" text-red-500" />
                     </Button>
                   </TableCell>
                 </TableRow>

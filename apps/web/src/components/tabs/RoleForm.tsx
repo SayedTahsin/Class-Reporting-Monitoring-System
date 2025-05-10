@@ -82,7 +82,7 @@ const RoleForm = () => {
 
   const handleDoubleClick = (role: Role, field: "name" | "description") => {
     setEditingCell({ id: role.id, field })
-    setEditValue(role[field] ?? "") // Fix: convert null to empty string
+    setEditValue(role[field] ?? "")
   }
 
   const handleEditBlur = () => {
@@ -99,9 +99,9 @@ const RoleForm = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-6 py-6">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+      <CardContent className="space-y-6">
+        <form onSubmit={onSubmit} className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
             <div>
               <Label htmlFor="name">Role Name</Label>
               <Input id="name" {...register("name", { required: true })} />
@@ -115,7 +115,7 @@ const RoleForm = () => {
         </form>
 
         <div>
-          <Label className="mb-2 block">Existing Roles</Label>
+          <Label className="mb-2">Existing Roles</Label>
           <Table>
             <TableHeader>
               <TableRow>
@@ -168,10 +168,10 @@ const RoleForm = () => {
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="sm"
                       onClick={() => deleteRole.mutate({ id: role.id })}
                     >
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                      <Trash2 className=" text-red-500" />
                     </Button>
                   </TableCell>
                 </TableRow>

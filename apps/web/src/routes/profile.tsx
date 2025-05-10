@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { authClient } from "@/lib/auth-client"
-import { getDaysAgo } from "@/utils/daysAgo"
+import { getTimeAgo } from "@/utils/daysAgo"
 import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
@@ -22,7 +22,6 @@ export const Route = createFileRoute("/profile")({
 function ProfilePage() {
   const { data: session, isPending } = authClient.useSession()
   const navigate = Route.useNavigate()
-  const isAdmin = true
 
   const { data: user, isFetching } = useQuery(trpc.user.getById.queryOptions())
   const { data: batches } = useQuery(trpc.batch.getAll.queryOptions())
@@ -51,14 +50,14 @@ function ProfilePage() {
     if (user) {
       const u = user[0]
       reset({
-        name: u.name || "",
-        email: u.email || "",
-        emailVerified: u.emailVerified || false,
+        name: u.name,
+        email: u.email,
+        id: u.id,
+        emailVerified: u.emailVerified,
         username: u.username || "",
         batchId: u.batchId || "",
         phone: u.phone || "",
         roleId: u.roleId || "",
-        id: u.id || "",
       })
     }
   }, [user, reset])
@@ -85,12 +84,16 @@ function ProfilePage() {
   if (isPending || isFetching || !user) return <Loader />
 
   const emailVerified = watch("emailVerified")
-  const createdAgo = getDaysAgo(user[0].createdAt)
-  const updatedAgo = user[0].updatedBy ? getDaysAgo(user[0].updatedAt) : null
+  const createdAgo = getTimeAgo(user[0].createdAt)
+  const updatedAgo = getTimeAgo(user[0].updatedAt || "")
+  const userRoleName =
+    roles?.find((role) => role.id === user?.[0]?.roleId)?.name || ""
+
+  const isAdmin = ["SuperAdmin", "Chairman", "Teacher"].includes(userRoleName)
 
   return (
-    <Tabs defaultValue="profile" className="mx-auto mt-10 w-full max-w-3xl">
-      <TabsList className="mb-4">
+    <Tabs defaultValue="profile" className="mx-auto mt-2 w-full max-w-5xl">
+      <TabsList>
         <TabsTrigger value="profile">Profile</TabsTrigger>
         {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
       </TabsList>
@@ -98,8 +101,8 @@ function ProfilePage() {
       <TabsContent value="profile">
         <Card>
           <CardContent>
-            <form onSubmit={onSubmit} className="space-y-4 py-6">
-              <div className="flex gap-4">
+            <form onSubmit={onSubmit} className="space-y-4">
+              <div className="flex gap-2">
                 <div className="w-[80%]">
                   <Label htmlFor="name">Name</Label>
                   <Input id="name" {...register("name")} />
@@ -110,10 +113,9 @@ function ProfilePage() {
                     id="roleId"
                     value={
                       roles?.find((role) => role.id === user[0].roleId)?.name ??
-                      "Unknown"
+                      "Student"
                     }
                     disabled
-                    className="bg-muted text-muted-foreground"
                   />
                 </div>
               </div>
@@ -138,11 +140,6 @@ function ProfilePage() {
                       onClick={handleSendVerification}
                       className="text-red-500"
                       title="Click to send verification email"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          handleSendVerification()
-                        }
-                      }}
                     >
                       <AlertCircle />
                     </button>
@@ -164,9 +161,9 @@ function ProfilePage() {
                 <select
                   id="batchId"
                   {...register("batchId")}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground"
+                  className="w-full rounded-md border border-input bg-background p-2 text-foreground"
                 >
-                  <option value="">Select batch</option>
+                  <option>Select Batch</option>
                   {batches?.map((batch) => (
                     <option key={batch.id} value={batch.id}>
                       {batch.name}
@@ -175,22 +172,12 @@ function ProfilePage() {
                 </select>
               </div>
 
-              <Button type="submit" className="mt-2">
-                Save Changes
-              </Button>
+              <Button type="submit">Save Changes</Button>
 
-              <div className="pt-4 text-muted-foreground text-sm">
-                <p>
-                  Profile created {createdAgo} day{createdAgo !== 1 ? "s" : ""}{" "}
-                  ago.
-                </p>
-                {updatedAgo !== null && (
-                  <p>
-                    Profile edited by someone {updatedAgo} day
-                    {updatedAgo !== 1 ? "s" : ""} ago.
-                  </p>
-                )}
-              </div>
+              <p className="pt-4 text-sm">
+                Profile created {createdAgo}{" "}
+                {updatedAgo !== null && <span>and updated {updatedAgo}.</span>}
+              </p>
             </form>
           </CardContent>
         </Card>

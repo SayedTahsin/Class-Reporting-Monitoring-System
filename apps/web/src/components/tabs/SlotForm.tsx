@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table"
 import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { Trash } from "lucide-react"
+import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -20,6 +20,7 @@ import { toast } from "sonner"
 const SlotForm = () => {
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
+      slotNumber: 1,
       startTime: "",
       endTime: "",
     },
@@ -60,22 +61,24 @@ const SlotForm = () => {
 
   const [editing, setEditing] = useState<{
     id: number
-    field: "startTime" | "endTime"
+    field: "slotNumber" | "startTime" | "endTime"
   } | null>(null)
   const [editValue, setEditValue] = useState("")
 
   const handleEdit = (
     id: number,
-    field: "startTime" | "endTime",
-    value: string,
+    field: "slotNumber" | "startTime" | "endTime",
+    value: string | number,
   ) => {
     setEditing({ id, field })
-    setEditValue(value)
+    setEditValue(String(value))
   }
 
   const handleEditSubmit = () => {
     if (editing) {
-      updateSlot.mutate({ id: editing.id, [editing.field]: editValue })
+      const value =
+        editing.field === "slotNumber" ? Number(editValue) : editValue
+      updateSlot.mutate({ id: editing.id, [editing.field]: value })
       setEditing(null)
     }
   }
@@ -87,14 +90,29 @@ const SlotForm = () => {
   }
 
   const onSubmit = handleSubmit((data) => {
-    createSlot.mutate(data)
+    createSlot.mutate({
+      slotNumber: Number(data.slotNumber),
+      startTime: data.startTime,
+      endTime: data.endTime,
+    })
   })
 
   return (
     <Card>
-      <CardContent className="space-y-6 py-6">
+      <CardContent className="space-y-6">
         <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <Label htmlFor="slotNumber">Slot Number</Label>
+              <Input
+                id="slotNumber"
+                type="number"
+                {...register("slotNumber", {
+                  required: true,
+                  valueAsNumber: true,
+                })}
+              />
+            </div>
             <div>
               <Label htmlFor="startTime">Start Time</Label>
               <Input
@@ -119,15 +137,34 @@ const SlotForm = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
+                <TableHead>Slot #</TableHead>
                 <TableHead>Start Time</TableHead>
                 <TableHead>End Time</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {slots?.map((slot) => (
                 <TableRow key={slot.id}>
                   <TableCell>{slot.id}</TableCell>
+
+                  <TableCell
+                    onDoubleClick={() =>
+                      handleEdit(slot.id, "slotNumber", slot.slotNumber || "")
+                    }
+                  >
+                    {editing?.id === slot.id &&
+                    editing.field === "slotNumber" ? (
+                      <Input
+                        type="number"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={handleEditSubmit}
+                      />
+                    ) : (
+                      slot.slotNumber
+                    )}
+                  </TableCell>
+
                   <TableCell
                     onDoubleClick={() =>
                       handleEdit(slot.id, "startTime", slot.startTime)
@@ -139,12 +176,12 @@ const SlotForm = () => {
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleEditSubmit}
-                        autoFocus
                       />
                     ) : (
                       slot.startTime
                     )}
                   </TableCell>
+
                   <TableCell
                     onDoubleClick={() =>
                       handleEdit(slot.id, "endTime", slot.endTime)
@@ -155,20 +192,10 @@ const SlotForm = () => {
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleEditSubmit}
-                        autoFocus
                       />
                     ) : (
                       slot.endTime
                     )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(slot.id)}
-                    >
-                      <Trash className="h-4 w-4 text-red-500" />
-                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

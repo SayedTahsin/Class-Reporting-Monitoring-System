@@ -1,1 +1,0 @@
-ALTER TABLE `room` ADD `description` text;

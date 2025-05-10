@@ -106,9 +106,9 @@ const CourseForm = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-6 py-6">
+      <CardContent className="space-y-6">
         <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2">
             <div>
               <Label htmlFor="code">Course Code</Label>
               <Input id="code" {...register("code", { required: true })} />
@@ -134,7 +134,7 @@ const CourseForm = () => {
         </form>
 
         <div>
-          <Label className="mb-2 block">Existing Courses</Label>
+          <Label className="mb-2">Existing Courses</Label>
           <Table>
             <TableHeader>
               <TableRow>
@@ -208,10 +208,10 @@ const CourseForm = () => {
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="sm"
                       onClick={() => deleteCourse.mutate({ id: course.id })}
                     >
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                      <Trash2 className=" text-red-500" />
                     </Button>
                   </TableCell>
                 </TableRow>

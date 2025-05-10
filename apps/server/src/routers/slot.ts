@@ -35,6 +35,7 @@ export const slotRouter = router({
     .input(
       z.object({
         id: z.number(),
+        slotNumber: z.number().optional(),
         startTime: z.string().optional(),
         endTime: z.string().optional(),
       }),
@@ -62,6 +63,7 @@ export const slotRouter = router({
   create: protectedProcedure
     .input(
       z.object({
+        slotNumber: z.number(),
         startTime: z.string(),
         endTime: z.string(),
       }),
@@ -71,6 +73,7 @@ export const slotRouter = router({
       const newSlot = await db.insert(slot).values({
         startTime: input.startTime,
         endTime: input.endTime,
+        slotNumber: input.slotNumber,
         createdAt: now,
         updatedAt: now,
         updatedBy: ctx.session.user.id,
