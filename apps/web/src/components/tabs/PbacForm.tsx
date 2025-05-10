@@ -44,10 +44,10 @@ const PBACForm = () => {
   })
 
   const { data: userRoles, refetch: refetchUserRoles } = useQuery(
-    trpc.userRole.getAll.queryOptions(),
+    trpc.userRole.getAll.queryOptions()
   )
   const { data: rolePermissions, refetch: refetchRolePermissions } = useQuery(
-    trpc.rolePermission.getAll.queryOptions(),
+    trpc.rolePermission.getAll.queryOptions()
   )
 
   const {
@@ -69,7 +69,7 @@ const PBACForm = () => {
         setEditingUserId(null)
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const removeUserRole = useMutation(
@@ -79,7 +79,7 @@ const PBACForm = () => {
         refetchUserRoles()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const assignRolePermission = useMutation(
@@ -90,7 +90,7 @@ const PBACForm = () => {
         resetRolePermission()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const removeRolePermission = useMutation(
@@ -100,7 +100,7 @@ const PBACForm = () => {
         refetchRolePermissions()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   return (
@@ -191,7 +191,7 @@ const PBACForm = () => {
                               {assignedRoles.length > 0 ? (
                                 assignedRoles.map((ur) => {
                                   const role = roles?.find(
-                                    (r) => r.id === ur.roleId,
+                                    (r) => r.id === ur.roleId
                                   )
                                   return (
                                     <span
@@ -262,7 +262,7 @@ const PBACForm = () => {
           </h2>
           <form
             onSubmit={handleRolePermissionSubmit((data) =>
-              assignRolePermission.mutate(data),
+              assignRolePermission.mutate(data)
             )}
           >
             <div className="grid grid-cols-2 items-end gap-4">
