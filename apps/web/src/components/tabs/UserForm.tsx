@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import {
@@ -67,13 +66,13 @@ const UserForm = () => {
         setEditingCell(null)
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const handleUpdate = (
     id: string,
     field: keyof FormData,
-    value: string | undefined,
+    value: string | undefined
   ) => {
     updateUser.mutate({ id, [field]: value })
   }
@@ -129,6 +128,7 @@ const UserForm = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
               <TableHead>Username</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>

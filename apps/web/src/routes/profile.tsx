@@ -66,7 +66,6 @@ function ProfilePage() {
         sectionId: u.sectionId || "",
         phone: u.phone || "",
         roleId: u.roleId || "",
-        id: u.id || "",
       })
       if (u.roleId) {
         setUserRoleName(role?.[0]?.name ?? "Student")

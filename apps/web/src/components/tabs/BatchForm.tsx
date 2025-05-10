@@ -10,9 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-
 import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
+import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -124,7 +124,7 @@ const BatchForm = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-6 py-6">
+      <CardContent className="space-y-6">
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name">Create New Batch</Label>
@@ -137,7 +137,7 @@ const BatchForm = () => {
           <Label htmlFor="batch-select">Existing Batches</Label>
           <select
             id="batch-select"
-            className="mt-1 block w-full rounded-md border bg-background px-3 py-2 text-foreground"
+            className="w-full rounded-md border bg-background p-2 text-foreground"
             onChange={handleBatchSelect}
             value={selectedBatchId}
           >
@@ -162,8 +162,8 @@ const BatchForm = () => {
             </div>
             <div className="flex gap-2">
               <Button onClick={handleBatchRename}>Update</Button>
-              <Button variant="destructive" onClick={handleBatchDelete}>
-                Delete
+              <Button variant="ghost" onClick={handleBatchDelete}>
+                <Trash2 className=" text-red-500" />
               </Button>
             </div>
           </div>
@@ -171,7 +171,7 @@ const BatchForm = () => {
 
         {userList.length > 0 && (
           <Card>
-            <CardContent className="p-4">
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
