@@ -55,7 +55,16 @@ export const userRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
+      try {
+        await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
+      } catch {
+        if (input.id !== ctx.session.user.id) {
+          const err = new Error("You can only update your own Info.")
+          err.name = "ForbiddenError"
+          throw err
+        }
+      }
+
       const userID = input.id
       const now = new Date()
 

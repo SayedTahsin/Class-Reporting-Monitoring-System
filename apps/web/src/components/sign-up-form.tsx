@@ -1,5 +1,7 @@
 import { authClient } from "@/lib/auth-client"
+import { trpc } from "@/utils/trpc"
 import { useForm } from "@tanstack/react-form"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -18,6 +20,9 @@ export default function SignUpForm({
   })
   const { isPending } = authClient.useSession()
 
+  const updateUser = useMutation(trpc.user.update.mutationOptions())
+  const getRoleId = useMutation(trpc.role.getByName.mutationOptions())
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -32,7 +37,13 @@ export default function SignUpForm({
           name: value.name,
         },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
+            const newSession = await authClient.getSession()
+            const role = await getRoleId.mutateAsync({ name: "Student" })
+            updateUser.mutate({
+              roleId: role[0].id,
+              id: newSession.data?.user.id || "",
+            })
             navigate({
               to: "/",
             })

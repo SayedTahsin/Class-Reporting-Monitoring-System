@@ -14,8 +14,13 @@ export const roleRouter = router({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      await checkPermission(ctx.session.user.id, "*")
       return await db.select().from(role).where(eq(role.id, input.id))
+    }),
+
+  getByName: protectedProcedure
+    .input(z.object({ name: z.string() }))
+    .mutation(async ({ input }) => {
+      return await db.select().from(role).where(eq(role.name, input.name))
     }),
 
   delete: protectedProcedure

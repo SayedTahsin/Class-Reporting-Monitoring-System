@@ -11,7 +11,7 @@ import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { AlertCircle, BadgeCheck } from "lucide-react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
@@ -25,7 +25,10 @@ function ProfilePage() {
 
   const { data: user, isFetching } = useQuery(trpc.user.getById.queryOptions())
   const { data: batches } = useQuery(trpc.batch.getAll.queryOptions())
-  const { data: roles } = useQuery(trpc.role.getAll.queryOptions())
+
+  const [userRoleName, setUserRoleName] = useState("Student")
+
+  const getRoleById = useMutation(trpc.role.getById.mutationOptions())
 
   const { register, handleSubmit, reset, watch } = useForm({
     defaultValues: {
@@ -59,6 +62,20 @@ function ProfilePage() {
         phone: u.phone || "",
         roleId: u.roleId || "",
       })
+
+      if (u.roleId) {
+        getRoleById.mutate(
+          { id: u.roleId },
+          {
+            onSuccess: (res) => {
+              setUserRoleName(res[0].name ?? "Student")
+            },
+            onError: () => {
+              setUserRoleName("Unknown")
+            },
+          },
+        )
+      }
     }
   }, [user, reset])
 
@@ -74,7 +91,13 @@ function ProfilePage() {
   )
 
   const onSubmit = handleSubmit((data) => {
-    updateUser.mutate({ ...data, id: session?.user.id || "" })
+    const updatedData = Object.fromEntries(
+      Object.entries(data).filter(([_, value]) => value !== ""),
+    )
+    updateUser.mutate({
+      ...updatedData,
+      id: session?.user.id || "",
+    })
   })
 
   const handleSendVerification = () => {
@@ -86,8 +109,6 @@ function ProfilePage() {
   const emailVerified = watch("emailVerified")
   const createdAgo = getTimeAgo(user[0].createdAt)
   const updatedAgo = getTimeAgo(user[0].updatedAt || "")
-  const userRoleName =
-    roles?.find((role) => role.id === user?.[0]?.roleId)?.name || ""
 
   const isAdmin = ["SuperAdmin", "Chairman", "Teacher"].includes(userRoleName)
 
@@ -109,14 +130,7 @@ function ProfilePage() {
                 </div>
                 <div className="w-[20%]">
                   <Label htmlFor="roleId">Role</Label>
-                  <Input
-                    id="roleId"
-                    value={
-                      roles?.find((role) => role.id === user[0].roleId)?.name ??
-                      "Student"
-                    }
-                    disabled
-                  />
+                  <Input id="roleId" value={userRoleName} disabled />
                 </div>
               </div>
 
@@ -163,7 +177,7 @@ function ProfilePage() {
                   {...register("batchId")}
                   className="w-full rounded-md border border-input bg-background p-2 text-foreground"
                 >
-                  <option>Select Batch</option>
+                  <option value="">Select Batch</option>
                   {batches?.map((batch) => (
                     <option key={batch.id} value={batch.id}>
                       {batch.name}
@@ -176,7 +190,7 @@ function ProfilePage() {
 
               <p className="pt-4 text-sm">
                 Profile created {createdAgo}{" "}
-                {updatedAgo !== null && <span>and updated {updatedAgo}.</span>}
+                {updatedAgo && <span>and updated {updatedAgo}.</span>}
               </p>
             </form>
           </CardContent>
