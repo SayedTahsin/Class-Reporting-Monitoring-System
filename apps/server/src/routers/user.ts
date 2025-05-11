@@ -1,3 +1,4 @@
+import { checkPermission } from "@/lib/helpers/checkPermission"
 import { eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
@@ -5,7 +6,8 @@ import { user } from "../db/schema/auth"
 import { protectedProcedure, router } from "../lib/trpc"
 
 export const userRouter = router({
-  getAll: protectedProcedure.query(async () => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
     return await db.select().from(user).where(isNull(user.deletedAt))
   }),
 
@@ -14,6 +16,7 @@ export const userRouter = router({
   }),
 
   delete: protectedProcedure.mutation(async ({ ctx }) => {
+    await checkPermission(ctx.session.user.id, "*")
     const now = new Date()
     const userID = ctx.session.user.id
     await db
@@ -34,7 +37,8 @@ export const userRouter = router({
         batchId: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
       return await db.select().from(user).where(eq(user.batchId, input.batchId))
     }),
 
@@ -51,6 +55,7 @@ export const userRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
       const userID = input.id
       const now = new Date()
 

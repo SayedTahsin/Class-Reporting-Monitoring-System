@@ -1,18 +1,21 @@
 import { user } from "@/db/schema/auth"
-import { and, eq, isNull } from "drizzle-orm"
+import { checkPermission } from "@/lib/helpers/checkPermission"
+import { and, eq } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
 import { role, userRole } from "../db/schema/pbac"
 import { protectedProcedure, router } from "../lib/trpc"
 
 export const userRoleRouter = router({
-  getAll: protectedProcedure.query(async () => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    await checkPermission(ctx.session.user.id, "*")
     return await db.select().from(userRole)
   }),
 
   getRolesByUserId: protectedProcedure
     .input(z.object({ userId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "*")
       return await db
         .select({
           roleId: userRole.roleId,
@@ -26,7 +29,8 @@ export const userRoleRouter = router({
 
   getUsersByRoleId: protectedProcedure
     .input(z.object({ roleId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "*")
       return await db
         .select({
           userId: userRole.userId,
@@ -45,7 +49,8 @@ export const userRoleRouter = router({
         roleId: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "*")
       await db.insert(userRole).values({
         userId: input.userId,
         roleId: input.roleId,
@@ -60,7 +65,8 @@ export const userRoleRouter = router({
         roleId: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "*")
       await db
         .delete(userRole)
         .where(

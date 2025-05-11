@@ -1,3 +1,4 @@
+import { checkPermission } from "@/lib/helpers/checkPermission"
 import { and, eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
@@ -34,6 +35,7 @@ export const classScheduleRouter = router({
   delete: protectedProcedure
     .input(classScheduleKeySchema)
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "*")
       const now = new Date()
       await db
         .update(classSchedule)
@@ -69,6 +71,17 @@ export const classScheduleRouter = router({
       if (Object.keys(updateData).length === 0) {
         throw new Error("No fields provided for update.")
       }
+      try {
+        await checkPermission(ctx.session.user.id, "class_schedule:update")
+      } catch {
+        await checkPermission(ctx.session.user.id, "class_schedule:update_own")
+
+        if (input.teacherId !== ctx.session.user.id) {
+          const err = new Error("You can only update your own schedule.")
+          err.name = "ForbiddenError"
+          throw err
+        }
+      }
 
       await db
         .update(classSchedule)
@@ -97,6 +110,7 @@ export const classScheduleRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "class_schedule:create")
       const now = new Date()
 
       const newSchedule = await db.insert(classSchedule).values({

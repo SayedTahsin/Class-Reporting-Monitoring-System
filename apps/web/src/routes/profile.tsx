@@ -182,7 +182,9 @@ function ProfilePage() {
           </CardContent>
         </Card>
       </TabsContent>
-      <TabsContent value="admin">{isAdmin && <AdminTab />}</TabsContent>
+      <TabsContent value="admin">
+        {isAdmin && <AdminTab userRoleName={userRoleName} />}
+      </TabsContent>
     </Tabs>
   )
 }

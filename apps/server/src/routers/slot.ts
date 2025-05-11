@@ -1,3 +1,4 @@
+import { checkPermission } from "@/lib/helpers/checkPermission"
 import { eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
@@ -5,19 +6,22 @@ import { slot } from "../db/schema/slot"
 import { protectedProcedure, router } from "../lib/trpc"
 
 export const slotRouter = router({
-  getAll: protectedProcedure.query(async () => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    await checkPermission(ctx.session.user.id, "slot:create_update_view")
     return await db.select().from(slot).where(isNull(slot.deletedAt))
   }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "slot:create_update_view")
       return await db.select().from(slot).where(eq(slot.id, input.id))
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "*")
       const now = new Date()
       await db
         .update(slot)
@@ -41,6 +45,7 @@ export const slotRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "slot:create_update_view")
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -69,6 +74,7 @@ export const slotRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "slot:create_update_view")
       const now = new Date()
       const newSlot = await db.insert(slot).values({
         startTime: input.startTime,

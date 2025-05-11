@@ -9,18 +9,28 @@ import RoomForm from "./RoomForm"
 import SlotForm from "./SlotForm"
 import UserForm from "./UserForm"
 
-const AdminTab = () => {
+type AdminTabProps = {
+  userRoleName: string
+}
+const AdminTab = ({ userRoleName }: AdminTabProps) => {
+  const isSuperAdmin = userRoleName === "SuperAdmin"
   return (
     <Tabs defaultValue="user" className="w-full">
-      <TabsList className="grid w-full grid-cols-8">
+      <TabsList
+        className={`grid w-full ${isSuperAdmin ? "grid-cols-8" : "grid-cols-5"}`}
+      >
         <TabsTrigger value="user">User</TabsTrigger>
         <TabsTrigger value="batch">Batch</TabsTrigger>
         <TabsTrigger value="course">Course</TabsTrigger>
         <TabsTrigger value="room">Room</TabsTrigger>
         <TabsTrigger value="slot">Slot</TabsTrigger>
-        <TabsTrigger value="role">Role</TabsTrigger>
-        <TabsTrigger value="permission">Permission</TabsTrigger>
-        <TabsTrigger value="pbac">PBAC</TabsTrigger>
+        {isSuperAdmin && (
+          <>
+            <TabsTrigger value="role">Role</TabsTrigger>
+            <TabsTrigger value="permission">Permission</TabsTrigger>
+            <TabsTrigger value="pbac">PBAC</TabsTrigger>
+          </>
+        )}
       </TabsList>
 
       <TabsContent value="user">
@@ -38,15 +48,19 @@ const AdminTab = () => {
       <TabsContent value="slot">
         <SlotForm />
       </TabsContent>
-      <TabsContent value="role">
-        <RoleForm />
-      </TabsContent>
-      <TabsContent value="permission">
-        <PermissionForm />
-      </TabsContent>
-      <TabsContent value="pbac">
-        <PBACForm />
-      </TabsContent>
+      {isSuperAdmin && (
+        <>
+          <TabsContent value="role">
+            <RoleForm />
+          </TabsContent>
+          <TabsContent value="permission">
+            <PermissionForm />
+          </TabsContent>
+          <TabsContent value="pbac">
+            <PBACForm />
+          </TabsContent>
+        </>
+      )}
     </Tabs>
   )
 }

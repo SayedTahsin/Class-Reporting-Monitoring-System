@@ -1,3 +1,4 @@
+import { checkPermission } from "@/lib/helpers/checkPermission"
 import { eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
@@ -5,19 +6,22 @@ import { room } from "../db/schema/room"
 import { protectedProcedure, router } from "../lib/trpc"
 
 export const roomRouter = router({
-  getAll: protectedProcedure.query(async () => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    await checkPermission(ctx.session.user.id, "room:create_update_view")
     return await db.select().from(room).where(isNull(room.deletedAt))
   }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "room:create_update_view")
       return await db.select().from(room).where(eq(room.id, input.id))
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "*")
       const now = new Date()
       await db
         .update(room)
@@ -40,6 +44,7 @@ export const roomRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "room:create_update_view")
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -67,6 +72,7 @@ export const roomRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "room:create_update_view")
       const now = new Date()
       const newRoom = await db.insert(room).values({
         name: input.name,
