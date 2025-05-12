@@ -69,7 +69,7 @@ const ClassScheduleTable = () => {
   const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
   const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
   const { data: schedules = [], refetch } = useQuery(
-    trpc.classSchedule.getAll.queryOptions(),
+    trpc.classSchedule.getAll.queryOptions()
   )
 
   const { mutate: createSchedule, isPending: isCreating } = useMutation(
@@ -80,7 +80,7 @@ const ClassScheduleTable = () => {
         setEditingCell(null)
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const { mutate: updateSchedule, isPending: isUpdating } = useMutation(
@@ -91,7 +91,7 @@ const ClassScheduleTable = () => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const getScheduleItem = (day: string, slotId: string, sectionId: string) => {
@@ -99,7 +99,7 @@ const ClassScheduleTable = () => {
       (s) =>
         s.day.toLowerCase() === day.toLowerCase() &&
         s.slotId === slotId &&
-        s.sectionId === sectionId,
+        s.sectionId === sectionId
     )
   }
 
