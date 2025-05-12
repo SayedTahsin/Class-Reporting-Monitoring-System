@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import BatchForm from "./BatchForm"
+import ClassScheduleForm from "./ClassScheduleTab"
 import CourseForm from "./CourseForm"
 import PBACForm from "./PbacForm"
 import PermissionForm from "./PermissionForm"
@@ -14,12 +15,20 @@ type AdminTabProps = {
 }
 const AdminTab = ({ userRoleName }: AdminTabProps) => {
   const isSuperAdmin = userRoleName === "SuperAdmin"
+  const isTeacher = userRoleName === "Teacher"
+  const isChairman = userRoleName === "Chairman"
   return (
-    <Tabs defaultValue="user" className="w-full">
+    <Tabs
+      defaultValue={isTeacher ? "class_schedule" : "user"}
+      className="w-full"
+    >
       <TabsList
-        className={`grid w-full ${isSuperAdmin ? "grid-cols-8" : "grid-cols-5"}`}
+        className={`grid w-full ${isSuperAdmin ? "grid-cols-9" : isTeacher ? "grid-cols-5" : "grid-cols-6"}`}
       >
-        <TabsTrigger value="user">User</TabsTrigger>
+        {(isSuperAdmin || isChairman) && (
+          <TabsTrigger value="user">User</TabsTrigger>
+        )}
+        <TabsTrigger value="class_schedule">Class Schedule</TabsTrigger>
         <TabsTrigger value="batch">Batch</TabsTrigger>
         <TabsTrigger value="course">Course</TabsTrigger>
         <TabsTrigger value="room">Room</TabsTrigger>
@@ -33,8 +42,13 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
         )}
       </TabsList>
 
-      <TabsContent value="user">
-        <UserForm />
+      {(isSuperAdmin || isChairman) && (
+        <TabsContent value="user">
+          <UserForm />
+        </TabsContent>
+      )}
+      <TabsContent value="class_schedule">
+        <ClassScheduleForm />
       </TabsContent>
       <TabsContent value="batch">
         <BatchForm />

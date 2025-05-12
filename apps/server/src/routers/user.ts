@@ -1,3 +1,4 @@
+import { role } from "@/db/schema/pbac"
 import { checkPermission } from "@/lib/helpers/checkPermission"
 import { eq, isNull } from "drizzle-orm"
 import { z } from "zod"
@@ -9,6 +10,35 @@ export const userRouter = router({
   getAll: protectedProcedure.query(async ({ ctx }) => {
     await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
     return await db.select().from(user).where(isNull(user.deletedAt))
+  }),
+
+  getTeachers: protectedProcedure.query(async () => {
+    const result = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        username: user.username,
+      })
+      .from(user)
+      .innerJoin(role, eq(user.roleId, role.id))
+      .where(eq(role.name, "Teacher"))
+
+    return result
+  }),
+
+  getStudents: protectedProcedure.query(async ({ ctx }) => {
+    await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
+    const result = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        username: user.username,
+      })
+      .from(user)
+      .innerJoin(role, eq(user.roleId, role.id))
+      .where(eq(role.name, "Student"))
+
+    return result
   }),
 
   getById: protectedProcedure.query(async ({ ctx }) => {

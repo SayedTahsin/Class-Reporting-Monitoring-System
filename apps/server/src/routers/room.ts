@@ -7,14 +7,12 @@ import { protectedProcedure, router } from "../lib/trpc"
 
 export const roomRouter = router({
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    await checkPermission(ctx.session.user.id, "room:create_update_view")
     return await db.select().from(room).where(isNull(room.deletedAt))
   }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      await checkPermission(ctx.session.user.id, "room:create_update_view")
       return await db.select().from(room).where(eq(room.id, input.id))
     }),
 
@@ -44,7 +42,7 @@ export const roomRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      await checkPermission(ctx.session.user.id, "room:create_update_view")
+      await checkPermission(ctx.session.user.id, "room:create_update")
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -72,7 +70,7 @@ export const roomRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      await checkPermission(ctx.session.user.id, "room:create_update_view")
+      await checkPermission(ctx.session.user.id, "room:create_update")
       const now = new Date()
       const newRoom = await db.insert(room).values({
         name: input.name,

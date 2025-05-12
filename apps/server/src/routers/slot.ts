@@ -7,14 +7,12 @@ import { protectedProcedure, router } from "../lib/trpc"
 
 export const slotRouter = router({
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    await checkPermission(ctx.session.user.id, "slot:create_update_view")
     return await db.select().from(slot).where(isNull(slot.deletedAt))
   }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      await checkPermission(ctx.session.user.id, "slot:create_update_view")
       return await db.select().from(slot).where(eq(slot.id, input.id))
     }),
 
@@ -45,7 +43,7 @@ export const slotRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      await checkPermission(ctx.session.user.id, "slot:create_update_view")
+      await checkPermission(ctx.session.user.id, "slot:create_update")
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -74,7 +72,7 @@ export const slotRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      await checkPermission(ctx.session.user.id, "slot:create_update_view")
+      await checkPermission(ctx.session.user.id, "slot:create_update")
       const now = new Date()
       const newSlot = await db.insert(slot).values({
         startTime: input.startTime,

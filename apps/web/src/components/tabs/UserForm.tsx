@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -68,54 +67,12 @@ const UserForm = () => {
           <TableBody>
             {users?.map((user) => (
               <TableRow key={user.id}>
-                <TableCell
-                  onDoubleClick={() =>
-                    setEditingCell({ userId: user.id, field: "name" })
-                  }
-                  className="cursor-pointer"
-                >
-                  {editingCell?.userId === user.id &&
-                  editingCell.field === "name" ? (
-                    <Input
-                      defaultValue={user.name ?? ""}
-                      onBlur={(e) =>
-                        handleUpdate(user.id, "name", e.target.value)
-                      }
-                      autoFocus
-                    />
-                  ) : (
-                    (user.name ?? "-")
-                  )}
-                </TableCell>
-
+                <TableCell>{user.name}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.username ?? "-"}</TableCell>
                 <TableCell>{user.phone ?? "-"}</TableCell>
-
-                <TableCell
-                  onDoubleClick={() =>
-                    setEditingCell({ userId: user.id, field: "batchId" })
-                  }
-                  className="cursor-pointer"
-                >
-                  {editingCell?.userId === user.id &&
-                  editingCell.field === "batchId" ? (
-                    <select
-                      defaultValue={user.batchId ?? ""}
-                      onBlur={(e) =>
-                        handleUpdate(user.id, "batchId", e.target.value)
-                      }
-                      className="w-full rounded bg-background p-1 text-foreground"
-                    >
-                      {batches?.map((batch) => (
-                        <option key={batch.id} value={batch.id}>
-                          {batch.name}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    (batches?.find((b) => b.id === user.batchId)?.name ?? "-")
-                  )}
+                <TableCell>
+                  {batches?.find((b) => b.id === user.batchId)?.name ?? "-"}
                 </TableCell>
 
                 <TableCell

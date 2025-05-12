@@ -8,6 +8,7 @@ import { protectedProcedure, router } from "../lib/trpc"
 const classScheduleKeySchema = z.object({
   date: z.coerce.date(),
   slotId: z.number(),
+  teacherId: z.string(),
 })
 
 export const classScheduleRouter = router({
@@ -18,7 +19,7 @@ export const classScheduleRouter = router({
       .where(isNull(classSchedule.deletedAt))
   }),
 
-  getById: protectedProcedure
+  getBySlotDate: protectedProcedure
     .input(classScheduleKeySchema)
     .mutation(async ({ input }) => {
       return await db
@@ -30,6 +31,32 @@ export const classScheduleRouter = router({
             eq(classSchedule.slotId, input.slotId),
           ),
         )
+    }),
+
+  getByDate: protectedProcedure
+    .input(
+      z.object({
+        date: z.coerce.date(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db
+        .select()
+        .from(classSchedule)
+        .where(and(eq(classSchedule.date, input.date)))
+    }),
+
+  getByTeacherId: protectedProcedure
+    .input(
+      z.object({
+        teacherId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db
+        .select()
+        .from(classSchedule)
+        .where(and(eq(classSchedule.teacherId, input.teacherId)))
     }),
 
   delete: protectedProcedure
@@ -110,9 +137,18 @@ export const classScheduleRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      await checkPermission(ctx.session.user.id, "class_schedule:create")
-      const now = new Date()
+      try {
+        await checkPermission(ctx.session.user.id, "*")
+      } catch {
+        await checkPermission(ctx.session.user.id, "class_schedule:create")
+        if (input.teacherId !== ctx.session.user.id) {
+          const err = new Error("Invalid TeacherId.")
+          err.name = "ForbiddenError"
+          throw err
+        }
+      }
 
+      const now = new Date()
       const newSchedule = await db.insert(classSchedule).values({
         ...input,
         status: input.status ?? "notdelivered",
