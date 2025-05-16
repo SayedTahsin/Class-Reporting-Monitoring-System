@@ -5,19 +5,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { authClient } from "@/lib/auth-client";
-import { useNavigate } from "@tanstack/react-router";
-import { Link } from "@tanstack/react-router";
-import { Button } from "./ui/button";
-import { Skeleton } from "./ui/skeleton";
+} from "@/components/ui/dropdown-menu"
+import { authClient } from "@/lib/auth-client"
+import { useNavigate } from "@tanstack/react-router"
+import { Link } from "@tanstack/react-router"
+import { Button } from "./ui/button"
+import { Skeleton } from "./ui/skeleton"
 
 export default function UserMenu() {
-  const navigate = useNavigate();
-  const { data: session, isPending } = authClient.useSession();
+  const navigate = useNavigate()
+  const { data: session, isPending } = authClient.useSession()
 
   if (isPending) {
-    return <Skeleton className="h-9 w-24" />;
+    return <Skeleton className="h-9 w-24" />
   }
 
   if (!session) {
@@ -25,7 +25,7 @@ export default function UserMenu() {
       <Button variant="outline" asChild>
         <Link to="/login">Sign In</Link>
       </Button>
-    );
+    )
   }
 
   return (
@@ -34,9 +34,15 @@ export default function UserMenu() {
         <Button variant="outline">{session.user.name}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-card">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>{session.user.email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>{session.user.email}</DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={() => {
+            navigate({ to: "/profile" })
+          }}
+        >
+          Profile
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Button
             variant="destructive"
@@ -47,10 +53,10 @@ export default function UserMenu() {
                   onSuccess: () => {
                     navigate({
                       to: "/",
-                    });
+                    })
                   },
                 },
-              });
+              })
             }}
           >
             Sign Out
@@ -58,5 +64,5 @@ export default function UserMenu() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }

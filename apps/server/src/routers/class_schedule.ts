@@ -1,3 +1,4 @@
+import { checkPermission } from "@/lib/helpers/checkPermission"
 import { and, eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
@@ -7,6 +8,7 @@ import { protectedProcedure, router } from "../lib/trpc"
 const classScheduleKeySchema = z.object({
   date: z.coerce.date(),
   slotId: z.number(),
+  teacherId: z.string(),
 })
 
 export const classScheduleRouter = router({
@@ -17,7 +19,7 @@ export const classScheduleRouter = router({
       .where(isNull(classSchedule.deletedAt))
   }),
 
-  getById: protectedProcedure
+  getBySlotDate: protectedProcedure
     .input(classScheduleKeySchema)
     .mutation(async ({ input }) => {
       return await db
@@ -31,9 +33,36 @@ export const classScheduleRouter = router({
         )
     }),
 
+  getByDate: protectedProcedure
+    .input(
+      z.object({
+        date: z.coerce.date(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db
+        .select()
+        .from(classSchedule)
+        .where(and(eq(classSchedule.date, input.date)))
+    }),
+
+  getByTeacherId: protectedProcedure
+    .input(
+      z.object({
+        teacherId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db
+        .select()
+        .from(classSchedule)
+        .where(and(eq(classSchedule.teacherId, input.teacherId)))
+    }),
+
   delete: protectedProcedure
     .input(classScheduleKeySchema)
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "*")
       const now = new Date()
       await db
         .update(classSchedule)
@@ -69,6 +98,17 @@ export const classScheduleRouter = router({
       if (Object.keys(updateData).length === 0) {
         throw new Error("No fields provided for update.")
       }
+      try {
+        await checkPermission(ctx.session.user.id, "class_schedule:update")
+      } catch {
+        await checkPermission(ctx.session.user.id, "class_schedule:update_own")
+
+        if (input.teacherId !== ctx.session.user.id) {
+          const err = new Error("You can only update your own schedule.")
+          err.name = "ForbiddenError"
+          throw err
+        }
+      }
 
       await db
         .update(classSchedule)
@@ -97,8 +137,18 @@ export const classScheduleRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const now = new Date()
+      try {
+        await checkPermission(ctx.session.user.id, "*")
+      } catch {
+        await checkPermission(ctx.session.user.id, "class_schedule:create")
+        if (input.teacherId !== ctx.session.user.id) {
+          const err = new Error("Invalid TeacherId.")
+          err.name = "ForbiddenError"
+          throw err
+        }
+      }
 
+      const now = new Date()
       const newSchedule = await db.insert(classSchedule).values({
         ...input,
         status: input.status ?? "notdelivered",

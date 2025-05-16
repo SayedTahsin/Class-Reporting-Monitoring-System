@@ -1,3 +1,4 @@
+import { checkPermission } from "@/lib/helpers/checkPermission"
 import { eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
@@ -18,6 +19,7 @@ export const batchRouter = router({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "*")
       const now = new Date()
       await db
         .update(batch)
@@ -39,6 +41,7 @@ export const batchRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "batch:create_update")
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -65,6 +68,7 @@ export const batchRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "batch:create_update")
       const now = new Date()
       const newBatch = await db.insert(batch).values({
         name: input.name,
