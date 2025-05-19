@@ -1,12 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import BatchForm from "./BatchForm"
 import ClassScheduleForm from "./ClassScheduleTab"
 import CourseForm from "./CourseForm"
 import PBACForm from "./PbacForm"
 import PermissionForm from "./PermissionForm"
 import RoleForm from "./RoleForm"
 import RoomForm from "./RoomForm"
+import SectionForm from "./SectionForm"
 import SlotForm from "./SlotForm"
 import UserForm from "./UserForm"
 
@@ -29,7 +29,7 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
           <TabsTrigger value="user">User</TabsTrigger>
         )}
         <TabsTrigger value="class_schedule">Class Schedule</TabsTrigger>
-        <TabsTrigger value="batch">Batch</TabsTrigger>
+        <TabsTrigger value="section">Section</TabsTrigger>
         <TabsTrigger value="course">Course</TabsTrigger>
         <TabsTrigger value="room">Room</TabsTrigger>
         <TabsTrigger value="slot">Slot</TabsTrigger>
@@ -50,8 +50,8 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
       <TabsContent value="class_schedule">
         <ClassScheduleForm />
       </TabsContent>
-      <TabsContent value="batch">
-        <BatchForm />
+      <TabsContent value="section">
+        <SectionForm />
       </TabsContent>
       <TabsContent value="course">
         <CourseForm />

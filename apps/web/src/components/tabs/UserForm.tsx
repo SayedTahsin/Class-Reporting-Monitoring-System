@@ -17,7 +17,7 @@ type FormData = {
   username?: string
   phone?: string
   image?: string
-  batchId?: string
+  sectionId?: string
   roleId?: string
 }
 
@@ -28,7 +28,7 @@ const UserForm = () => {
   } | null>(null)
 
   const { data: users, refetch } = useQuery(trpc.user.getAll.queryOptions())
-  const { data: batches } = useQuery(trpc.batch.getAll.queryOptions())
+  const { data: sectiones } = useQuery(trpc.section.getAll.queryOptions())
   const { data: roles } = useQuery(trpc.role.getAll.queryOptions())
 
   const updateUser = useMutation(
@@ -60,7 +60,7 @@ const UserForm = () => {
               <TableHead>Email</TableHead>
               <TableHead>Username</TableHead>
               <TableHead>Phone</TableHead>
-              <TableHead>Batch</TableHead>
+              <TableHead>Section</TableHead>
               <TableHead>Role</TableHead>
             </TableRow>
           </TableHeader>
@@ -72,7 +72,7 @@ const UserForm = () => {
                 <TableCell>{user.username ?? "-"}</TableCell>
                 <TableCell>{user.phone ?? "-"}</TableCell>
                 <TableCell>
-                  {batches?.find((b) => b.id === user.batchId)?.name ?? "-"}
+                  {sectiones?.find((b) => b.id === user.sectionId)?.name ?? "-"}
                 </TableCell>
 
                 <TableCell

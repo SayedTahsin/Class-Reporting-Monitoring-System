@@ -45,7 +45,7 @@ export default function SignUpForm({
               id: newSession.data?.user.id || "",
             })
             navigate({
-              to: "/",
+              to: "/profile",
             })
             toast.success("Sign up successful")
           },

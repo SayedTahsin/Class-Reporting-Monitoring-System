@@ -25,23 +25,25 @@ type User = {
   email: string
 }
 
-const BatchForm = () => {
+const SectionForm = () => {
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       name: "",
     },
   })
 
-  const [selectedBatchId, setSelectedBatchId] = useState("")
-  const [selectedBatchName, setSelectedBatchName] = useState("")
+  const [selectedSectionId, setSelectedSectionId] = useState("")
+  const [selectedSectionName, setSelectedSectionName] = useState("")
   const [userList, setUserList] = useState<User[]>([])
 
-  const { data: batches, refetch } = useQuery(trpc.batch.getAll.queryOptions())
+  const { data: sectiones, refetch } = useQuery(
+    trpc.section.getAll.queryOptions(),
+  )
 
-  const createBatch = useMutation(
-    trpc.batch.create.mutationOptions({
+  const createSection = useMutation(
+    trpc.section.create.mutationOptions({
       onSuccess: () => {
-        toast.success("Batch created successfully!")
+        toast.success("Section created successfully!")
         reset()
         refetch()
       },
@@ -51,10 +53,10 @@ const BatchForm = () => {
     }),
   )
 
-  const updateBatch = useMutation(
-    trpc.batch.update.mutationOptions({
+  const updateSection = useMutation(
+    trpc.section.update.mutationOptions({
       onSuccess: () => {
-        toast.success("Batch name updated!")
+        toast.success("Section name updated!")
         refetch()
       },
       onError: (err) => {
@@ -63,12 +65,12 @@ const BatchForm = () => {
     }),
   )
 
-  const deleteBatch = useMutation(
-    trpc.batch.delete.mutationOptions({
+  const deleteSection = useMutation(
+    trpc.section.delete.mutationOptions({
       onSuccess: () => {
-        toast.success("Batch deleted successfully!")
-        setSelectedBatchId("")
-        setSelectedBatchName("")
+        toast.success("Section deleted successfully!")
+        setSelectedSectionId("")
+        setSelectedSectionName("")
         setUserList([])
         refetch()
       },
@@ -78,8 +80,8 @@ const BatchForm = () => {
     }),
   )
 
-  const getuserListByBatch = useMutation(
-    trpc.user.getByBatch.mutationOptions({
+  const getuserListBySection = useMutation(
+    trpc.user.getBySection.mutationOptions({
       onError: (err) => {
         toast.error(err.message)
       },
@@ -87,38 +89,40 @@ const BatchForm = () => {
   )
 
   const onSubmit = handleSubmit((data) => {
-    createBatch.mutate(data)
+    createSection.mutate(data)
   })
 
-  const handleBatchSelect = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const batchId = e.target.value
-    setSelectedBatchId(batchId)
+  const handleSectionSelect = async (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const sectionId = e.target.value
+    setSelectedSectionId(sectionId)
 
-    const batchName = batches?.find((b) => b.id === batchId)?.name ?? ""
-    setSelectedBatchName(batchName)
+    const sectionName = sectiones?.find((b) => b.id === sectionId)?.name ?? ""
+    setSelectedSectionName(sectionName)
 
-    if (batchId) {
-      const res = await getuserListByBatch.mutateAsync({ batchId })
+    if (sectionId) {
+      const res = await getuserListBySection.mutateAsync({ sectionId })
       const users = res || []
       setUserList(users)
     } else {
       setUserList([])
-      setSelectedBatchName("")
+      setSelectedSectionName("")
     }
   }
 
-  const handleBatchRename = () => {
-    if (!selectedBatchId || !selectedBatchName.trim()) return
-    updateBatch.mutate({ id: selectedBatchId, name: selectedBatchName })
+  const handleSectionRename = () => {
+    if (!selectedSectionId || !selectedSectionName.trim()) return
+    updateSection.mutate({ id: selectedSectionId, name: selectedSectionName })
   }
 
-  const handleBatchDelete = () => {
-    if (!selectedBatchId) return
+  const handleSectionDelete = () => {
+    if (!selectedSectionId) return
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this batch?",
+      "Are you sure you want to delete this section?",
     )
     if (confirmDelete) {
-      deleteBatch.mutate({ id: selectedBatchId })
+      deleteSection.mutate({ id: selectedSectionId })
     }
   }
 
@@ -127,42 +131,42 @@ const BatchForm = () => {
       <CardContent className="space-y-6">
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="name">Create New Batch</Label>
+            <Label htmlFor="name">Create New Section</Label>
             <Input id="name" {...register("name", { required: true })} />
           </div>
-          <Button type="submit">Create Batch</Button>
+          <Button type="submit">Create Section</Button>
         </form>
 
         <div>
-          <Label htmlFor="batch-select">Existing Batches</Label>
+          <Label htmlFor="section-select">Existing Sectiones</Label>
           <select
-            id="batch-select"
+            id="section-select"
             className="w-full rounded-md border bg-background p-2 text-foreground"
-            onChange={handleBatchSelect}
-            value={selectedBatchId}
+            onChange={handleSectionSelect}
+            value={selectedSectionId}
           >
-            <option value="">Select a batch</option>
-            {batches?.map((batch) => (
-              <option key={batch.id} value={batch.id}>
-                {batch.name}
+            <option value="">Select a section</option>
+            {sectiones?.map((section) => (
+              <option key={section.id} value={section.id}>
+                {section.name}
               </option>
             ))}
           </select>
         </div>
 
-        {selectedBatchId && (
+        {selectedSectionId && (
           <div className="flex items-end gap-2">
             <div className="flex-1">
-              <Label htmlFor="edit-batch-name">Edit Batch Name</Label>
+              <Label htmlFor="edit-section-name">Edit Section Name</Label>
               <Input
-                id="edit-batch-name"
-                value={selectedBatchName}
-                onChange={(e) => setSelectedBatchName(e.target.value)}
+                id="edit-section-name"
+                value={selectedSectionName}
+                onChange={(e) => setSelectedSectionName(e.target.value)}
               />
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleBatchRename}>Update</Button>
-              <Button variant="ghost" onClick={handleBatchDelete}>
+              <Button onClick={handleSectionRename}>Update</Button>
+              <Button variant="ghost" onClick={handleSectionDelete}>
                 <Trash2 className=" text-red-500" />
               </Button>
             </div>
@@ -200,4 +204,4 @@ const BatchForm = () => {
   )
 }
 
-export default BatchForm
+export default SectionForm

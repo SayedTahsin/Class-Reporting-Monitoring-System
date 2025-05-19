@@ -2,18 +2,18 @@ import { checkPermission } from "@/lib/helpers/checkPermission"
 import { eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
-import { batch } from "../db/schema/batch"
+import { section } from "../db/schema/section"
 import { protectedProcedure, router } from "../lib/trpc"
 
-export const batchRouter = router({
+export const sectionRouter = router({
   getAll: protectedProcedure.query(async () => {
-    return await db.select().from(batch).where(isNull(batch.deletedAt))
+    return await db.select().from(section).where(isNull(section.deletedAt))
   }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
-      return await db.select().from(batch).where(eq(batch.id, input.id))
+      return await db.select().from(section).where(eq(section.id, input.id))
     }),
 
   delete: protectedProcedure
@@ -22,14 +22,14 @@ export const batchRouter = router({
       await checkPermission(ctx.session.user.id, "*")
       const now = new Date()
       await db
-        .update(batch)
+        .update(section)
         .set({
           deletedAt: now,
           updatedAt: now,
           updatedBy: ctx.session.user.id,
           deletedBy: ctx.session.user.id,
         })
-        .where(eq(batch.id, input.id))
+        .where(eq(section.id, input.id))
       return { success: true }
     }),
 
@@ -41,7 +41,7 @@ export const batchRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      await checkPermission(ctx.session.user.id, "batch:create_update")
+      await checkPermission(ctx.session.user.id, "section:create_update")
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -50,13 +50,13 @@ export const batchRouter = router({
       }
 
       await db
-        .update(batch)
+        .update(section)
         .set({
           ...updateData,
           updatedAt: now,
           updatedBy: ctx.session.user.id,
         })
-        .where(eq(batch.id, id))
+        .where(eq(section.id, id))
 
       return { success: true }
     }),
@@ -68,15 +68,15 @@ export const batchRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      await checkPermission(ctx.session.user.id, "batch:create_update")
+      await checkPermission(ctx.session.user.id, "section:create_update")
       const now = new Date()
-      const newBatch = await db.insert(batch).values({
+      const newSection = await db.insert(section).values({
         name: input.name,
         createdAt: now,
         updatedAt: now,
         updatedBy: ctx.session.user.id,
       })
 
-      return { success: true, batch: newBatch }
+      return { success: true, section: newSection }
     }),
 })

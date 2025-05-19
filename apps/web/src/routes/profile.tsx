@@ -24,7 +24,7 @@ function ProfilePage() {
   const navigate = Route.useNavigate()
 
   const { data: user, isFetching } = useQuery(trpc.user.getById.queryOptions())
-  const { data: batches } = useQuery(trpc.batch.getAll.queryOptions())
+  const { data: sectiones } = useQuery(trpc.section.getAll.queryOptions())
 
   const [userRoleName, setUserRoleName] = useState("Student")
 
@@ -36,7 +36,7 @@ function ProfilePage() {
       email: "",
       emailVerified: false,
       username: "",
-      batchId: "",
+      sectionId: "",
       phone: "",
       roleId: "",
       id: "",
@@ -58,7 +58,7 @@ function ProfilePage() {
         id: u.id,
         emailVerified: u.emailVerified,
         username: u.username || "",
-        batchId: u.batchId || "",
+        sectionId: u.sectionId || "",
         phone: u.phone || "",
         roleId: u.roleId || "",
       })
@@ -171,16 +171,16 @@ function ProfilePage() {
               </div>
 
               <div>
-                <Label htmlFor="batchId">Batch</Label>
+                <Label htmlFor="sectionId">Section</Label>
                 <select
-                  id="batchId"
-                  {...register("batchId")}
+                  id="sectionId"
+                  {...register("sectionId")}
                   className="w-full rounded-md border border-input bg-background p-2 text-foreground"
                 >
-                  <option value="">Select Batch</option>
-                  {batches?.map((batch) => (
-                    <option key={batch.id} value={batch.id}>
-                      {batch.name}
+                  <option value="">Select Section</option>
+                  {sectiones?.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.name}
                     </option>
                   ))}
                 </select>

@@ -6,9 +6,16 @@ import { classSchedule } from "../db/schema/class_schedule"
 import { protectedProcedure, router } from "../lib/trpc"
 
 const classScheduleKeySchema = z.object({
-  date: z.coerce.date(),
+  day: z.enum([
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ]),
   slotId: z.number(),
-  teacherId: z.string(),
 })
 
 export const classScheduleRouter = router({
@@ -19,7 +26,7 @@ export const classScheduleRouter = router({
       .where(isNull(classSchedule.deletedAt))
   }),
 
-  getBySlotDate: protectedProcedure
+  getByDaySlot: protectedProcedure
     .input(classScheduleKeySchema)
     .mutation(async ({ input }) => {
       return await db
@@ -27,23 +34,10 @@ export const classScheduleRouter = router({
         .from(classSchedule)
         .where(
           and(
-            eq(classSchedule.date, input.date),
+            eq(classSchedule.day, input.day),
             eq(classSchedule.slotId, input.slotId),
           ),
         )
-    }),
-
-  getByDate: protectedProcedure
-    .input(
-      z.object({
-        date: z.coerce.date(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      return await db
-        .select()
-        .from(classSchedule)
-        .where(and(eq(classSchedule.date, input.date)))
     }),
 
   getByTeacherId: protectedProcedure
@@ -56,7 +50,7 @@ export const classScheduleRouter = router({
       return await db
         .select()
         .from(classSchedule)
-        .where(and(eq(classSchedule.teacherId, input.teacherId)))
+        .where(eq(classSchedule.teacherId, input.teacherId))
     }),
 
   delete: protectedProcedure
@@ -74,7 +68,7 @@ export const classScheduleRouter = router({
         })
         .where(
           and(
-            eq(classSchedule.date, input.date),
+            eq(classSchedule.day, input.day),
             eq(classSchedule.slotId, input.slotId),
           ),
         )
@@ -84,15 +78,14 @@ export const classScheduleRouter = router({
   update: protectedProcedure
     .input(
       classScheduleKeySchema.extend({
-        batchId: z.string().optional(),
+        sectionId: z.string().optional(),
         courseId: z.string().optional(),
         teacherId: z.string().optional(),
         roomId: z.string().optional(),
-        status: z.enum(["delivered", "notdelivered", "rescheduled"]).optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { date, slotId, ...updateData } = input
+      const { day, slotId, ...updateData } = input
       const now = new Date()
 
       if (Object.keys(updateData).length === 0) {
@@ -103,7 +96,7 @@ export const classScheduleRouter = router({
       } catch {
         await checkPermission(ctx.session.user.id, "class_schedule:update_own")
 
-        if (input.teacherId !== ctx.session.user.id) {
+        if (input.teacherId && input.teacherId !== ctx.session.user.id) {
           const err = new Error("You can only update your own schedule.")
           err.name = "ForbiddenError"
           throw err
@@ -118,7 +111,7 @@ export const classScheduleRouter = router({
           updatedBy: ctx.session.user.id,
         })
         .where(
-          and(eq(classSchedule.date, date), eq(classSchedule.slotId, slotId)),
+          and(eq(classSchedule.day, day), eq(classSchedule.slotId, slotId)),
         )
 
       return { success: true }
@@ -127,13 +120,20 @@ export const classScheduleRouter = router({
   create: protectedProcedure
     .input(
       z.object({
-        date: z.coerce.date(),
+        day: z.enum([
+          "sunday",
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+        ]),
         slotId: z.number(),
-        batchId: z.string(),
+        sectionId: z.string(),
         courseId: z.string(),
         teacherId: z.string(),
         roomId: z.string(),
-        status: z.enum(["delivered", "notdelivered", "rescheduled"]).optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -151,7 +151,6 @@ export const classScheduleRouter = router({
       const now = new Date()
       const newSchedule = await db.insert(classSchedule).values({
         ...input,
-        status: input.status ?? "notdelivered",
         createdAt: now,
         updatedAt: now,
         updatedBy: ctx.session.user.id,

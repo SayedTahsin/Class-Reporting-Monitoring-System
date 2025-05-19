@@ -61,15 +61,18 @@ export const userRouter = router({
     return { success: true }
   }),
 
-  getByBatch: protectedProcedure
+  getBySection: protectedProcedure
     .input(
       z.object({
-        batchId: z.string(),
+        sectionId: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
       await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
-      return await db.select().from(user).where(eq(user.batchId, input.batchId))
+      return await db
+        .select()
+        .from(user)
+        .where(eq(user.sectionId, input.sectionId))
     }),
 
   update: protectedProcedure
@@ -79,7 +82,7 @@ export const userRouter = router({
         phone: z.string().optional(),
         image: z.string().optional(),
         username: z.string().optional(),
-        batchId: z.string().optional(),
+        sectionId: z.string().optional(),
         roleId: z.string().optional(),
         id: z.string(),
       }),
