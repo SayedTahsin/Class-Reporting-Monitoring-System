@@ -42,7 +42,7 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
   const [selectedSectionName, setSelectedSectionName] = useState("")
 
   const { data: sectiones, refetch } = useQuery(
-    trpc.section.getAll.queryOptions(),
+    trpc.section.getAll.queryOptions()
   )
 
   const createSection = useMutation(
@@ -55,7 +55,7 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
       onError: (err) => {
         toast.error(err.message)
       },
-    }),
+    })
   )
 
   const updateSection = useMutation(
@@ -67,7 +67,7 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
       onError: (err) => {
         toast.error(err.message)
       },
-    }),
+    })
   )
 
   const deleteSection = useMutation(
@@ -81,7 +81,7 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
       onError: (err) => {
         toast.error(err.message)
       },
-    }),
+    })
   )
 
   const { data: users } = useQuery({
@@ -96,7 +96,7 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
   })
 
   const handleSectionSelect = async (
-    e: React.ChangeEvent<HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const sectionId = e.target.value
     setSelectedSectionId(sectionId)
@@ -115,7 +115,7 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
   const handleSectionDelete = () => {
     if (!selectedSectionId) return
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this section?",
+      "Are you sure you want to delete this section?"
     )
     if (confirmDelete) {
       deleteSection.mutate({ id: selectedSectionId })

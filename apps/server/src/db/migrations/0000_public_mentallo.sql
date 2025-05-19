@@ -35,7 +35,7 @@ CREATE TABLE `user` (
 	`email_verified` integer NOT NULL,
 	`image` text,
 	`username` text,
-	`batch_id` text,
+	`section_id` text,
 	`phone` text,
 	`role_id` text,
 	`created_at` integer NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE `user` (
 	`deleted_at` integer,
 	`updated_by` text,
 	`deleted_by` text,
-	FOREIGN KEY (`batch_id`) REFERENCES `batch`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`section_id`) REFERENCES `section`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`role_id`) REFERENCES `role`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
@@ -58,45 +58,62 @@ CREATE TABLE `verification` (
 	`updated_at` integer
 );
 --> statement-breakpoint
-CREATE TABLE `batch` (
-	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
-	`deleted_at` integer,
-	`updated_by` text,
-	`deleted_by` text
-);
---> statement-breakpoint
-CREATE UNIQUE INDEX `batch_name_unique` ON `batch` (`name`);--> statement-breakpoint
-CREATE TABLE `class_schedule` (
+CREATE TABLE `class_history` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`date` integer NOT NULL,
 	`slot_id` integer NOT NULL,
-	`batch_id` text NOT NULL,
-	`course_id` text NOT NULL,
+	`section_id` text NOT NULL,
 	`teacher_id` text NOT NULL,
 	`room_id` text NOT NULL,
+	`schedule_id` integer NOT NULL,
 	`status` text DEFAULT 'notdelivered' NOT NULL,
+	`notes` text,
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	`deleted_at` integer,
 	`updated_by` text,
 	`deleted_by` text,
-	PRIMARY KEY(`date`, `slot_id`),
 	FOREIGN KEY (`slot_id`) REFERENCES `slot`(`id`) ON UPDATE no action ON DELETE set null,
-	FOREIGN KEY (`batch_id`) REFERENCES `batch`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`section_id`) REFERENCES `section`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`teacher_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`room_id`) REFERENCES `room`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`schedule_id`) REFERENCES `class_schedule`(`id`) ON UPDATE no action ON DELETE set null
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `unique_class_session` ON `class_history` (`date`,`slot_id`,`section_id`);--> statement-breakpoint
+CREATE INDEX `classhistory_teacher` ON `class_history` (`teacher_id`);--> statement-breakpoint
+CREATE INDEX `classhistory_room` ON `class_history` (`room_id`);--> statement-breakpoint
+CREATE INDEX `classhistory_section` ON `class_history` (`section_id`);--> statement-breakpoint
+CREATE INDEX `classsession_schedule` ON `class_history` (`schedule_id`);--> statement-breakpoint
+CREATE TABLE `class_schedule` (
+	`id` text PRIMARY KEY NOT NULL,
+	`day` text NOT NULL,
+	`slot_id` integer NOT NULL,
+	`section_id` text NOT NULL,
+	`course_id` text NOT NULL,
+	`teacher_id` text NOT NULL,
+	`room_id` text NOT NULL,
+	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text,
+	FOREIGN KEY (`slot_id`) REFERENCES `slot`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`section_id`) REFERENCES `section`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`course_id`) REFERENCES `course`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`teacher_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`room_id`) REFERENCES `room`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `data_slot_room` ON `class_schedule` (`date`,`slot_id`,`room_id`);--> statement-breakpoint
-CREATE UNIQUE INDEX `date_slot_teacher` ON `class_schedule` (`date`,`slot_id`,`teacher_id`);--> statement-breakpoint
-CREATE INDEX `schedule_batch` ON `class_schedule` (`batch_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `data_slot` ON `class_schedule` (`day`,`slot_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `data_slot_room` ON `class_schedule` (`day`,`slot_id`,`room_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `date_slot_teacher` ON `class_schedule` (`day`,`slot_id`,`teacher_id`);--> statement-breakpoint
+CREATE INDEX `schedule_section` ON `class_schedule` (`section_id`);--> statement-breakpoint
 CREATE INDEX `schedule_course` ON `class_schedule` (`course_id`);--> statement-breakpoint
 CREATE INDEX `schedule_teacher` ON `class_schedule` (`teacher_id`);--> statement-breakpoint
 CREATE INDEX `schedule_room` ON `class_schedule` (`room_id`);--> statement-breakpoint
 CREATE INDEX `schedule_slot` ON `class_schedule` (`slot_id`);--> statement-breakpoint
+CREATE INDEX `schedule_day` ON `class_schedule` (`day`);--> statement-breakpoint
 CREATE TABLE `course` (
 	`id` text PRIMARY KEY NOT NULL,
 	`code` text NOT NULL,
@@ -162,6 +179,17 @@ CREATE TABLE `room` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `room_name_unique` ON `room` (`name`);--> statement-breakpoint
+CREATE TABLE `section` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`deleted_at` integer,
+	`updated_by` text,
+	`deleted_by` text
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `section_name_unique` ON `section` (`name`);--> statement-breakpoint
 CREATE TABLE `slot` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`slot_number` integer,
