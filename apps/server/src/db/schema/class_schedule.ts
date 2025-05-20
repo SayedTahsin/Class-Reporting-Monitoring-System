@@ -43,12 +43,16 @@ export const classSchedule = sqliteTable(
   },
   (table) => {
     return [
-      uniqueIndex("data_slot").on(table.day, table.slotId),
-      uniqueIndex("data_slot_room").on(table.day, table.slotId, table.roomId),
-      uniqueIndex("date_slot_teacher").on(
+      uniqueIndex("day_slot_room").on(table.day, table.slotId, table.roomId),
+      uniqueIndex("day_slot_teacher").on(
         table.day,
         table.slotId,
         table.teacherId,
+      ),
+      uniqueIndex("day_slot_section").on(
+        table.day,
+        table.slotId,
+        table.sectionId,
       ),
       index("schedule_section").on(table.sectionId),
       index("schedule_course").on(table.courseId),
