@@ -1,3 +1,4 @@
+import { createId } from "@/lib/helpers/createId"
 import {
   index,
   integer,
@@ -11,14 +12,15 @@ import { classSchedule } from "./class_schedule"
 import { room } from "./room"
 import { section } from "./section"
 import { slot } from "./slot"
+
 export const classHistory = sqliteTable(
   "class_history",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: text("id").primaryKey().$defaultFn(createId),
 
     date: integer("date", { mode: "timestamp_ms" }).notNull(),
 
-    slotId: integer("slot_id")
+    slotId: text("slot_id")
       .notNull()
       .references(() => slot.id, { onDelete: "set null" }),
 
@@ -34,7 +36,7 @@ export const classHistory = sqliteTable(
       .notNull()
       .references(() => room.id, { onDelete: "set null" }),
 
-    scheduleId: integer("schedule_id")
+    scheduleId: text("schedule_id")
       .notNull()
       .references(() => classSchedule.id, {
         onDelete: "set null",

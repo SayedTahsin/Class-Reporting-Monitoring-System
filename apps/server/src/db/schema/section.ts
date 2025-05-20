@@ -1,5 +1,5 @@
 import { createId } from "@/lib/helpers/createId"
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { sqliteTable, text } from "drizzle-orm/sqlite-core"
 import { auditColumns } from "./audit_column"
 export const section = sqliteTable("section", {
   id: text("id").primaryKey().$defaultFn(createId),

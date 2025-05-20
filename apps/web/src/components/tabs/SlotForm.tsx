@@ -60,13 +60,13 @@ const SlotForm = () => {
   )
 
   const [editing, setEditing] = useState<{
-    id: number
+    id: string
     field: "slotNumber" | "startTime" | "endTime"
   } | null>(null)
   const [editValue, setEditValue] = useState("")
 
   const handleEdit = (
-    id: number,
+    id: string,
     field: "slotNumber" | "startTime" | "endTime",
     value: string | number,
   ) => {
@@ -83,7 +83,7 @@ const SlotForm = () => {
     }
   }
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this slot?")) {
       deleteSlot.mutate({ id })
     }
@@ -136,7 +136,6 @@ const SlotForm = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
                 <TableHead>Slot #</TableHead>
                 <TableHead>Start Time</TableHead>
                 <TableHead>End Time</TableHead>
@@ -145,8 +144,6 @@ const SlotForm = () => {
             <TableBody>
               {slots?.map((slot) => (
                 <TableRow key={slot.id}>
-                  <TableCell>{slot.id}</TableCell>
-
                   <TableCell
                     onDoubleClick={() =>
                       handleEdit(slot.id, "slotNumber", slot.slotNumber || "")

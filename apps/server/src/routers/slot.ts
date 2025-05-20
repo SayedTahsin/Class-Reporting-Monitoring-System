@@ -11,13 +11,13 @@ export const slotRouter = router({
   }),
 
   getById: protectedProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       return await db.select().from(slot).where(eq(slot.id, input.id))
     }),
 
   delete: protectedProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       await checkPermission(ctx.session.user.id, "*")
       const now = new Date()
@@ -36,7 +36,7 @@ export const slotRouter = router({
   update: protectedProcedure
     .input(
       z.object({
-        id: z.number(),
+        id: z.string(),
         slotNumber: z.number().optional(),
         startTime: z.string().optional(),
         endTime: z.string().optional(),

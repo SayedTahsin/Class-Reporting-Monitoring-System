@@ -1,12 +1,5 @@
 import { createId } from "@/lib/helpers/createId"
-import {
-  index,
-  integer,
-  primaryKey,
-  sqliteTable,
-  text,
-  uniqueIndex,
-} from "drizzle-orm/sqlite-core"
+import { index, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
 import { auditColumns } from "./audit_column"
 import { user } from "./auth"
 import { course } from "./course"
@@ -30,7 +23,7 @@ export const classSchedule = sqliteTable(
       ],
     }).notNull(),
 
-    slotId: integer("slot_id")
+    slotId: text("slot_id")
       .notNull()
       .references(() => slot.id, { onDelete: "set null" }),
     sectionId: text("section_id")

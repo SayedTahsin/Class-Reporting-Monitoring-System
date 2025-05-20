@@ -15,7 +15,7 @@ const classScheduleKeySchema = z.object({
     "friday",
     "saturday",
   ]),
-  slotId: z.number(),
+  slotId: z.string(),
 })
 
 export const classScheduleRouter = router({
@@ -78,14 +78,14 @@ export const classScheduleRouter = router({
   update: protectedProcedure
     .input(
       classScheduleKeySchema.extend({
-        sectionId: z.string().optional(),
+        sectionId: z.string(),
         courseId: z.string().optional(),
         teacherId: z.string().optional(),
         roomId: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { day, slotId, ...updateData } = input
+      const { day, slotId, sectionId, ...updateData } = input
       const now = new Date()
 
       if (Object.keys(updateData).length === 0) {
@@ -111,7 +111,11 @@ export const classScheduleRouter = router({
           updatedBy: ctx.session.user.id,
         })
         .where(
-          and(eq(classSchedule.day, day), eq(classSchedule.slotId, slotId)),
+          and(
+            eq(classSchedule.day, day),
+            eq(classSchedule.slotId, slotId),
+            eq(classSchedule.sectionId, sectionId),
+          ),
         )
 
       return { success: true }
@@ -129,7 +133,7 @@ export const classScheduleRouter = router({
           "friday",
           "saturday",
         ]),
-        slotId: z.number(),
+        slotId: z.string(),
         sectionId: z.string(),
         courseId: z.string(),
         teacherId: z.string(),
