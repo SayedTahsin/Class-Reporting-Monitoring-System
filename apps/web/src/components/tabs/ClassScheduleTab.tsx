@@ -25,6 +25,15 @@ const weekdays = [
   "Friday",
 ]
 
+type WeekDay =
+  | "sunday"
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+
 const ClassScheduleTable = () => {
   const [editingCell, setEditingCell] = useState<{
     day: string
@@ -32,27 +41,36 @@ const ClassScheduleTable = () => {
     sectionId: string
   } | null>(null)
 
-  const { data: schedules = [], refetch } = useQuery(
-    trpc.classSchedule.getAll.queryOptions(),
-  )
+  const [editFormData, setEditFormData] = useState<{
+    courseId: string
+    teacherId: string
+    roomId: string
+  }>({ courseId: "", teacherId: "", roomId: "" })
+
+  const [isNewSchedule, SetIsNewSchedule] = useState<boolean>(false)
+
   const { data: teachers = [] } = useQuery(trpc.user.getTeachers.queryOptions())
   const { data: courses = [] } = useQuery(trpc.course.getAll.queryOptions())
   const { data: rooms = [] } = useQuery(trpc.room.getAll.queryOptions())
   const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
   const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
+  const { data: schedules = [], refetch } = useQuery(
+    trpc.classSchedule.getAll.queryOptions(),
+  )
 
-  const createSchedule = useMutation(
+  const { mutate: createSchedule, isPending: isCreating } = useMutation(
     trpc.classSchedule.create.mutationOptions({
       onSuccess: () => {
         toast.success("Schedule created!")
         reset()
         refetch()
+        setEditingCell(null)
       },
       onError: (err) => toast.error(err.message),
     }),
   )
 
-  const updateSchedule = useMutation(
+  const { mutate: updateSchedule, isPending: isUpdating } = useMutation(
     trpc.classSchedule.update.mutationOptions({
       onSuccess: () => {
         toast.success("Schedule updated!")
@@ -75,16 +93,9 @@ const ClassScheduleTable = () => {
   })
 
   const onSubmit = handleSubmit((data) => {
-    createSchedule.mutate({
+    createSchedule({
       ...data,
-      day: data.day.toLowerCase() as
-        | "sunday"
-        | "monday"
-        | "tuesday"
-        | "wednesday"
-        | "thursday"
-        | "friday"
-        | "saturday",
+      day: data.day.toLowerCase() as WeekDay,
     })
   })
 
@@ -97,29 +108,41 @@ const ClassScheduleTable = () => {
     )
   }
 
-  const handleCellUpdate = (
-    day: string,
-    slotId: string,
-    sectionId: string,
-    courseId: string,
-    teacherId: string,
-    roomId: string,
-  ) => {
-    updateSchedule.mutate({
-      day: day.toLowerCase() as
-        | "sunday"
-        | "monday"
-        | "tuesday"
-        | "wednesday"
-        | "thursday"
-        | "friday"
-        | "saturday",
-      slotId,
-      sectionId,
-      courseId,
-      teacherId,
-      roomId,
+  const handleEditStart = (day: string, slotId: string, sectionId: string) => {
+    const item = getScheduleItem(day, slotId, sectionId)
+
+    if (!item) SetIsNewSchedule(true)
+
+    setEditingCell({ day, slotId, sectionId })
+    setEditFormData({
+      courseId: item?.courseId || "",
+      teacherId: item?.teacherId || "",
+      roomId: item?.roomId || "",
     })
+  }
+
+  const handleCellUpdate = () => {
+    if (!editingCell) return
+    const { day, slotId, sectionId } = editingCell
+    if (isNewSchedule) {
+      createSchedule({
+        day: day.toLowerCase() as WeekDay,
+        slotId,
+        sectionId,
+        courseId: editFormData.courseId,
+        teacherId: editFormData.teacherId,
+        roomId: editFormData.roomId,
+      })
+    } else {
+      updateSchedule({
+        day: day.toLowerCase() as WeekDay,
+        slotId,
+        sectionId,
+        courseId: editFormData.courseId,
+        teacherId: editFormData.teacherId,
+        roomId: editFormData.roomId,
+      })
+    }
   }
 
   return (
@@ -254,7 +277,6 @@ const ClassScheduleTable = () => {
                     ))}
                   </TableRow>
                 </TableHeader>
-
                 <TableBody>
                   {slots.map((slot) => (
                     <TableRow key={slot.id}>
@@ -274,17 +296,19 @@ const ClassScheduleTable = () => {
                             key={section.id}
                             className="border border-gray-300 px-4 py-2"
                             onDoubleClick={() =>
-                              setEditingCell({
-                                day,
-                                slotId: slot.id,
-                                sectionId: section.id,
-                              })
+                              handleEditStart(day, slot.id, section.id)
                             }
                           >
                             {isEditing ? (
-                              <div className="space-y-1">
+                              <div className="flex flex-col space-y-1">
                                 <select
-                                  defaultValue={item?.courseId || ""}
+                                  value={editFormData.courseId}
+                                  onChange={(e) =>
+                                    setEditFormData((prev) => ({
+                                      ...prev,
+                                      courseId: e.target.value,
+                                    }))
+                                  }
                                   className="w-full rounded bg-background p-1 text-sm"
                                 >
                                   <option value="">Select course</option>
@@ -295,7 +319,13 @@ const ClassScheduleTable = () => {
                                   ))}
                                 </select>
                                 <select
-                                  defaultValue={item?.teacherId || ""}
+                                  value={editFormData.teacherId}
+                                  onChange={(e) =>
+                                    setEditFormData((prev) => ({
+                                      ...prev,
+                                      teacherId: e.target.value,
+                                    }))
+                                  }
                                   className="w-full rounded bg-background p-1 text-sm"
                                 >
                                   <option value="">Select teacher</option>
@@ -306,7 +336,13 @@ const ClassScheduleTable = () => {
                                   ))}
                                 </select>
                                 <select
-                                  defaultValue={item?.roomId || ""}
+                                  value={editFormData.roomId}
+                                  onChange={(e) =>
+                                    setEditFormData((prev) => ({
+                                      ...prev,
+                                      roomId: e.target.value,
+                                    }))
+                                  }
                                   className="w-full rounded bg-background p-1 text-sm"
                                 >
                                   <option value="">Select room</option>
@@ -319,50 +355,30 @@ const ClassScheduleTable = () => {
                                 <Button
                                   size="sm"
                                   className="mt-1 w-full"
-                                  onClick={() =>
-                                    handleCellUpdate(
-                                      day,
-                                      slot.id,
-                                      section.id,
-                                      item?.courseId || "",
-                                      item?.teacherId || "",
-                                      item?.roomId || "",
-                                    )
-                                  }
+                                  onClick={handleCellUpdate}
+                                  disabled={isCreating || isUpdating}
                                 >
                                   Save
                                 </Button>
                               </div>
                             ) : item ? (
-                              <div
-                                style={{
-                                  whiteSpace: "nowrap",
-                                  fontSize: "0.875rem",
-                                }}
-                              >
+                              <div className="space-y-1 whitespace-nowrap text-sm">
                                 <div>
-                                  {
-                                    courses.find((c) => c.id === item.courseId)
-                                      ?.title
-                                  }
+                                  {courses.find((c) => c.id === item.courseId)
+                                    ?.title || "-"}
                                 </div>
                                 <div>
-                                  {
-                                    teachers.find(
-                                      (t) => t.id === item.teacherId,
-                                    )?.name
-                                  }
+                                  {teachers.find((t) => t.id === item.teacherId)
+                                    ?.name || "-"}
                                 </div>
                                 <div>
-                                  {
-                                    rooms.find((r) => r.id === item.roomId)
-                                      ?.name
-                                  }
+                                  {rooms.find((r) => r.id === item.roomId)
+                                    ?.name || "-"}
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-gray-400 italic">
-                                (empty)
+                              <span className="text-muted-foreground text-xs">
+                                Double click to add
                               </span>
                             )}
                           </TableCell>
