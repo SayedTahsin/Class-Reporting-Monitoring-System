@@ -1,3 +1,4 @@
+import { createId } from "@/lib/helpers/createId"
 import { sql } from "drizzle-orm"
 import { check, integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 import { auditColumns } from "./audit_column"
@@ -5,9 +6,10 @@ import { auditColumns } from "./audit_column"
 export const slot = sqliteTable(
   "slot",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    startTime: text("start_time").notNull(),
-    endTime: text("end_time").notNull(),
+    id: text("id").primaryKey().$default(createId),
+    slotNumber: integer("slot_number").unique(),
+    startTime: text("start_time").notNull().default("00:00"),
+    endTime: text("end_time").notNull().default("00:00"),
 
     ...auditColumns,
   },

@@ -1,3 +1,4 @@
+import { checkPermission } from "@/lib/helpers/checkPermission"
 import { eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
@@ -5,29 +6,21 @@ import { room } from "../db/schema/room"
 import { protectedProcedure, router } from "../lib/trpc"
 
 export const roomRouter = router({
-  getAll: protectedProcedure.query(async () => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
     return await db.select().from(room).where(isNull(room.deletedAt))
   }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       return await db.select().from(room).where(eq(room.id, input.id))
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const now = new Date()
-      await db
-        .update(room)
-        .set({
-          deletedAt: now,
-          updatedAt: now,
-          updatedBy: ctx.session.user.id,
-          deletedBy: ctx.session.user.id,
-        })
-        .where(eq(room.id, input.id))
+      await checkPermission(ctx.session.user.id, "*")
+      await db.delete(room).where(eq(room.id, input.id))
       return { success: true }
     }),
 
@@ -36,9 +29,11 @@ export const roomRouter = router({
       z.object({
         id: z.string(),
         name: z.string().optional(),
+        description: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "room:create_update")
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -62,12 +57,15 @@ export const roomRouter = router({
     .input(
       z.object({
         name: z.string(),
+        description: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "room:create_update")
       const now = new Date()
       const newRoom = await db.insert(room).values({
         name: input.name,
+        description: input.description,
         createdAt: now,
         updatedAt: now,
         updatedBy: ctx.session.user.id,

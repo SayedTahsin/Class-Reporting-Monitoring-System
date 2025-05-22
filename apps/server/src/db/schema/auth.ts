@@ -1,6 +1,6 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
-import { batch } from "./batch"
 import { role } from "./pbac"
+import { section } from "./section"
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -9,9 +9,11 @@ export const user = sqliteTable("user", {
   emailVerified: integer("email_verified", { mode: "boolean" }).notNull(),
   image: text("image"),
   username: text("username").unique(),
-  batchId: text("batch_id").references(() => batch.id),
+  sectionId: text("section_id").references(() => section.id, {
+    onDelete: "set null",
+  }),
   phone: text("phone"),
-  roleId: text("role_id").references(() => role.id),
+  roleId: text("role_id").references(() => role.id, { onDelete: "set null" }),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   deletedAt: integer("deleted_at", { mode: "timestamp" }),

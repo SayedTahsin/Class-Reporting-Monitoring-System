@@ -1,3 +1,4 @@
+import { checkPermission } from "@/lib/helpers/checkPermission"
 import { eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
@@ -18,6 +19,7 @@ export const courseRouter = router({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "*")
       const now = new Date()
       await db
         .update(course)
@@ -41,6 +43,7 @@ export const courseRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "course:create_update")
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -69,6 +72,7 @@ export const courseRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "course:create_update")
       const now = new Date()
       const newCourse = await db.insert(course).values({
         code: input.code,
