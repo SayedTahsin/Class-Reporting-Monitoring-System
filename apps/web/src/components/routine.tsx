@@ -41,7 +41,7 @@ const RoutineView = () => {
   const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
   const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
   const { data: schedules = [], refetch } = useQuery(
-    trpc.classSchedule.getAll.queryOptions(),
+    trpc.classSchedule.getAll.queryOptions()
   )
 
   const getScheduleItem = (day: string, slotId: string, sectionId: string) => {
@@ -49,7 +49,7 @@ const RoutineView = () => {
       (s) =>
         s.day.toLowerCase() === day.toLowerCase() &&
         s.slotId === slotId &&
-        s.sectionId === sectionId,
+        s.sectionId === sectionId
     )
   }
 
@@ -108,7 +108,7 @@ const RoutineView = () => {
                                 </div>
                                 <div>
                                   {teachers.find(
-                                    (t) => t.id === item?.teacherId,
+                                    (t) => t.id === item?.teacherId
                                   )?.name || "-"}
                                 </div>
                                 <div>
