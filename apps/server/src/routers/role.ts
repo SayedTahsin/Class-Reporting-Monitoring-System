@@ -27,7 +27,6 @@ export const roleRouter = router({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       await checkPermission(ctx.session.user.id, "*")
-      const now = new Date()
       await db.delete(role).where(eq(role.id, input.id))
       return { success: true }
     }),

@@ -62,7 +62,6 @@ const ClassScheduleTable = () => {
     trpc.classSchedule.create.mutationOptions({
       onSuccess: () => {
         toast.success("Schedule created!")
-        reset()
         refetch()
         setEditingCell(null)
       },
@@ -80,24 +79,6 @@ const ClassScheduleTable = () => {
       onError: (err) => toast.error(err.message),
     }),
   )
-
-  const { register, handleSubmit, reset } = useForm({
-    defaultValues: {
-      slotId: "",
-      teacherId: "",
-      roomId: "",
-      sectionId: "",
-      courseId: "",
-      day: "",
-    },
-  })
-
-  const onSubmit = handleSubmit((data) => {
-    createSchedule({
-      ...data,
-      day: data.day.toLowerCase() as WeekDay,
-    })
-  })
 
   const getScheduleItem = (day: string, slotId: string, sectionId: string) => {
     return schedules.find(
@@ -147,104 +128,6 @@ const ClassScheduleTable = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-6">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <Label htmlFor="day">Day</Label>
-              <select
-                id="day"
-                {...register("day", { required: true })}
-                className="w-full rounded bg-background p-1 text-foreground"
-              >
-                <option value="">Select day</option>
-                {weekdays.map((day) => (
-                  <option key={day} value={day.toLowerCase()}>
-                    {day}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="slotId">Slot</Label>
-              <select
-                id="slotId"
-                {...register("slotId", { required: true })}
-                className="w-full rounded bg-background p-1 text-foreground"
-              >
-                <option value="">Select slot</option>
-                {slots.map((slot) => (
-                  <option key={slot.id} value={slot.id}>
-                    {slot.startTime} - {slot.endTime}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="roomId">Room</Label>
-              <select
-                id="roomId"
-                {...register("roomId", { required: true })}
-                className="w-full rounded bg-background p-1 text-foreground"
-              >
-                <option value="">Select room</option>
-                {rooms.map((room) => (
-                  <option key={room.id} value={room.id}>
-                    {room.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="teacherId">Teacher</Label>
-              <select
-                id="teacherId"
-                {...register("teacherId", { required: true })}
-                className="w-full rounded bg-background p-1 text-foreground"
-              >
-                <option value="">Select teacher</option>
-                {teachers.map((teacher) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="sectionId">Section</Label>
-              <select
-                id="sectionId"
-                {...register("sectionId", { required: true })}
-                className="w-full rounded bg-background p-1 text-foreground"
-              >
-                <option value="">Select section</option>
-                {sections.map((section) => (
-                  <option key={section.id} value={section.id}>
-                    {section.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="courseId">Course</Label>
-              <select
-                id="courseId"
-                {...register("courseId", { required: true })}
-                className="w-full rounded bg-background p-1 text-foreground"
-              >
-                <option value="">Select course</option>
-                {courses.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <Button type="submit">Create Schedule</Button>
-        </form>
-      </CardContent>
-
       <CardContent className="space-y-8">
         <Label className="text-2xl">Weekly Routine</Label>
         {weekdays.map((day) => (

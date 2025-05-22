@@ -1,4 +1,5 @@
 import { router } from "../lib/trpc"
+import { classHistoryRouter } from "./class_history"
 import { classScheduleRouter } from "./class_schedule"
 import { courseRouter } from "./course"
 import { permissionRouter } from "./permission"
@@ -19,6 +20,7 @@ export const appRouter = router({
   role: roleRouter,
   permission: permissionRouter,
   classSchedule: classScheduleRouter,
+  classHistory: classHistoryRouter,
   userRole: userRoleRouter,
   rolePermission: rolePermissionRouter,
 })

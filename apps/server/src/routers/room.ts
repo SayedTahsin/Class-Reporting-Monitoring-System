@@ -20,16 +20,7 @@ export const roomRouter = router({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       await checkPermission(ctx.session.user.id, "*")
-      const now = new Date()
-      await db
-        .update(room)
-        .set({
-          deletedAt: now,
-          updatedAt: now,
-          updatedBy: ctx.session.user.id,
-          deletedBy: ctx.session.user.id,
-        })
-        .where(eq(room.id, input.id))
+      await db.delete(room).where(eq(room.id, input.id))
       return { success: true }
     }),
 

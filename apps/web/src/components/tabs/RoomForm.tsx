@@ -22,8 +22,13 @@ type Room = {
   name: string
   description: string | null
 }
+type AdminTabProps = {
+  userRoleName: string
+}
+const RoomForm = ({ userRoleName }: AdminTabProps) => {
+  const isSuperAdmin = userRoleName === "SuperAdmin"
+  const isChairman = userRoleName === "Chairman"
 
-const RoomForm = () => {
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       name: "",
@@ -77,6 +82,8 @@ const RoomForm = () => {
   })
 
   const handleDoubleClick = (room: Room, field: "name" | "description") => {
+    if (!isChairman && !isSuperAdmin) return
+
     setEditingCell({ id: room.id, field })
     setEditValue(room[field] ?? "")
   }
@@ -101,19 +108,21 @@ const RoomForm = () => {
   return (
     <Card>
       <CardContent className="space-y-6">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label htmlFor="name">Room Name</Label>
-              <Input id="name" {...register("name", { required: true })} />
+        {(isChairman || isSuperAdmin) && (
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="name">Room Name</Label>
+                <Input id="name" {...register("name", { required: true })} />
+              </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Input id="description" {...register("description")} />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Input id="description" {...register("description")} />
-            </div>
-          </div>
-          <Button type="submit">Create Room</Button>
-        </form>
+            <Button type="submit">Create Room</Button>
+          </form>
+        )}
 
         <div>
           <Label className="mb-2">Existing Rooms</Label>
@@ -122,7 +131,9 @@ const RoomForm = () => {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                {isSuperAdmin && (
+                  <TableHead className="text-right">Actions</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -166,15 +177,17 @@ const RoomForm = () => {
                       (room.description ?? "-")
                     )}
                   </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(room.id)}
-                    >
-                      <Trash2 className=" text-red-500" />
-                    </Button>
-                  </TableCell>
+                  {isSuperAdmin && (
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(room.id)}
+                      >
+                        <Trash2 className=" text-red-500" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

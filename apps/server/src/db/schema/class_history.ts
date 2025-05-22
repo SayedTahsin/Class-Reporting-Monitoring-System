@@ -8,7 +8,7 @@ import {
 } from "drizzle-orm/sqlite-core"
 import { auditColumns } from "./audit_column"
 import { user } from "./auth"
-import { classSchedule } from "./class_schedule"
+import { course } from "./course"
 import { room } from "./room"
 import { section } from "./section"
 import { slot } from "./slot"
@@ -36,11 +36,9 @@ export const classHistory = sqliteTable(
       .notNull()
       .references(() => room.id, { onDelete: "set null" }),
 
-    scheduleId: text("schedule_id")
+    courseId: text("course_id")
       .notNull()
-      .references(() => classSchedule.id, {
-        onDelete: "set null",
-      }),
+      .references(() => course.id, { onDelete: "set null" }),
 
     status: text("status", {
       enum: ["delivered", "notdelivered", "rescheduled"],
@@ -61,7 +59,7 @@ export const classHistory = sqliteTable(
       index("classhistory_teacher").on(table.teacherId),
       index("classhistory_room").on(table.roomId),
       index("classhistory_section").on(table.sectionId),
-      index("classsession_schedule").on(table.scheduleId),
+      index("classsession_course").on(table.courseId),
     ]
   },
 )

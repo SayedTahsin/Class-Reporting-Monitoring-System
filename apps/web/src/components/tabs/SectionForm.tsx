@@ -25,7 +25,13 @@ type User = {
   email: string
 }
 
-const SectionForm = () => {
+type AdminTabProps = {
+  userRoleName: string
+}
+
+const SectionForm = ({ userRoleName }: AdminTabProps) => {
+  const isSuperAdmin = userRoleName === "SuperAdmin"
+  const isChairman = userRoleName === "Chairman"
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       name: "",
@@ -129,13 +135,15 @@ const SectionForm = () => {
   return (
     <Card>
       <CardContent className="space-y-6">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Create New Section</Label>
-            <Input id="name" {...register("name", { required: true })} />
-          </div>
-          <Button type="submit">Create Section</Button>
-        </form>
+        {(isChairman || isSuperAdmin) && (
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="name">Create New Section</Label>
+              <Input id="name" {...register("name", { required: true })} />
+            </div>
+            <Button type="submit">Create Section</Button>
+          </form>
+        )}
 
         <div>
           <Label htmlFor="section-select">Existing Sectiones</Label>
@@ -165,10 +173,14 @@ const SectionForm = () => {
               />
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleSectionRename}>Update</Button>
-              <Button variant="ghost" onClick={handleSectionDelete}>
-                <Trash2 className=" text-red-500" />
-              </Button>
+              {(isChairman || isSuperAdmin) && (
+                <Button onClick={handleSectionRename}>Update</Button>
+              )}
+              {isSuperAdmin && (
+                <Button variant="ghost" onClick={handleSectionDelete}>
+                  <Trash2 className=" text-red-500" />
+                </Button>
+              )}
             </div>
           </div>
         )}

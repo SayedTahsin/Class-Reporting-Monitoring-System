@@ -16,8 +16,12 @@ import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-
-const SlotForm = () => {
+type AdminTabProps = {
+  userRoleName: string
+}
+const SlotForm = ({ userRoleName }: AdminTabProps) => {
+  const isChairman = userRoleName === "Chairman"
+  const isSuperAdmin = userRoleName === "SuperAdmin"
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       slotNumber: 1,
@@ -70,6 +74,7 @@ const SlotForm = () => {
     field: "slotNumber" | "startTime" | "endTime",
     value: string | number,
   ) => {
+    if (!isChairman && !isSuperAdmin) return
     setEditing({ id, field })
     setEditValue(String(value))
   }
@@ -80,12 +85,6 @@ const SlotForm = () => {
         editing.field === "slotNumber" ? Number(editValue) : editValue
       updateSlot.mutate({ id: editing.id, [editing.field]: value })
       setEditing(null)
-    }
-  }
-
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this slot?")) {
-      deleteSlot.mutate({ id })
     }
   }
 
@@ -100,36 +99,38 @@ const SlotForm = () => {
   return (
     <Card>
       <CardContent className="space-y-6">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <Label htmlFor="slotNumber">Slot Number</Label>
-              <Input
-                id="slotNumber"
-                type="number"
-                {...register("slotNumber", {
-                  required: true,
-                  valueAsNumber: true,
-                })}
-              />
+        {(isChairman || isSuperAdmin) && (
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <Label htmlFor="slotNumber">Slot Number</Label>
+                <Input
+                  id="slotNumber"
+                  type="number"
+                  {...register("slotNumber", {
+                    required: true,
+                    valueAsNumber: true,
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="startTime">Start Time</Label>
+                <Input
+                  id="startTime"
+                  {...register("startTime", { required: true })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="endTime">End Time</Label>
+                <Input
+                  id="endTime"
+                  {...register("endTime", { required: true })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="startTime">Start Time</Label>
-              <Input
-                id="startTime"
-                {...register("startTime", { required: true })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="endTime">End Time</Label>
-              <Input
-                id="endTime"
-                {...register("endTime", { required: true })}
-              />
-            </div>
-          </div>
-          <Button type="submit">Create Slot</Button>
-        </form>
+            <Button type="submit">Create Slot</Button>
+          </form>
+        )}
 
         <div>
           <Label>Existing Slots</Label>

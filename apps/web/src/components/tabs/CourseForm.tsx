@@ -23,8 +23,13 @@ type Course = {
   title: string
   credits: number
 }
+type AdminTabProps = {
+  userRoleName: string
+}
+const CourseForm = ({ userRoleName }: AdminTabProps) => {
+  const isSuperAdmin = userRoleName === "SuperAdmin"
+  const isChairman = userRoleName === "Chairman"
 
-const CourseForm = () => {
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       code: "",
@@ -87,6 +92,8 @@ const CourseForm = () => {
     course: Course,
     field: "code" | "title" | "credits",
   ) => {
+    if (!isChairman && !isSuperAdmin) return
+
     setEditingCell({ id: course.id, field })
     setEditValue(course[field]?.toString() ?? "")
   }
@@ -107,31 +114,33 @@ const CourseForm = () => {
   return (
     <Card>
       <CardContent className="space-y-6">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <Label htmlFor="code">Course Code</Label>
-              <Input id="code" {...register("code", { required: true })} />
+        {(isChairman || isSuperAdmin) && (
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <Label htmlFor="code">Course Code</Label>
+                <Input id="code" {...register("code", { required: true })} />
+              </div>
+              <div>
+                <Label htmlFor="title">Title</Label>
+                <Input id="title" {...register("title", { required: true })} />
+              </div>
+              <div>
+                <Label htmlFor="credits">Credits</Label>
+                <Input
+                  id="credits"
+                  type="number"
+                  {...register("credits", {
+                    required: true,
+                    valueAsNumber: true,
+                    min: 1,
+                  })}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="title">Title</Label>
-              <Input id="title" {...register("title", { required: true })} />
-            </div>
-            <div>
-              <Label htmlFor="credits">Credits</Label>
-              <Input
-                id="credits"
-                type="number"
-                {...register("credits", {
-                  required: true,
-                  valueAsNumber: true,
-                  min: 1,
-                })}
-              />
-            </div>
-          </div>
-          <Button type="submit">Create Course</Button>
-        </form>
+            <Button type="submit">Create Course</Button>
+          </form>
+        )}
 
         <div>
           <Label className="mb-2">Existing Courses</Label>
@@ -141,7 +150,9 @@ const CourseForm = () => {
                 <TableHead>Code</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Credits</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                {isSuperAdmin && (
+                  <TableHead className="text-right">Actions</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -205,15 +216,17 @@ const CourseForm = () => {
                       course.credits
                     )}
                   </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteCourse.mutate({ id: course.id })}
-                    >
-                      <Trash2 className=" text-red-500" />
-                    </Button>
-                  </TableCell>
+                  {isSuperAdmin && (
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteCourse.mutate({ id: course.id })}
+                      >
+                        <Trash2 className=" text-red-500" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

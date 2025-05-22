@@ -51,16 +51,16 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
         <ClassScheduleForm />
       </TabsContent>
       <TabsContent value="section">
-        <SectionForm />
+        <SectionForm userRoleName={userRoleName} />
       </TabsContent>
       <TabsContent value="course">
-        <CourseForm />
+        <CourseForm userRoleName={userRoleName} />
       </TabsContent>
       <TabsContent value="room">
-        <RoomForm />
+        <RoomForm userRoleName={userRoleName} />
       </TabsContent>
       <TabsContent value="slot">
-        <SlotForm />
+        <SlotForm userRoleName={userRoleName} />
       </TabsContent>
       {isSuperAdmin && (
         <>

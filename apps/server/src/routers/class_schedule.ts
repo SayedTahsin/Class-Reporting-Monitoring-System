@@ -57,21 +57,16 @@ export const classScheduleRouter = router({
     .input(classScheduleKeySchema)
     .mutation(async ({ input, ctx }) => {
       await checkPermission(ctx.session.user.id, "*")
-      const now = new Date()
+
       await db
-        .update(classSchedule)
-        .set({
-          deletedAt: now,
-          updatedAt: now,
-          updatedBy: ctx.session.user.id,
-          deletedBy: ctx.session.user.id,
-        })
+        .delete(classSchedule)
         .where(
           and(
             eq(classSchedule.day, input.day),
             eq(classSchedule.slotId, input.slotId),
           ),
         )
+
       return { success: true }
     }),
 
