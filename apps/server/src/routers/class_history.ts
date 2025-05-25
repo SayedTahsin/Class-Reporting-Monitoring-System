@@ -24,7 +24,7 @@ export const classHistoryRouter = router({
         to: z.string().optional(),
       }),
     )
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       const conditions = [isNull(classHistory.deletedAt)]
 
       if (input.from) {
