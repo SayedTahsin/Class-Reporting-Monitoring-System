@@ -1,21 +1,18 @@
-import { checkPermission } from "@/lib/helpers/checkPermission"
-import { createId } from "@/lib/helpers/createId"
-import { and, eq, isNull } from "drizzle-orm"
-import { z } from "zod"
-import { db } from "../db"
-import { classHistory } from "../db/schema/class_history"
-import { protectedProcedure, router } from "../lib/trpc"
+import { checkPermission } from '@/lib/helpers/checkPermission'
+import { createId } from '@/lib/helpers/createId'
+import { and, eq, isNull } from 'drizzle-orm'
+import { z } from 'zod'
+import { db } from '../db'
+import { classHistory } from '../db/schema/class_history'
+import { protectedProcedure, router } from '../lib/trpc'
 
 const classHistoryKeySchema = z.object({
-  id: z.string(),
+  id: z.string()
 })
 
 export const classHistoryRouter = router({
   getAll: protectedProcedure.query(async () => {
-    return await db
-      .select()
-      .from(classHistory)
-      .where(isNull(classHistory.deletedAt))
+    return await db.select().from(classHistory).where(isNull(classHistory.deletedAt))
   }),
 
   filter: protectedProcedure
@@ -25,23 +22,20 @@ export const classHistoryRouter = router({
         slotId: z.string().optional(),
         roomId: z.string().optional(),
         teacherId: z.string().optional(),
-        status: z.enum(["delivered", "notdelivered", "rescheduled"]).optional(),
+        status: z.enum(['delivered', 'notdelivered', 'rescheduled']).optional(),
         courseId: z.string().optional(),
-        date: z.date().optional(),
-      }),
+        date: z.date().optional()
+      })
     )
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       const conditions = [isNull(classHistory.deletedAt)]
 
-      if (input.sectionId)
-        conditions.push(eq(classHistory.sectionId, input.sectionId))
+      if (input.sectionId) conditions.push(eq(classHistory.sectionId, input.sectionId))
       if (input.slotId) conditions.push(eq(classHistory.slotId, input.slotId))
       if (input.roomId) conditions.push(eq(classHistory.roomId, input.roomId))
-      if (input.teacherId)
-        conditions.push(eq(classHistory.teacherId, input.teacherId))
+      if (input.teacherId) conditions.push(eq(classHistory.teacherId, input.teacherId))
       if (input.status) conditions.push(eq(classHistory.status, input.status))
-      if (input.courseId)
-        conditions.push(eq(classHistory.courseId, input.courseId))
+      if (input.courseId) conditions.push(eq(classHistory.courseId, input.courseId))
       if (input.date) {
         conditions.push(eq(classHistory.date, input.date))
       }
@@ -61,18 +55,18 @@ export const classHistoryRouter = router({
         teacherId: z.string(),
         roomId: z.string(),
         courseId: z.string(),
-        status: z.enum(["delivered", "notdelivered", "rescheduled"]).optional(),
-        notes: z.string().optional(),
-      }),
+        status: z.enum(['delivered', 'notdelivered', 'rescheduled']).optional(),
+        notes: z.string().optional()
+      })
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        await checkPermission(ctx.session.user.id, "*")
+        await checkPermission(ctx.session.user.id, '*')
       } catch {
-        await checkPermission(ctx.session.user.id, "class_history:create")
+        await checkPermission(ctx.session.user.id, 'class_history:create')
         if (input.teacherId !== ctx.session.user.id) {
-          const err = new Error("Invalid TeacherId.")
-          err.name = "ForbiddenError"
+          const err = new Error('Invalid TeacherId.')
+          err.name = 'ForbiddenError'
           throw err
         }
       }
@@ -82,7 +76,7 @@ export const classHistoryRouter = router({
         ...input,
         createdAt: now,
         updatedAt: now,
-        updatedBy: ctx.session.user.id,
+        updatedBy: ctx.session.user.id
       })
       return { success: true }
     }),
@@ -91,34 +85,31 @@ export const classHistoryRouter = router({
     .input(
       z.object({
         id: z.string(),
-        status: z.enum(["delivered", "notdelivered", "rescheduled"]).optional(),
+        status: z.enum(['delivered', 'notdelivered', 'rescheduled']).optional(),
         notes: z.string().optional(),
         slotId: z.string().optional(),
         sectionId: z.string().optional(),
         teacherId: z.string().optional(),
         roomId: z.string().optional(),
-        courseId: z.string().optional(),
-      }),
+        courseId: z.string().optional()
+      })
     )
     .mutation(async ({ input, ctx }) => {
       const { id, ...updateData } = input
       const now = new Date()
 
       if (Object.keys(updateData).length === 0) {
-        throw new Error("No fields provided for update.")
+        throw new Error('No fields provided for update.')
       }
 
       try {
-        await checkPermission(ctx.session.user.id, "class_history:update")
+        await checkPermission(ctx.session.user.id, 'class_history:update')
       } catch {
-        await checkPermission(ctx.session.user.id, "class_history:update_own")
+        await checkPermission(ctx.session.user.id, 'class_history:update_own')
 
-        if (
-          updateData.teacherId &&
-          updateData.teacherId !== ctx.session.user.id
-        ) {
-          const err = new Error("You can only update your own history.")
-          err.name = "ForbiddenError"
+        if (updateData.teacherId && updateData.teacherId !== ctx.session.user.id) {
+          const err = new Error('You can only update your own history.')
+          err.name = 'ForbiddenError'
           throw err
         }
       }
@@ -128,31 +119,27 @@ export const classHistoryRouter = router({
         .set({
           ...updateData,
           updatedAt: now,
-          updatedBy: ctx.session.user.id,
+          updatedBy: ctx.session.user.id
         })
         .where(and(eq(classHistory.id, id), isNull(classHistory.deletedAt)))
 
       return { success: true }
     }),
 
-  delete: protectedProcedure
-    .input(classHistoryKeySchema)
-    .mutation(async ({ input, ctx }) => {
-      await checkPermission(ctx.session.user.id, "*")
-      const now = new Date()
+  delete: protectedProcedure.input(classHistoryKeySchema).mutation(async ({ input, ctx }) => {
+    await checkPermission(ctx.session.user.id, '*')
+    const now = new Date()
 
-      await db
-        .update(classHistory)
-        .set({
-          deletedAt: now,
-          updatedAt: now,
-          updatedBy: ctx.session.user.id,
-          deletedBy: ctx.session.user.id,
-        })
-        .where(
-          and(eq(classHistory.id, input.id), isNull(classHistory.deletedAt)),
-        )
+    await db
+      .update(classHistory)
+      .set({
+        deletedAt: now,
+        updatedAt: now,
+        updatedBy: ctx.session.user.id,
+        deletedBy: ctx.session.user.id
+      })
+      .where(and(eq(classHistory.id, input.id), isNull(classHistory.deletedAt)))
 
-      return { success: true }
-    }),
+    return { success: true }
+  })
 })
