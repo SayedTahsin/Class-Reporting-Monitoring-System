@@ -1,108 +1,98 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { trpc } from '@/utils/trpc'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
-import { toast } from 'sonner'
-import { DatePicker } from './ui/date-picker'
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
+import { DatePicker } from "./ui/date-picker";
 
-const weekdays = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+type AdminTabProps = {
+  userRoleName: string;
+};
+const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
+  const isSuperAdmin = userRoleName === "SuperAdmin";
+  const isCR = userRoleName === "CR";
+  const isTeacher = userRoleName === "Teacher";
+  const canEdit = isSuperAdmin || isCR || isTeacher;
 
-type WeekDay = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday'
-
-const ClassHistoryTable = () => {
   const [editingCell, setEditingCell] = useState<{
-    slotId: string
-    sectionId: string
-  } | null>(null)
+    slotId: string;
+    sectionId: string;
+  } | null>(null);
 
-  const [editFormData, setEditFormData] = useState<{
-    courseId: string
-    teacherId: string
-    roomId: string
-  }>({ courseId: '', teacherId: '', roomId: '' })
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
-  const [isNewSchedule, SetIsNewSchedule] = useState<boolean>(false)
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const { data: teachers = [] } = useQuery(
+    trpc.user.getTeachers.queryOptions()
+  );
+  const { data: courses = [] } = useQuery(trpc.course.getAll.queryOptions());
+  const { data: rooms = [] } = useQuery(trpc.room.getAll.queryOptions());
+  const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions());
+  const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions());
 
-  const { data: teachers = [] } = useQuery(trpc.user.getTeachers.queryOptions())
-  const { data: courses = [] } = useQuery(trpc.course.getAll.queryOptions())
-  const { data: rooms = [] } = useQuery(trpc.room.getAll.queryOptions())
-  const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
-  const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
-  const { data: schedules = [], refetch } = useQuery(trpc.classSchedule.getAll.queryOptions())
+  const { data: classHistory = [], refetch: refetchHistory } = useQuery({
+    ...trpc.classHistory.getByDate.queryOptions({
+      date: selectedDate
+        ? Math.floor(selectedDate.getTime() / 1000).toString()
+        : "",
+    }),
+    enabled: !!selectedDate && !isNaN(selectedDate.getTime()),
+  });
 
-  const { mutate: createSchedule, isPending: isCreating } = useMutation(
-    trpc.classSchedule.create.mutationOptions({
-      onSuccess: () => {
-        toast.success('Schedule created!')
-        refetch()
-        setEditingCell(null)
-      },
-      onError: (err) => toast.error(err.message)
-    })
-  )
+  const { mutate: updateClassHistoryStatus, isPending: isStatusUpdating } =
+    useMutation(
+      trpc.classHistory.update.mutationOptions({
+        onSuccess: () => {
+          toast.success("Status updated");
+          setEditingCell(null);
+          refetchHistory();
+        },
+        onError: (err) => toast.error(err.message),
+      })
+    );
 
-  const { mutate: updateSchedule, isPending: isUpdating } = useMutation(
-    trpc.classSchedule.update.mutationOptions({
-      onSuccess: () => {
-        toast.success('Schedule updated!')
-        setEditingCell(null)
-        refetch()
-      },
-      onError: (err) => toast.error(err.message)
-    })
-  )
+  const fetchClassHistoryByDate = (date: Date) => {
+    const nDate = new Date(date);
+    nDate.setHours(0, 0, 0, 0);
+    setSelectedDate(nDate);
+  };
 
-  const { mutate: getClassHistory, isPending: isGettingClassHistory } = useMutation(
-    trpc.classHistory.filter.mutationOptions({
-      onSuccess: () => {},
-      onError: (err) => toast.error(err.message)
-    })
-  )
-
-  const getScheduleItem = (slotId: string, sectionId: string) => {
-    return schedules.find((s) => s.slotId === slotId && s.sectionId === sectionId)
-  }
-
-  const handleEditStart = (slotId: string, sectionId: string) => {
-    const item = getScheduleItem(slotId, sectionId)
-
-    if (!item) SetIsNewSchedule(true)
-
-    setEditingCell({ slotId, sectionId })
-    setEditFormData({
-      courseId: item?.courseId || '',
-      teacherId: item?.teacherId || '',
-      roomId: item?.roomId || ''
-    })
-  }
-
-  const handleCellUpdate = () => {
-    if (!editingCell) return
-    const { slotId, sectionId } = editingCell
-    if (isNewSchedule) {
-    } else {
-    }
-  }
+  const getClassHistoryItem = (slotId: string, sectionId: string) => {
+    return classHistory.find(
+      (h) => h.slotId === slotId && h.sectionId === sectionId
+    );
+  };
 
   return (
     <Card>
       <CardContent>
-        <DatePicker date={selectedDate} onDateChange={setSelectedDate} />
+        <DatePicker
+          date={selectedDate}
+          onDateChange={fetchClassHistoryByDate}
+        />
       </CardContent>
       <CardContent className="space-y-8">
-        <Label className="text-2xl">Weekly Routine</Label>
         <div className="flex items-start">
           <div className="flex-1 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="border border-gray-300 px-4 py-2">Slot / Section</TableHead>
+                  <TableHead className="border border-gray-300 px-4 py-2">
+                    Slot / Section
+                  </TableHead>
                   {sections.map((section) => (
-                    <TableHead key={section.id} className="border border-gray-300 px-4 py-2">
+                    <TableHead
+                      key={section.id}
+                      className="border border-gray-300 px-4 py-2"
+                    >
                       {section.name}
                     </TableHead>
                   ))}
@@ -115,84 +105,97 @@ const ClassHistoryTable = () => {
                       {slot.startTime} - {slot.endTime}
                     </TableCell>
                     {sections.map((section) => {
-                      const item = getScheduleItem(slot.id, section.id)
+                      const historyItem = getClassHistoryItem(
+                        slot.id,
+                        section.id
+                      );
                       const isEditing =
-                        editingCell && editingCell.slotId === slot.id && editingCell.sectionId === section.id
+                        editingCell?.slotId === slot.id &&
+                        editingCell?.sectionId === section.id;
 
                       return (
                         <TableCell
                           key={section.id}
-                          className="border border-gray-300 px-4 py-2"
-                          onDoubleClick={() => handleEditStart(slot.id, section.id)}>
-                          {isEditing ? (
-                            <div className="flex flex-col space-y-1">
-                              <select
-                                value={editFormData.courseId}
-                                onChange={(e) =>
-                                  setEditFormData((prev) => ({
-                                    ...prev,
-                                    courseId: e.target.value
-                                  }))
-                                }
-                                className="w-full rounded bg-background p-1 text-sm">
-                                <option value="">Select course</option>
-                                {courses.map((course) => (
-                                  <option key={course.id} value={course.id}>
-                                    {course.title}
+                          className={`border border-gray-300 px-4 py-2 ${
+                            historyItem?.status === "delivered"
+                              ? "bg-green-700"
+                              : historyItem?.status === "notdelivered"
+                                ? "bg-red-800"
+                                : historyItem?.status === "rescheduled"
+                                  ? "bg-yellow-700"
+                                  : ""
+                          }`}
+                          onDoubleClick={() =>
+                            historyItem &&
+                            canEdit &&
+                            setEditingCell({
+                              slotId: slot.id,
+                              sectionId: section.id,
+                            })
+                          }
+                        >
+                          {historyItem ? (
+                            isEditing ? (
+                              <div className="flex flex-col space-y-1">
+                                <select
+                                  value={historyItem.status}
+                                  onChange={(e) =>
+                                    updateClassHistoryStatus({
+                                      id: historyItem.id,
+                                      status: e.target.value as
+                                        | "delivered"
+                                        | "notdelivered"
+                                        | "rescheduled",
+                                    })
+                                  }
+                                  className="w-full rounded bg-background p-1 text-sm"
+                                >
+                                  <option value="delivered">Delivered</option>
+                                  <option value="notdelivered">
+                                    Not Delivered
                                   </option>
-                                ))}
-                              </select>
-                              <select
-                                value={editFormData.teacherId}
-                                onChange={(e) =>
-                                  setEditFormData((prev) => ({
-                                    ...prev,
-                                    teacherId: e.target.value
-                                  }))
-                                }
-                                className="w-full rounded bg-background p-1 text-sm">
-                                <option value="">Select teacher</option>
-                                {teachers.map((teacher) => (
-                                  <option key={teacher.id} value={teacher.id}>
-                                    {teacher.name}
+                                  <option value="rescheduled">
+                                    Rescheduled
                                   </option>
-                                ))}
-                              </select>
-                              <select
-                                value={editFormData.roomId}
-                                onChange={(e) =>
-                                  setEditFormData((prev) => ({
-                                    ...prev,
-                                    roomId: e.target.value
-                                  }))
-                                }
-                                className="w-full rounded bg-background p-1 text-sm">
-                                <option value="">Select room</option>
-                                {rooms.map((room) => (
-                                  <option key={room.id} value={room.id}>
-                                    {room.name}
-                                  </option>
-                                ))}
-                              </select>
-                              <Button
-                                size="sm"
-                                className="mt-1 w-full"
-                                onClick={handleCellUpdate}
-                                disabled={isCreating || isUpdating}>
-                                Save
-                              </Button>
-                            </div>
-                          ) : item ? (
-                            <div className="space-y-1 whitespace-nowrap text-sm">
-                              <div>{courses.find((c) => c.id === item.courseId)?.title || '-'}</div>
-                              <div>{teachers.find((t) => t.id === item.teacherId)?.name || '-'}</div>
-                              <div>{rooms.find((r) => r.id === item.roomId)?.name || '-'}</div>
-                            </div>
+                                </select>
+                                <Button
+                                  size="sm"
+                                  className="w-full"
+                                  onClick={() => setEditingCell(null)}
+                                  disabled={isStatusUpdating}
+                                >
+                                  Close
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="space-y-1 whitespace-nowrap text-sm">
+                                <div>
+                                  Course:{" "}
+                                  {courses.find(
+                                    (c) => c.id === historyItem.courseId
+                                  )?.title || "-"}
+                                </div>
+                                <div>
+                                  Teacher:{" "}
+                                  {teachers.find(
+                                    (t) => t.id === historyItem.teacherId
+                                  )?.name || "-"}
+                                </div>
+                                <div>
+                                  Room:{" "}
+                                  {rooms.find(
+                                    (r) => r.id === historyItem.roomId
+                                  )?.name || "-"}
+                                </div>
+                              </div>
+                            )
                           ) : (
-                            <span className="text-muted-foreground text-xs">Double click to add</span>
+                            <span className="text-muted-foreground text-xs">
+                              No data
+                            </span>
                           )}
                         </TableCell>
-                      )
+                      );
                     })}
                   </TableRow>
                 ))}
@@ -202,7 +205,7 @@ const ClassHistoryTable = () => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default ClassHistoryTable
+export default ClassHistoryTable;

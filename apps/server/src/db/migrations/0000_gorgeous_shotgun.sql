@@ -59,13 +59,13 @@ CREATE TABLE `verification` (
 );
 --> statement-breakpoint
 CREATE TABLE `class_history` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`date` integer NOT NULL,
-	`slot_id` integer NOT NULL,
+	`slot_id` text NOT NULL,
 	`section_id` text NOT NULL,
 	`teacher_id` text NOT NULL,
 	`room_id` text NOT NULL,
-	`schedule_id` integer NOT NULL,
+	`course_id` text NOT NULL,
 	`status` text DEFAULT 'notdelivered' NOT NULL,
 	`notes` text,
 	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
@@ -77,18 +77,18 @@ CREATE TABLE `class_history` (
 	FOREIGN KEY (`section_id`) REFERENCES `section`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`teacher_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`room_id`) REFERENCES `room`(`id`) ON UPDATE no action ON DELETE set null,
-	FOREIGN KEY (`schedule_id`) REFERENCES `class_schedule`(`id`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`course_id`) REFERENCES `course`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `unique_class_session` ON `class_history` (`date`,`slot_id`,`section_id`);--> statement-breakpoint
 CREATE INDEX `classhistory_teacher` ON `class_history` (`teacher_id`);--> statement-breakpoint
 CREATE INDEX `classhistory_room` ON `class_history` (`room_id`);--> statement-breakpoint
 CREATE INDEX `classhistory_section` ON `class_history` (`section_id`);--> statement-breakpoint
-CREATE INDEX `classsession_schedule` ON `class_history` (`schedule_id`);--> statement-breakpoint
+CREATE INDEX `classsession_course` ON `class_history` (`course_id`);--> statement-breakpoint
 CREATE TABLE `class_schedule` (
 	`id` text PRIMARY KEY NOT NULL,
 	`day` text NOT NULL,
-	`slot_id` integer NOT NULL,
+	`slot_id` text NOT NULL,
 	`section_id` text NOT NULL,
 	`course_id` text NOT NULL,
 	`teacher_id` text NOT NULL,
@@ -105,9 +105,9 @@ CREATE TABLE `class_schedule` (
 	FOREIGN KEY (`room_id`) REFERENCES `room`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `data_slot` ON `class_schedule` (`day`,`slot_id`);--> statement-breakpoint
-CREATE UNIQUE INDEX `data_slot_room` ON `class_schedule` (`day`,`slot_id`,`room_id`);--> statement-breakpoint
-CREATE UNIQUE INDEX `date_slot_teacher` ON `class_schedule` (`day`,`slot_id`,`teacher_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `day_slot_room` ON `class_schedule` (`day`,`slot_id`,`room_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `day_slot_teacher` ON `class_schedule` (`day`,`slot_id`,`teacher_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `day_slot_section` ON `class_schedule` (`day`,`slot_id`,`section_id`);--> statement-breakpoint
 CREATE INDEX `schedule_section` ON `class_schedule` (`section_id`);--> statement-breakpoint
 CREATE INDEX `schedule_course` ON `class_schedule` (`course_id`);--> statement-breakpoint
 CREATE INDEX `schedule_teacher` ON `class_schedule` (`teacher_id`);--> statement-breakpoint
@@ -191,7 +191,7 @@ CREATE TABLE `section` (
 --> statement-breakpoint
 CREATE UNIQUE INDEX `section_name_unique` ON `section` (`name`);--> statement-breakpoint
 CREATE TABLE `slot` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`slot_number` integer,
 	`start_time` text DEFAULT '00:00' NOT NULL,
 	`end_time` text DEFAULT '00:00' NOT NULL,

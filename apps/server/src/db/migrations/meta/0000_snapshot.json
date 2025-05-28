@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "f97d7886-19fe-49fe-a7d4-bcf457992390",
+  "id": "cd416502-7273-4701-8171-9180918a2f22",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -414,10 +414,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "date": {
           "name": "date",
@@ -428,7 +428,7 @@
         },
         "slot_id": {
           "name": "slot_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -454,9 +454,9 @@
           "notNull": true,
           "autoincrement": false
         },
-        "schedule_id": {
-          "name": "schedule_id",
-          "type": "integer",
+        "course_id": {
+          "name": "course_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -545,10 +545,10 @@
           ],
           "isUnique": false
         },
-        "classsession_schedule": {
-          "name": "classsession_schedule",
+        "classsession_course": {
+          "name": "classsession_course",
           "columns": [
-            "schedule_id"
+            "course_id"
           ],
           "isUnique": false
         }
@@ -606,12 +606,12 @@
           "onDelete": "set null",
           "onUpdate": "no action"
         },
-        "class_history_schedule_id_class_schedule_id_fk": {
-          "name": "class_history_schedule_id_class_schedule_id_fk",
+        "class_history_course_id_course_id_fk": {
+          "name": "class_history_course_id_course_id_fk",
           "tableFrom": "class_history",
-          "tableTo": "class_schedule",
+          "tableTo": "course",
           "columnsFrom": [
-            "schedule_id"
+            "course_id"
           ],
           "columnsTo": [
             "id"
@@ -643,7 +643,7 @@
         },
         "slot_id": {
           "name": "slot_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -715,16 +715,8 @@
         }
       },
       "indexes": {
-        "data_slot": {
-          "name": "data_slot",
-          "columns": [
-            "day",
-            "slot_id"
-          ],
-          "isUnique": true
-        },
-        "data_slot_room": {
-          "name": "data_slot_room",
+        "day_slot_room": {
+          "name": "day_slot_room",
           "columns": [
             "day",
             "slot_id",
@@ -732,12 +724,21 @@
           ],
           "isUnique": true
         },
-        "date_slot_teacher": {
-          "name": "date_slot_teacher",
+        "day_slot_teacher": {
+          "name": "day_slot_teacher",
           "columns": [
             "day",
             "slot_id",
             "teacher_id"
+          ],
+          "isUnique": true
+        },
+        "day_slot_section": {
+          "name": "day_slot_section",
+          "columns": [
+            "day",
+            "slot_id",
+            "section_id"
           ],
           "isUnique": true
         },
@@ -1358,10 +1359,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "slot_number": {
           "name": "slot_number",
