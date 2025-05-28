@@ -1,22 +1,22 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import ClassScheduleForm from "./ClassScheduleTab";
-import CourseForm from "./CourseForm";
-import PBACForm from "./PbacForm";
-import PermissionForm from "./PermissionForm";
-import RoleForm from "./RoleForm";
-import RoomForm from "./RoomForm";
-import SectionForm from "./SectionForm";
-import SlotForm from "./SlotForm";
-import UserForm from "./UserForm";
+import ClassScheduleForm from "./ClassScheduleTab"
+import CourseForm from "./CourseForm"
+import PBACForm from "./PbacForm"
+import PermissionForm from "./PermissionForm"
+import RoleForm from "./RoleForm"
+import RoomForm from "./RoomForm"
+import SectionForm from "./SectionForm"
+import SlotForm from "./SlotForm"
+import UserForm from "./UserForm"
 
 type AdminTabProps = {
-  userRoleName: string;
-};
+  userRoleName: string
+}
 const AdminTab = ({ userRoleName }: AdminTabProps) => {
-  const isSuperAdmin = userRoleName === "SuperAdmin";
-  const isTeacher = userRoleName === "Teacher";
-  const isChairman = userRoleName === "Chairman";
+  const isSuperAdmin = userRoleName === "SuperAdmin"
+  const isTeacher = userRoleName === "Teacher"
+  const isChairman = userRoleName === "Chairman"
   return (
     <Tabs
       defaultValue={isTeacher ? "class_schedule" : "user"}
@@ -76,7 +76,7 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
         </>
       )}
     </Tabs>
-  );
-};
+  )
+}
 
-export default AdminTab;
+export default AdminTab

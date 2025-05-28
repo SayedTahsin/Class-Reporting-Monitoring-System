@@ -44,7 +44,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
         ? Math.floor(selectedDate.getTime() / 1000).toString()
         : "",
     }),
-    enabled: !!selectedDate && !isNaN(selectedDate.getTime()),
+    enabled: !!selectedDate && !Number.isNaN(selectedDate.getTime()),
   });
 
   const { mutate: updateClassHistoryStatus, isPending: isStatusUpdating } =

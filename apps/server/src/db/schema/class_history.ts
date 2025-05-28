@@ -1,17 +1,17 @@
-import { createId } from "@/lib/helpers/createId";
+import { createId } from "@/lib/helpers/createId"
 import {
   index,
   integer,
   sqliteTable,
   text,
   uniqueIndex,
-} from "drizzle-orm/sqlite-core";
-import { auditColumns } from "./audit_column";
-import { user } from "./auth";
-import { course } from "./course";
-import { room } from "./room";
-import { section } from "./section";
-import { slot } from "./slot";
+} from "drizzle-orm/sqlite-core"
+import { auditColumns } from "./audit_column"
+import { user } from "./auth"
+import { course } from "./course"
+import { room } from "./room"
+import { section } from "./section"
+import { slot } from "./slot"
 
 export const classHistory = sqliteTable(
   "class_history",
@@ -54,12 +54,12 @@ export const classHistory = sqliteTable(
       uniqueIndex("unique_class_session").on(
         table.date,
         table.slotId,
-        table.sectionId
+        table.sectionId,
       ),
       index("classhistory_teacher").on(table.teacherId),
       index("classhistory_room").on(table.roomId),
       index("classhistory_section").on(table.sectionId),
       index("classsession_course").on(table.courseId),
-    ];
-  }
-);
+    ]
+  },
+)
