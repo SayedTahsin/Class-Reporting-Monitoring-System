@@ -176,7 +176,6 @@ export const classHistoryRouter = router({
         rescheduledCount,
       }
     }),
-
   create: protectedProcedure
     .input(
       z.object({
