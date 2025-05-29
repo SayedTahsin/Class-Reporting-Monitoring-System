@@ -144,6 +144,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                                         | "delivered"
                                         | "notdelivered"
                                         | "rescheduled",
+                                      sectionId: section.id,
                                     })
                                   }
                                   className="w-full rounded bg-background p-1 text-sm"

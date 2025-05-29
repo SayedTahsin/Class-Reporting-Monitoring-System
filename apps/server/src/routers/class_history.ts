@@ -76,7 +76,7 @@ export const classHistoryRouter = router({
         status: z.enum(["delivered", "notdelivered", "rescheduled"]).optional(),
         notes: z.string().optional(),
         slotId: z.string().optional(),
-        sectionId: z.string().optional(),
+        sectionId: z.string(),
         teacherId: z.string().optional(),
         roomId: z.string().optional(),
         courseId: z.string().optional(),
@@ -93,15 +93,21 @@ export const classHistoryRouter = router({
       try {
         await checkPermission(ctx.session.user.id, "class_history:update")
       } catch {
-        await checkPermission(ctx.session.user.id, "class_history:update_own")
-
-        if (
-          updateData.teacherId &&
-          updateData.teacherId !== ctx.session.user.id
-        ) {
-          const err = new Error("You can only update your own history.")
-          err.name = "ForbiddenError"
-          throw err
+        try {
+          await checkPermission(ctx.session.user.id, "class_history:update_own")
+          if (
+            updateData.teacherId &&
+            updateData.teacherId !== ctx.session.user.id
+          ) {
+            const err = new Error("You can only update your own history.")
+            err.name = "ForbiddenError"
+            throw err
+          }
+        } catch {
+          await checkPermission(
+            ctx.session.user.id,
+            "class_history:update_own_section",
+          )
         }
       }
 

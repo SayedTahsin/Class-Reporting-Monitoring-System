@@ -7,13 +7,12 @@ import { protectedProcedure, publicProcedure, router } from "../lib/trpc"
 
 export const roleRouter = router({
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    await checkPermission(ctx.session.user.id, "*")
     return await db.select().from(role).where(isNull(role.deletedAt))
   }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input, ctx }) => {
+    .query(async ({ input }) => {
       return await db.select().from(role).where(eq(role.id, input.id))
     }),
 
