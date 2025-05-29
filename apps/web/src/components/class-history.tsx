@@ -20,7 +20,6 @@ type OverviewType = "section" | "teacher" | "room"
 type AdminTabProps = {
   userRoleName: string
 }
-
 const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
   const isSuperAdmin = userRoleName === "SuperAdmin"
   const isCR = userRoleName === "CR"
