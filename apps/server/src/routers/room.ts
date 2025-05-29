@@ -12,7 +12,7 @@ export const roomRouter = router({
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input, ctx }) => {
+    .query(async ({ input }) => {
       return await db.select().from(room).where(eq(room.id, input.id))
     }),
 

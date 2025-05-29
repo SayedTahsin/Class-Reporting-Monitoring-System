@@ -12,7 +12,7 @@ export const sectionRouter = router({
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       return await db.select().from(section).where(eq(section.id, input.id))
     }),
 

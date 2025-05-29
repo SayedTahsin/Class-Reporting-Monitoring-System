@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -7,36 +7,34 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { trpc } from "@/utils/trpc";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { toast } from "sonner";
-import { DatePicker } from "./ui/date-picker";
+} from "@/components/ui/table"
+import { trpc } from "@/utils/trpc"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { useState } from "react"
+import { toast } from "sonner"
+import { DatePicker } from "./ui/date-picker"
 
 type AdminTabProps = {
-  userRoleName: string;
-};
+  userRoleName: string
+}
 const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
-  const isSuperAdmin = userRoleName === "SuperAdmin";
-  const isCR = userRoleName === "CR";
-  const isTeacher = userRoleName === "Teacher";
-  const canEdit = isSuperAdmin || isCR || isTeacher;
+  const isSuperAdmin = userRoleName === "SuperAdmin"
+  const isCR = userRoleName === "CR"
+  const isTeacher = userRoleName === "Teacher"
+  const canEdit = isSuperAdmin || isCR || isTeacher
 
   const [editingCell, setEditingCell] = useState<{
-    slotId: string;
-    sectionId: string;
-  } | null>(null);
+    slotId: string
+    sectionId: string
+  } | null>(null)
 
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 
-  const { data: teachers = [] } = useQuery(
-    trpc.user.getTeachers.queryOptions()
-  );
-  const { data: courses = [] } = useQuery(trpc.course.getAll.queryOptions());
-  const { data: rooms = [] } = useQuery(trpc.room.getAll.queryOptions());
-  const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions());
-  const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions());
+  const { data: teachers = [] } = useQuery(trpc.user.getTeachers.queryOptions())
+  const { data: courses = [] } = useQuery(trpc.course.getAll.queryOptions())
+  const { data: rooms = [] } = useQuery(trpc.room.getAll.queryOptions())
+  const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
+  const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
 
   const { data: classHistory = [], refetch: refetchHistory } = useQuery({
     ...trpc.classHistory.getByDate.queryOptions({
@@ -45,31 +43,31 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
         : "",
     }),
     enabled: !!selectedDate && !Number.isNaN(selectedDate.getTime()),
-  });
+  })
 
   const { mutate: updateClassHistoryStatus, isPending: isStatusUpdating } =
     useMutation(
       trpc.classHistory.update.mutationOptions({
         onSuccess: () => {
-          toast.success("Status updated");
-          setEditingCell(null);
-          refetchHistory();
+          toast.success("Status updated")
+          setEditingCell(null)
+          refetchHistory()
         },
         onError: (err) => toast.error(err.message),
-      })
-    );
+      }),
+    )
 
   const fetchClassHistoryByDate = (date: Date) => {
-    const nDate = new Date(date);
-    nDate.setHours(0, 0, 0, 0);
-    setSelectedDate(nDate);
-  };
+    const nDate = new Date(date)
+    nDate.setHours(0, 0, 0, 0)
+    setSelectedDate(nDate)
+  }
 
   const getClassHistoryItem = (slotId: string, sectionId: string) => {
     return classHistory.find(
-      (h) => h.slotId === slotId && h.sectionId === sectionId
-    );
-  };
+      (h) => h.slotId === slotId && h.sectionId === sectionId,
+    )
+  }
 
   return (
     <Card>
@@ -107,11 +105,11 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                     {sections.map((section) => {
                       const historyItem = getClassHistoryItem(
                         slot.id,
-                        section.id
-                      );
+                        section.id,
+                      )
                       const isEditing =
                         editingCell?.slotId === slot.id &&
-                        editingCell?.sectionId === section.id;
+                        editingCell?.sectionId === section.id
 
                       return (
                         <TableCell
@@ -172,19 +170,19 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                                 <div>
                                   Course:{" "}
                                   {courses.find(
-                                    (c) => c.id === historyItem.courseId
+                                    (c) => c.id === historyItem.courseId,
                                   )?.title || "-"}
                                 </div>
                                 <div>
                                   Teacher:{" "}
                                   {teachers.find(
-                                    (t) => t.id === historyItem.teacherId
+                                    (t) => t.id === historyItem.teacherId,
                                   )?.name || "-"}
                                 </div>
                                 <div>
                                   Room:{" "}
                                   {rooms.find(
-                                    (r) => r.id === historyItem.roomId
+                                    (r) => r.id === historyItem.roomId,
                                   )?.name || "-"}
                                 </div>
                               </div>
@@ -195,7 +193,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                             </span>
                           )}
                         </TableCell>
-                      );
+                      )
                     })}
                   </TableRow>
                 ))}
@@ -205,7 +203,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default ClassHistoryTable;
+export default ClassHistoryTable

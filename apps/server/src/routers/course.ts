@@ -12,7 +12,7 @@ export const courseRouter = router({
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       return await db.select().from(course).where(eq(course.id, input.id))
     }),
 

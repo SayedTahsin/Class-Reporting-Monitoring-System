@@ -28,7 +28,7 @@ export const classScheduleRouter = router({
 
   getByDaySlot: protectedProcedure
     .input(classScheduleKeySchema)
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       return await db
         .select()
         .from(classSchedule)
@@ -46,7 +46,7 @@ export const classScheduleRouter = router({
         teacherId: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       return await db
         .select()
         .from(classSchedule)

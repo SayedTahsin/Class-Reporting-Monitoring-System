@@ -21,7 +21,13 @@ export default function SignUpForm({
   const { isPending } = authClient.useSession()
 
   const updateUser = useMutation(trpc.user.update.mutationOptions())
-  const getRoleId = useMutation(trpc.role.getByName.mutationOptions())
+
+  const { data: role } = useQuery({
+    ...trpc.role.getByName.queryOptions({
+      name: "Student",
+    }),
+    enabled: true,
+  })
 
   const form = useForm({
     defaultValues: {
@@ -39,9 +45,8 @@ export default function SignUpForm({
         {
           onSuccess: async () => {
             const newSession = await authClient.getSession()
-            const role = await getRoleId.mutateAsync({ name: "Student" })
             updateUser.mutate({
-              roleId: role[0].id,
+              roleId: role?.[0]?.id ?? "",
               id: newSession.data?.user.id || "",
             })
             navigate({
@@ -153,9 +158,13 @@ export default function SignUpForm({
             <Button
               type="submit"
               className="w-full"
-              disabled={!state.canSubmit || state.isSubmitting}
+              disabled={
+                !state.canSubmit || state.isSubmitting || !role?.[0]?.id
+              }
             >
-              {state.isSubmitting ? "Submitting..." : "Sign Up"}
+              {state.isSubmitting || !role?.[0]?.id
+                ? "Submitting..."
+                : "Sign Up"}
             </Button>
           )}
         </form.Subscribe>

@@ -67,7 +67,7 @@ export const userRouter = router({
         sectionId: z.string(),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
+    .query(async ({ input, ctx }) => {
       await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
       return await db
         .select()

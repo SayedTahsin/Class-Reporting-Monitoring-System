@@ -3,7 +3,7 @@ import { eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
 import { role } from "../db/schema/pbac"
-import { protectedProcedure, router } from "../lib/trpc"
+import { protectedProcedure, publicProcedure, router } from "../lib/trpc"
 
 export const roleRouter = router({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -13,13 +13,13 @@ export const roleRouter = router({
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input, ctx }) => {
+    .query(async ({ input, ctx }) => {
       return await db.select().from(role).where(eq(role.id, input.id))
     }),
 
-  getByName: protectedProcedure
+  getByName: publicProcedure
     .input(z.object({ name: z.string() }))
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       return await db.select().from(role).where(eq(role.name, input.name))
     }),
 

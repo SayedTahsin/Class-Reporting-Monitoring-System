@@ -40,7 +40,6 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
 
   const [selectedSectionId, setSelectedSectionId] = useState("")
   const [selectedSectionName, setSelectedSectionName] = useState("")
-  const [userList, setUserList] = useState<User[]>([])
 
   const { data: sectiones, refetch } = useQuery(
     trpc.section.getAll.queryOptions(),
@@ -77,7 +76,6 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
         toast.success("Section deleted successfully!")
         setSelectedSectionId("")
         setSelectedSectionName("")
-        setUserList([])
         refetch()
       },
       onError: (err) => {
@@ -86,13 +84,12 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
     }),
   )
 
-  const getuserListBySection = useMutation(
-    trpc.user.getBySection.mutationOptions({
-      onError: (err) => {
-        toast.error(err.message)
-      },
+  const { data: users } = useQuery({
+    ...trpc.user.getBySection.queryOptions({
+      sectionId: selectedSectionId,
     }),
-  )
+    enabled: !!selectedSectionId,
+  })
 
   const onSubmit = handleSubmit((data) => {
     createSection.mutate(data)
@@ -107,14 +104,7 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
     const sectionName = sectiones?.find((b) => b.id === sectionId)?.name ?? ""
     setSelectedSectionName(sectionName)
 
-    if (sectionId) {
-      const res = await getuserListBySection.mutateAsync({ sectionId })
-      const users = res || []
-      setUserList(users)
-    } else {
-      setUserList([])
-      setSelectedSectionName("")
-    }
+    if (!sectionId) setSelectedSectionName("")
   }
 
   const handleSectionRename = () => {
@@ -185,7 +175,7 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
           </div>
         )}
 
-        {userList.length > 0 && (
+        {Array.isArray(users) && users.length > 0 && (
           <Card>
             <CardContent>
               <Table>
@@ -198,7 +188,7 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {userList.map((user) => (
+                  {users.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>{user.name}</TableCell>
                       <TableCell>{user.username || "-"}</TableCell>

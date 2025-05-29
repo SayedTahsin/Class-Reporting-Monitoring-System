@@ -16,7 +16,7 @@ export const permissionRouter = router({
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input, ctx }) => {
+    .query(async ({ input, ctx }) => {
       await checkPermission(ctx.session.user.id, "*")
       return await db
         .select()

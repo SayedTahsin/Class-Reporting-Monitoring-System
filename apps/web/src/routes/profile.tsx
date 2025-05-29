@@ -1,34 +1,39 @@
-import Loader from "@/components/loader"
-import AdminTab from "@/components/tabs/AdminTab"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { authClient } from "@/lib/auth-client"
-import { getTimeAgo } from "@/utils/daysAgo"
-import { trpc } from "@/utils/trpc"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
-import { AlertCircle, BadgeCheck } from "lucide-react"
-import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
+import Loader from "@/components/loader";
+import AdminTab from "@/components/tabs/AdminTab";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { authClient } from "@/lib/auth-client";
+import { getTimeAgo } from "@/utils/daysAgo";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { AlertCircle, BadgeCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
-})
+});
 
 function ProfilePage() {
-  const { data: session, isPending } = authClient.useSession()
-  const navigate = Route.useNavigate()
+  const { data: session, isPending } = authClient.useSession();
+  const navigate = Route.useNavigate();
 
-  const { data: user, isFetching } = useQuery(trpc.user.getById.queryOptions())
-  const { data: sectiones } = useQuery(trpc.section.getAll.queryOptions())
+  const { data: user, isFetching } = useQuery(trpc.user.getById.queryOptions());
+  const { data: sectiones } = useQuery(trpc.section.getAll.queryOptions());
 
-  const [userRoleName, setUserRoleName] = useState("Student")
+  const [userRoleName, setUserRoleName] = useState("Student");
 
-  const getRoleById = useMutation(trpc.role.getById.mutationOptions())
+  const { data: role } = useQuery({
+    ...trpc.role.getById.queryOptions({
+      id: user?.[0]?.roleId || "",
+    }),
+    enabled: !!user?.[0]?.roleId,
+  });
 
   const { register, handleSubmit, reset, watch } = useForm({
     defaultValues: {
@@ -41,17 +46,17 @@ function ProfilePage() {
       roleId: "",
       id: "",
     },
-  })
+  });
 
   useEffect(() => {
     if (!session && !isPending) {
-      navigate({ to: "/login" })
+      navigate({ to: "/login" });
     }
-  }, [session, isPending, navigate])
+  }, [session, isPending, navigate]);
 
   useEffect(() => {
     if (user) {
-      const u = user[0]
+      const u = user[0];
       reset({
         name: u.name,
         email: u.email,
@@ -61,56 +66,45 @@ function ProfilePage() {
         sectionId: u.sectionId || "",
         phone: u.phone || "",
         roleId: u.roleId || "",
-      })
-
+      });
       if (u.roleId) {
-        getRoleById.mutate(
-          { id: u.roleId },
-          {
-            onSuccess: (res) => {
-              setUserRoleName(res[0].name ?? "Student")
-            },
-            onError: () => {
-              setUserRoleName("Unknown")
-            },
-          },
-        )
+        setUserRoleName(role?.[0]?.name ?? "Student");
       }
     }
-  }, [user, reset])
+  }, [user, reset, role]);
 
   const updateUser = useMutation(
     trpc.user.update.mutationOptions({
       onSuccess: () => {
-        toast.success("Profile updated successfully.")
+        toast.success("Profile updated successfully.");
       },
       onError: (error) => {
-        toast.error(error.message)
+        toast.error(error.message);
       },
-    }),
-  )
+    })
+  );
 
   const onSubmit = handleSubmit((data) => {
     const updatedData = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value !== ""),
-    )
+      Object.entries(data).filter(([_, value]) => value !== "")
+    );
     updateUser.mutate({
       ...updatedData,
       id: session?.user.id || "",
-    })
-  })
+    });
+  });
 
   const handleSendVerification = () => {
-    toast.info("Verification email sent.")
-  }
+    toast.info("Verification email sent.");
+  };
 
-  if (isPending || isFetching || !user) return <Loader />
+  if (isPending || isFetching || !user) return <Loader />;
 
-  const emailVerified = watch("emailVerified")
-  const createdAgo = getTimeAgo(user[0].createdAt)
-  const updatedAgo = getTimeAgo(user[0].updatedAt || "")
+  const emailVerified = watch("emailVerified");
+  const createdAgo = getTimeAgo(user[0].createdAt);
+  const updatedAgo = getTimeAgo(user[0].updatedAt || "");
 
-  const isAdmin = ["SuperAdmin", "Chairman", "Teacher"].includes(userRoleName)
+  const isAdmin = ["SuperAdmin", "Chairman", "Teacher"].includes(userRoleName);
 
   return (
     <Tabs defaultValue="profile" className="mx-auto mt-2 w-full max-w-5xl">
@@ -200,5 +194,5 @@ function ProfilePage() {
         {isAdmin && <AdminTab userRoleName={userRoleName} />}
       </TabsContent>
     </Tabs>
-  )
+  );
 }
