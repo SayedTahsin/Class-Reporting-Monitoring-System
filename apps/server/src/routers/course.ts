@@ -36,7 +36,13 @@ export const courseRouter = router({
     }),
 
   getById: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(
+      z.object({
+        id: z.string(),
+        page: z.number().min(1).optional(),
+        limit: z.number().min(1).max(100).optional(),
+      }),
+    )
     .query(async ({ input }) => {
       return await db
         .select()
