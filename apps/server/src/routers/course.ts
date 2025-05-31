@@ -1,19 +1,155 @@
 import { checkPermission } from "@/lib/helpers/checkPermission"
-import { eq, isNull } from "drizzle-orm"
+import { and, eq, ilike, isNull, or, sql } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
 import { course } from "../db/schema/course"
 import { protectedProcedure, router } from "../lib/trpc"
 
+const paginationSchema = z.object({
+  page: z.number().min(1).optional(), // default: 1
+  limit: z.number().min(1).max(100).optional(), // default: 10
+})
+
 export const courseRouter = router({
-  getAll: protectedProcedure.query(async () => {
-    return await db.select().from(course).where(isNull(course.deletedAt))
-  }),
+  getAll: protectedProcedure
+    .input(paginationSchema.optional())
+    .query(async ({ input }) => {
+      const hasPagination =
+        input?.page !== undefined && input?.limit !== undefined
+      const page = input?.page ?? 1
+      const limit = input?.limit ?? 10
+      const offset = (page - 1) * limit
+
+      const query = db.select().from(course).where(isNull(course.deletedAt))
+
+      if (hasPagination) {
+        query.limit(limit).offset(offset)
+      }
+
+      return await query
+    }),
 
   getById: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(
+      z.object({
+        id: z.string(),
+        page: z.number().min(1).optional(),
+        limit: z.number().min(1).max(100).optional(),
+      }),
+    )
     .query(async ({ input }) => {
-      return await db.select().from(course).where(eq(course.id, input.id))
+      const hasPagination =
+        input.page !== undefined && input.limit !== undefined
+      const page = input.page ?? 1
+      const limit = input.limit ?? 10
+      const offset = (page - 1) * limit
+
+      const query = db.select().from(course).where(eq(course.id, input.id))
+
+      if (hasPagination) {
+        query.limit(limit).offset(offset)
+      }
+
+      return await query
+    }),
+
+  search: protectedProcedure
+    .input(
+      z.object({
+        q: z.string().min(1),
+        page: z.number().min(1).optional(),
+        limit: z.number().min(1).max(100).optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const hasPagination =
+        input.page !== undefined && input.limit !== undefined
+      const page = input.page ?? 1
+      const limit = input.limit ?? 10
+      const offset = (page - 1) * limit
+
+      const query = db
+        .select()
+        .from(course)
+        .where(
+          and(
+            isNull(course.deletedAt),
+            or(
+              sql`LOWER(${course.title}) LIKE ${`%${input.q.toLowerCase()}%`}`,
+              sql`LOWER(${course.code}) LIKE ${`%${input.q.toLowerCase()}%`}`,
+            ),
+          ),
+        )
+
+      if (hasPagination) {
+        query.limit(limit).offset(offset)
+      }
+
+      return await query
+    }),
+
+  searchByCredits: protectedProcedure
+    .input(
+      z.object({
+        q: z.string().min(1),
+        credits: z.number().positive(),
+        page: z.number().min(1).optional(),
+        limit: z.number().min(1).max(100).optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const hasPagination =
+        input.page !== undefined && input.limit !== undefined
+      const page = input.page ?? 1
+      const limit = input.limit ?? 10
+      const offset = (page - 1) * limit
+
+      const query = db
+        .select()
+        .from(course)
+        .where(
+          and(
+            isNull(course.deletedAt),
+            eq(course.credits, input.credits),
+            or(
+              sql`LOWER(${course.title}) LIKE ${`%${input.q.toLowerCase()}%`}`,
+              sql`LOWER(${course.code}) LIKE ${`%${input.q.toLowerCase()}%`}`,
+            ),
+          ),
+        )
+
+      if (hasPagination) {
+        query.limit(limit).offset(offset)
+      }
+
+      return await query
+    }),
+
+  filterByCredits: protectedProcedure
+    .input(
+      z
+        .object({
+          credits: z.number().positive(),
+        })
+        .merge(paginationSchema),
+    )
+    .query(async ({ input }) => {
+      const hasPagination =
+        input?.page !== undefined && input?.limit !== undefined
+      const page = input?.page ?? 1
+      const limit = input?.limit ?? 10
+      const offset = (page - 1) * limit
+
+      const query = db
+        .select()
+        .from(course)
+        .where(and(isNull(course.deletedAt), eq(course.credits, input.credits)))
+
+      if (hasPagination) {
+        query.limit(limit).offset(offset)
+      }
+
+      return await query
     }),
 
   delete: protectedProcedure
