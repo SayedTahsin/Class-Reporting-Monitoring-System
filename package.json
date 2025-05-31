@@ -13,9 +13,7 @@
 		"db:studio": "turbo -F server db:studio",
 		"check": "biome check --write ."
 	},
-	"dependencies": {
-		"@uidotdev/usehooks": "^2.4.1"
-	},
+
 	"devDependencies": {
 		"turbo": "^2.4.2",
 		"@biomejs/biome": "1.9.4",

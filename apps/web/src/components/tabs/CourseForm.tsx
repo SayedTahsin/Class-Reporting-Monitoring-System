@@ -75,9 +75,17 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
     return trpc.course.getAll.queryOptions(queryInput)
   }
 
-  const { data: courses = [], refetch } = useQuery({
+  const {
+    data: courseResult = { data: [], total: 0, hasNext: false },
+    refetch,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     ...getCoursesQuery(),
   })
+  const courses = courseResult.data || []
+  const hasNext = courseResult.hasNext || false
 
   const createCourse = useMutation(
     trpc.course.create.mutationOptions({
@@ -88,7 +96,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const updateCourse = useMutation(
@@ -98,7 +106,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const deleteCourse = useMutation(
@@ -108,7 +116,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    }),
+    })
   )
 
   const [editingCell, setEditingCell] = useState<{
@@ -128,7 +136,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
 
   const handleDoubleClick = (
     course: Course,
-    field: "code" | "title" | "credits",
+    field: "code" | "title" | "credits"
   ) => {
     if (!isChairman && !isSuperAdmin) return
 
@@ -168,7 +176,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
     if (page > 1) setPage(page - 1)
   }
   const handleNextPage = () => {
-    if (courses.length === PAGE_LIMIT) setPage(page + 1)
+    if (hasNext) setPage(page + 1)
   }
 
   return (
@@ -236,93 +244,101 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
                 )}
               </TableRow>
             </TableHeader>
-            <TableBody>
-              {courses.map((course) => (
-                <TableRow key={course.id}>
-                  <TableCell
-                    onDoubleClick={() => handleDoubleClick(course, "code")}
-                    className="cursor-pointer"
-                  >
-                    {editingCell?.id === course.id &&
-                    editingCell.field === "code" ? (
-                      <Input
-                        value={editValue}
-                        autoFocus
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleEditBlur}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.currentTarget.blur()
-                        }}
-                      />
-                    ) : (
-                      course.code
-                    )}
-                  </TableCell>
-                  <TableCell
-                    onDoubleClick={() => handleDoubleClick(course, "title")}
-                    className="cursor-pointer"
-                  >
-                    {editingCell?.id === course.id &&
-                    editingCell.field === "title" ? (
-                      <Input
-                        value={editValue}
-                        autoFocus
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleEditBlur}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.currentTarget.blur()
-                        }}
-                      />
-                    ) : (
-                      course.title
-                    )}
-                  </TableCell>
-                  <TableCell
-                    onDoubleClick={() => handleDoubleClick(course, "credits")}
-                    className="cursor-pointer"
-                  >
-                    {editingCell?.id === course.id &&
-                    editingCell.field === "credits" ? (
-                      <Input
-                        type="number"
-                        min={1}
-                        value={editValue}
-                        autoFocus
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleEditBlur}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.currentTarget.blur()
-                        }}
-                      />
-                    ) : (
-                      course.credits
-                    )}
-                  </TableCell>
-
-                  {isSuperAdmin && (
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteCourse.mutate({ id: course.id })}
-                      >
-                        <Trash2 className=" text-red-500" />
-                      </Button>
+            {isLoading && <div className="text-center">Loading courses...</div>}
+            {isError && (
+              <div className="text-center py-4 text-red-500">
+                Error loading courses: {error?.message}
+              </div>
+            )}
+            {!isLoading && !isError && (
+              <TableBody>
+                {courses.map((course) => (
+                  <TableRow key={course.id}>
+                    <TableCell
+                      onDoubleClick={() => handleDoubleClick(course, "code")}
+                      className="cursor-pointer"
+                    >
+                      {editingCell?.id === course.id &&
+                      editingCell.field === "code" ? (
+                        <Input
+                          value={editValue}
+                          autoFocus
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={handleEditBlur}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.currentTarget.blur()
+                          }}
+                        />
+                      ) : (
+                        course.code
+                      )}
                     </TableCell>
-                  )}
-                </TableRow>
-              ))}
-              {courses.length === 0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={isSuperAdmin ? 4 : 3}
-                    className="text-center"
-                  >
-                    No courses found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
+                    <TableCell
+                      onDoubleClick={() => handleDoubleClick(course, "title")}
+                      className="cursor-pointer"
+                    >
+                      {editingCell?.id === course.id &&
+                      editingCell.field === "title" ? (
+                        <Input
+                          value={editValue}
+                          autoFocus
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={handleEditBlur}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.currentTarget.blur()
+                          }}
+                        />
+                      ) : (
+                        course.title
+                      )}
+                    </TableCell>
+                    <TableCell
+                      onDoubleClick={() => handleDoubleClick(course, "credits")}
+                      className="cursor-pointer"
+                    >
+                      {editingCell?.id === course.id &&
+                      editingCell.field === "credits" ? (
+                        <Input
+                          type="number"
+                          min={1}
+                          value={editValue}
+                          autoFocus
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={handleEditBlur}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.currentTarget.blur()
+                          }}
+                        />
+                      ) : (
+                        course.credits
+                      )}
+                    </TableCell>
+
+                    {isSuperAdmin && (
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteCourse.mutate({ id: course.id })}
+                        >
+                          <Trash2 className=" text-red-500" />
+                        </Button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+                {courses.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={isSuperAdmin ? 4 : 3}
+                      className="text-center"
+                    >
+                      No courses found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            )}
           </Table>
         </div>
 
@@ -344,7 +360,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
             />
           </div>
           <Button
-            disabled={courses.length < PAGE_LIMIT}
+            disabled={courses.length === 0 || !hasNext}
             onClick={handleNextPage}
           >
             Next

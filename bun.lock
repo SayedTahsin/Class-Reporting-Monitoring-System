@@ -3,9 +3,6 @@
   "workspaces": {
     "": {
       "name": "react-tanstack-router-hono-drizzle",
-      "dependencies": {
-        "@uidotdev/usehooks": "^2.4.1",
-      },
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "husky": "^9.1.7",
@@ -52,6 +49,7 @@
         "@trpc/client": "^11.0.0",
         "@trpc/server": "^11.0.0",
         "@trpc/tanstack-react-query": "^11.0.0",
+        "@uidotdev/usehooks": "^2.4.1",
         "better-auth": "^1.2.6",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",

@@ -20,37 +20,29 @@ export const courseRouter = router({
       const limit = input?.limit ?? 10
       const offset = (page - 1) * limit
 
-      const query = db.select().from(course).where(isNull(course.deletedAt))
+      const total = await db
+        .select({ count: sql`count(*)` })
+        .from(course)
+        .where(isNull(course.deletedAt))
+        .then((rows) => Number(rows[0]?.count ?? 0))
 
+      const query = db.select().from(course).where(isNull(course.deletedAt))
       if (hasPagination) {
         query.limit(limit).offset(offset)
       }
-
-      return await query
+      const data = await query
+      const hasNext = offset + data.length < total
+      return { data, total, hasNext }
     }),
 
   getById: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        page: z.number().min(1).optional(),
-        limit: z.number().min(1).max(100).optional(),
-      }),
-    )
+    .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
-      const hasPagination =
-        input.page !== undefined && input.limit !== undefined
-      const page = input.page ?? 1
-      const limit = input.limit ?? 10
-      const offset = (page - 1) * limit
-
-      const query = db.select().from(course).where(eq(course.id, input.id))
-
-      if (hasPagination) {
-        query.limit(limit).offset(offset)
-      }
-
-      return await query
+      return await db
+        .select()
+        .from(course)
+        .where(and(eq(course.id, input.id), isNull(course.deletedAt)))
+        .limit(1)
     }),
 
   search: protectedProcedure
@@ -68,6 +60,20 @@ export const courseRouter = router({
       const limit = input.limit ?? 10
       const offset = (page - 1) * limit
 
+      const total = await db
+        .select({ count: sql`count(*)` })
+        .from(course)
+        .where(
+          and(
+            isNull(course.deletedAt),
+            or(
+              sql`LOWER(${course.title}) LIKE LOWER(${'%' + input.q + '%'})`,
+              sql`LOWER(${course.code}) LIKE LOWER(${'%' + input.q + '%'})`,
+            ),
+          ),
+        )
+        .then((rows) => Number(rows[0]?.count ?? 0))
+
       const query = db
         .select()
         .from(course)
@@ -75,17 +81,17 @@ export const courseRouter = router({
           and(
             isNull(course.deletedAt),
             or(
-              sql`LOWER(${course.title}) LIKE ${`%${input.q.toLowerCase()}%`}`,
-              sql`LOWER(${course.code}) LIKE ${`%${input.q.toLowerCase()}%`}`,
+              sql`LOWER(${course.title}) LIKE LOWER(${'%' + input.q + '%'})`,
+              sql`LOWER(${course.code}) LIKE LOWER(${'%' + input.q + '%'})`,
             ),
           ),
         )
-
       if (hasPagination) {
         query.limit(limit).offset(offset)
       }
-
-      return await query
+      const data = await query
+      const hasNext = offset + data.length < total
+      return { data, total, hasNext }
     }),
 
   searchByCredits: protectedProcedure
@@ -104,6 +110,21 @@ export const courseRouter = router({
       const limit = input.limit ?? 10
       const offset = (page - 1) * limit
 
+      const total = await db
+        .select({ count: sql`count(*)` })
+        .from(course)
+        .where(
+          and(
+            isNull(course.deletedAt),
+            eq(course.credits, input.credits),
+            or(
+              sql`LOWER(${course.title}) LIKE ${`%${input.q.toLowerCase()}%`}`,
+              sql`LOWER(${course.code}) LIKE ${`%${input.q.toLowerCase()}%`}`,
+            ),
+          ),
+        )
+        .then((rows) => Number(rows[0]?.count ?? 0))
+
       const query = db
         .select()
         .from(course)
@@ -117,12 +138,12 @@ export const courseRouter = router({
             ),
           ),
         )
-
       if (hasPagination) {
         query.limit(limit).offset(offset)
       }
-
-      return await query
+      const data = await query
+      const hasNext = offset + data.length < total
+      return { data, total, hasNext }
     }),
 
   filterByCredits: protectedProcedure
@@ -140,16 +161,22 @@ export const courseRouter = router({
       const limit = input?.limit ?? 10
       const offset = (page - 1) * limit
 
+      const total = await db
+        .select({ count: sql`count(*)` })
+        .from(course)
+        .where(and(isNull(course.deletedAt), eq(course.credits, input.credits)))
+        .then((rows) => Number(rows[0]?.count ?? 0))
+
       const query = db
         .select()
         .from(course)
         .where(and(isNull(course.deletedAt), eq(course.credits, input.credits)))
-
       if (hasPagination) {
         query.limit(limit).offset(offset)
       }
-
-      return await query
+      const data = await query
+      const hasNext = offset + data.length < total
+      return { data, total, hasNext }
     }),
 
   delete: protectedProcedure
