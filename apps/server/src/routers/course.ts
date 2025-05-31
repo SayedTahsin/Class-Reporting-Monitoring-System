@@ -67,8 +67,8 @@ export const courseRouter = router({
           and(
             isNull(course.deletedAt),
             or(
-              sql`LOWER(${course.title}) LIKE LOWER(${"%" + input.q + "%"})`,
-              sql`LOWER(${course.code}) LIKE LOWER(${"%" + input.q + "%"})`,
+              sql`LOWER(${course.title}) LIKE LOWER(${`%${input.q}%`})`,
+              sql`LOWER(${course.code}) LIKE LOWER(${`%${input.q}%`})`,
             ),
           ),
         )
@@ -81,8 +81,8 @@ export const courseRouter = router({
           and(
             isNull(course.deletedAt),
             or(
-              sql`LOWER(${course.title}) LIKE LOWER(${"%" + input.q + "%"})`,
-              sql`LOWER(${course.code}) LIKE LOWER(${"%" + input.q + "%"})`,
+              sql`LOWER(${course.title}) LIKE LOWER(${`%${input.q}%`})`,
+              sql`LOWER(${course.code}) LIKE LOWER(${`%${input.q}%`})`,
             ),
           ),
         )
@@ -118,8 +118,8 @@ export const courseRouter = router({
             isNull(course.deletedAt),
             eq(course.credits, input.credits),
             or(
-              sql`LOWER(${course.title}) LIKE LOWER(${"%" + input.q + "%"})`,
-              sql`LOWER(${course.code}) LIKE LOWER(${"%" + input.q + "%"})`,
+              sql`LOWER(${course.title}) LIKE LOWER(${`%${input.q}%`})`,
+              sql`LOWER(${course.code}) LIKE LOWER(${`%${input.q}%`})`,
             ),
           ),
         )
@@ -133,8 +133,8 @@ export const courseRouter = router({
             isNull(course.deletedAt),
             eq(course.credits, input.credits),
             or(
-              sql`LOWER(${course.title}) LIKE LOWER(${"%" + input.q + "%"})`,
-              sql`LOWER(${course.code}) LIKE LOWER(${"%" + input.q + "%"})`,
+              sql`LOWER(${course.title}) LIKE LOWER(${`%${input.q}%`})`,
+              sql`LOWER(${course.code}) LIKE LOWER(${`%${input.q}%`})`,
             ),
           ),
         )

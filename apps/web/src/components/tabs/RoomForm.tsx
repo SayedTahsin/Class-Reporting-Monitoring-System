@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table"
 import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
+import { useDebounce } from "@uidotdev/usehooks"
 import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -25,9 +26,16 @@ type Room = {
 type AdminTabProps = {
   userRoleName: string
 }
+
+const PAGE_LIMIT = 10
+
 const RoomForm = ({ userRoleName }: AdminTabProps) => {
   const isSuperAdmin = userRoleName === "SuperAdmin"
   const isChairman = userRoleName === "Chairman"
+
+  const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
+  const [page, setPage] = useState(1)
 
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
@@ -36,9 +44,32 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
     },
   })
 
-  const { data: rooms = [], refetch } = useQuery(
-    trpc.room.getAll.queryOptions(),
-  )
+  const queryInput = {
+    page,
+    limit: PAGE_LIMIT,
+  }
+
+  const getCoursesQuery = () => {
+    if (debouncedSearchTerm) {
+      return trpc.room.search.queryOptions({
+        q: debouncedSearchTerm,
+        ...queryInput,
+      })
+    }
+    return trpc.room.getAll.queryOptions(queryInput)
+  }
+
+  const {
+    data: result = { data: [], total: 0, hasNext: false },
+    refetch,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    ...getCoursesQuery(),
+  })
+  const rooms = result.data || []
+  const hasNext = result.hasNext || false
 
   const createRoom = useMutation(
     trpc.room.create.mutationOptions({
@@ -105,6 +136,18 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
     }
   }
 
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    setPage(1)
+  }
+
+  const handlePreviousPage = () => {
+    if (page > 1) setPage(page - 1)
+  }
+  const handleNextPage = () => {
+    if (hasNext) setPage(page + 1)
+  }
+
   return (
     <Card>
       <CardContent className="space-y-6">
@@ -124,8 +167,13 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
           </form>
         )}
 
+        <Input
+          placeholder="Search rooms..."
+          value={searchTerm}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          className="max-w-full"
+        />
         <div>
-          <Label className="mb-2">Existing Rooms</Label>
           <Table>
             <TableHeader>
               <TableRow>
@@ -192,6 +240,30 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
               ))}
             </TableBody>
           </Table>
+          <div className="mt-4 flex justify-between">
+            <Button disabled={page === 1} onClick={handlePreviousPage}>
+              Previous
+            </Button>
+            <div className="flex items-center space-x-2">
+              <span>Page</span>
+              <Input
+                type="number"
+                min={1}
+                value={page}
+                onChange={(e) => {
+                  const val = Number(e.target.value)
+                  if (val > 0) setPage(val)
+                }}
+                className="w-12 p-0 text-center"
+              />
+            </div>
+            <Button
+              disabled={rooms.length === 0 || !hasNext}
+              onClick={handleNextPage}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
