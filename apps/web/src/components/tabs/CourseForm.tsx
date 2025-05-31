@@ -232,7 +232,6 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         </div>
 
         <div>
-          <Label className="mb-2">Existing Courses</Label>
           <Table>
             <TableHeader>
               <TableRow>
@@ -246,7 +245,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
             </TableHeader>
             {isLoading && <div className="text-center">Loading courses...</div>}
             {isError && (
-              <div className="text-center py-4 text-red-500">
+              <div className="py-4 text-center text-red-500">
                 Error loading courses: {error?.message}
               </div>
             )}
