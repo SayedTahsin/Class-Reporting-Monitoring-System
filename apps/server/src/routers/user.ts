@@ -174,7 +174,7 @@ export const userRouter = router({
         })
         .from(user)
         .innerJoin(role, eq(user.roleId, role.id))
-        .where(eq(role.name, "Student"))
+        .where(and(eq(role.name, "Student"), isNull(user.deletedAt)))
 
       if (hasPagination) query.limit(limit).offset(offset)
 
