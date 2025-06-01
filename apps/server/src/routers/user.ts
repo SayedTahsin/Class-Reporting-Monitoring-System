@@ -103,34 +103,84 @@ export const userRouter = router({
       return { data, total, hasNext }
     }),
 
-  getTeachers: protectedProcedure.query(async () => {
-    const result = await db
-      .select({
-        id: user.id,
-        name: user.name,
-        username: user.username,
-      })
-      .from(user)
-      .innerJoin(role, eq(user.roleId, role.id))
-      .where(eq(role.name, "Teacher"))
+      const total = await db
+        .select({ count: sql`count(*)` })
+        .from(user)
+        .where(isNull(user.deletedAt))
+        .then((rows) => Number(rows[0]?.count ?? 0))
 
-    return result
-  }),
+      const query = db.select().from(user).where(isNull(user.deletedAt))
+      if (hasPagination) query.limit(limit).offset(offset)
 
-  getStudents: protectedProcedure.query(async ({ ctx }) => {
-    await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
-    const result = await db
-      .select({
-        id: user.id,
-        name: user.name,
-        username: user.username,
-      })
-      .from(user)
-      .innerJoin(role, eq(user.roleId, role.id))
-      .where(eq(role.name, "Student"))
+      const data = await query
+      const hasNext = offset + data.length < total
+      return { data, total, hasNext }
+    }),
 
-    return result
-  }),
+  getTeachers: protectedProcedure
+    .input(paginationSchema.optional())
+    .query(async ({ input }) => {
+      const hasPagination = input?.page && input?.limit
+      const page = input?.page ?? 1
+      const limit = input?.limit ?? 10
+      const offset = (page - 1) * limit
+
+      const total = await db
+        .select({ count: sql`count(*)` })
+        .from(user)
+        .innerJoin(role, eq(user.roleId, role.id))
+        .where(eq(role.name, "Teacher"))
+        .then((rows) => Number(rows[0]?.count ?? 0))
+
+      const query = db
+        .select({
+          id: user.id,
+          name: user.name,
+          username: user.username,
+        })
+        .from(user)
+        .innerJoin(role, eq(user.roleId, role.id))
+        .where(eq(role.name, "Teacher"))
+
+      if (hasPagination) query.limit(limit).offset(offset)
+
+      const data = await query
+      const hasNext = offset + data.length < total
+      return { data, total, hasNext }
+    }),
+
+  getStudents: protectedProcedure
+    .input(paginationSchema.optional())
+    .query(async ({ ctx, input }) => {
+      await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
+      const hasPagination = input?.page && input?.limit
+      const page = input?.page ?? 1
+      const limit = input?.limit ?? 10
+      const offset = (page - 1) * limit
+
+      const total = await db
+        .select({ count: sql`count(*)` })
+        .from(user)
+        .innerJoin(role, eq(user.roleId, role.id))
+        .where(eq(role.name, "Student"))
+        .then((rows) => Number(rows[0]?.count ?? 0))
+
+      const query = db
+        .select({
+          id: user.id,
+          name: user.name,
+          username: user.username,
+        })
+        .from(user)
+        .innerJoin(role, eq(user.roleId, role.id))
+        .where(eq(role.name, "Student"))
+
+      if (hasPagination) query.limit(limit).offset(offset)
+
+      const data = await query
+      const hasNext = offset + data.length < total
+      return { data, total, hasNext }
+    }),
 
   getById: protectedProcedure.query(async ({ ctx }) => {
     return await db.select().from(user).where(eq(user.id, ctx.session.user.id))
