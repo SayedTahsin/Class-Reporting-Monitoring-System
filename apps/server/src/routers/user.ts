@@ -129,7 +129,7 @@ export const userRouter = router({
         .select({ count: sql`count(*)` })
         .from(user)
         .innerJoin(role, eq(user.roleId, role.id))
-        .where(eq(role.name, "Teacher"))
+        .where(and(eq(role.name, "Teacher"), isNull(user.deletedAt)))
         .then((rows) => Number(rows[0]?.count ?? 0))
 
       const query = db
@@ -153,7 +153,8 @@ export const userRouter = router({
     .input(paginationSchema.optional())
     .query(async ({ ctx, input }) => {
       await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
-      const hasPagination = input?.page && input?.limit
+      const hasPagination =
+        typeof input?.page === "number" && typeof input?.limit === "number"
       const page = input?.page ?? 1
       const limit = input?.limit ?? 10
       const offset = (page - 1) * limit
@@ -162,7 +163,7 @@ export const userRouter = router({
         .select({ count: sql`count(*)` })
         .from(user)
         .innerJoin(role, eq(user.roleId, role.id))
-        .where(eq(role.name, "Student"))
+        .where(and(eq(role.name, "Student"), isNull(user.deletedAt)))
         .then((rows) => Number(rows[0]?.count ?? 0))
 
       const query = db
