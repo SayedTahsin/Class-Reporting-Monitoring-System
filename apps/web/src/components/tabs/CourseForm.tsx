@@ -96,7 +96,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    })
+    }),
   )
 
   const updateCourse = useMutation(
@@ -106,7 +106,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    })
+    }),
   )
 
   const deleteCourse = useMutation(
@@ -116,7 +116,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         refetch()
       },
       onError: (err) => toast.error(err.message),
-    })
+    }),
   )
 
   const [editingCell, setEditingCell] = useState<{
@@ -136,7 +136,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
 
   const handleDoubleClick = (
     course: Course,
-    field: "code" | "title" | "credits"
+    field: "code" | "title" | "credits",
   ) => {
     if (!isChairman && !isSuperAdmin) return
 

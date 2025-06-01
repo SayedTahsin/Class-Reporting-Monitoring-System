@@ -1,45 +1,104 @@
 import { role } from "@/db/schema/pbac"
 import { checkPermission } from "@/lib/helpers/checkPermission"
-import { eq, isNull } from "drizzle-orm"
+import { type SQL, and, eq, isNull, or, sql } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
 import { user } from "../db/schema/auth"
 import { protectedProcedure, router } from "../lib/trpc"
 
+const paginationSchema = z.object({
+  page: z.number().min(1).optional(),
+  limit: z.number().min(1).max(100).optional(),
+})
+
 export const userRouter = router({
-  getAll: protectedProcedure.query(async ({ ctx }) => {
-    await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
-    return await db.select().from(user).where(isNull(user.deletedAt))
-  }),
+  getAll: protectedProcedure
+    .input(paginationSchema.optional())
+    .query(async ({ ctx, input }) => {
+      await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
+      const hasPagination = input?.page && input?.limit
+      const page = input?.page ?? 1
+      const limit = input?.limit ?? 10
+      const offset = (page - 1) * limit
 
-  getTeachers: protectedProcedure.query(async () => {
-    const result = await db
-      .select({
-        id: user.id,
-        name: user.name,
-        username: user.username,
-      })
-      .from(user)
-      .innerJoin(role, eq(user.roleId, role.id))
-      .where(eq(role.name, "Teacher"))
+      const total = await db
+        .select({ count: sql`count(*)` })
+        .from(user)
+        .where(isNull(user.deletedAt))
+        .then((rows) => Number(rows[0]?.count ?? 0))
 
-    return result
-  }),
+      const query = db.select().from(user).where(isNull(user.deletedAt))
+      if (hasPagination) query.limit(limit).offset(offset)
 
-  getStudents: protectedProcedure.query(async ({ ctx }) => {
-    await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
-    const result = await db
-      .select({
-        id: user.id,
-        name: user.name,
-        username: user.username,
-      })
-      .from(user)
-      .innerJoin(role, eq(user.roleId, role.id))
-      .where(eq(role.name, "Student"))
+      const data = await query
+      const hasNext = offset + data.length < total
+      return { data, total, hasNext }
+    }),
 
-    return result
-  }),
+  getTeachers: protectedProcedure
+    .input(paginationSchema.optional())
+    .query(async ({ input }) => {
+      const hasPagination = input?.page && input?.limit
+      const page = input?.page ?? 1
+      const limit = input?.limit ?? 10
+      const offset = (page - 1) * limit
+
+      const total = await db
+        .select({ count: sql`count(*)` })
+        .from(user)
+        .innerJoin(role, eq(user.roleId, role.id))
+        .where(eq(role.name, "Teacher"))
+        .then((rows) => Number(rows[0]?.count ?? 0))
+
+      const query = db
+        .select({
+          id: user.id,
+          name: user.name,
+          username: user.username,
+        })
+        .from(user)
+        .innerJoin(role, eq(user.roleId, role.id))
+        .where(eq(role.name, "Teacher"))
+
+      if (hasPagination) query.limit(limit).offset(offset)
+
+      const data = await query
+      const hasNext = offset + data.length < total
+      return { data, total, hasNext }
+    }),
+
+  getStudents: protectedProcedure
+    .input(paginationSchema.optional())
+    .query(async ({ ctx, input }) => {
+      await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
+      const hasPagination = input?.page && input?.limit
+      const page = input?.page ?? 1
+      const limit = input?.limit ?? 10
+      const offset = (page - 1) * limit
+
+      const total = await db
+        .select({ count: sql`count(*)` })
+        .from(user)
+        .innerJoin(role, eq(user.roleId, role.id))
+        .where(eq(role.name, "Student"))
+        .then((rows) => Number(rows[0]?.count ?? 0))
+
+      const query = db
+        .select({
+          id: user.id,
+          name: user.name,
+          username: user.username,
+        })
+        .from(user)
+        .innerJoin(role, eq(user.roleId, role.id))
+        .where(eq(role.name, "Student"))
+
+      if (hasPagination) query.limit(limit).offset(offset)
+
+      const data = await query
+      const hasNext = offset + data.length < total
+      return { data, total, hasNext }
+    }),
 
   getById: protectedProcedure.query(async ({ ctx }) => {
     return await db.select().from(user).where(eq(user.id, ctx.session.user.id))
@@ -75,6 +134,65 @@ export const userRouter = router({
         .where(eq(user.sectionId, input.sectionId))
     }),
 
+  filter: protectedProcedure
+    .input(
+      z.object({
+        roleId: z.string().optional(),
+        sectionId: z.string().optional(),
+        q: z.string().optional(),
+        page: z.number().min(1).optional(),
+        limit: z.number().min(1).max(100).optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      await checkPermission(ctx.session.user.id, "user:filter_update_viewAll")
+
+      const page = input.page ?? 1
+      const limit = input.limit ?? 10
+      const offset = (page - 1) * limit
+
+      const whereConditions: Array<unknown | undefined> = [
+        isNull(user.deletedAt),
+      ]
+
+      if (input.roleId) {
+        whereConditions.push(eq(user.roleId, input.roleId))
+      }
+
+      if (input.sectionId) {
+        whereConditions.push(eq(user.sectionId, input.sectionId))
+      }
+
+      if (typeof input.q === "string" && input.q.trim() !== "") {
+        whereConditions.push(
+          or(
+            sql`LOWER(${user.name}) LIKE LOWER(${`%${input.q}%`})`,
+            sql`LOWER(${user.username}) LIKE LOWER(${`%${input.q}%`})`,
+          ),
+        )
+      }
+
+      const whereClause = and(
+        ...whereConditions.filter((c): c is SQL => c !== undefined),
+      )
+
+      const total = await db
+        .select({ count: sql`count(*)` })
+        .from(user)
+        .where(whereClause)
+        .then((rows) => Number(rows[0]?.count ?? 0))
+
+      const data = await db
+        .select()
+        .from(user)
+        .where(whereClause)
+        .limit(limit)
+        .offset(offset)
+
+      const hasNext = offset + data.length < total
+      return { data, total, hasNext }
+    }),
+
   update: protectedProcedure
     .input(
       z.object({
@@ -98,13 +216,7 @@ export const userRouter = router({
         }
       }
 
-      const userID = input.id
       const now = new Date()
-
-      if (Object.keys(input).length === 0) {
-        throw new Error("No fields provided for update.")
-      }
-
       await db
         .update(user)
         .set({
@@ -112,7 +224,7 @@ export const userRouter = router({
           updatedAt: now,
           updatedBy: ctx.session.user.id,
         })
-        .where(eq(user.id, userID))
+        .where(eq(user.id, input.id))
 
       return { success: true }
     }),

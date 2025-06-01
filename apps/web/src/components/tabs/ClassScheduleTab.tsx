@@ -48,9 +48,24 @@ const ClassScheduleTable = () => {
 
   const [isNewSchedule, SetIsNewSchedule] = useState<boolean>(false)
 
-  const { data: teachers = [] } = useQuery(trpc.user.getTeachers.queryOptions())
-  const { data: courses = [] } = useQuery(trpc.course.getAll.queryOptions())
-  const { data: rooms = [] } = useQuery(trpc.room.getAll.queryOptions())
+  const { data: courseResult = { data: [], total: 0, hasNext: false } } =
+    useQuery({
+      ...trpc.course.getAll.queryOptions(),
+    })
+
+  const { data: teachersResult = { data: [], total: 0, hasNext: false } } =
+    useQuery({
+      ...trpc.user.getTeachers.queryOptions(),
+    })
+
+  const teachers = teachersResult.data || []
+  const courses = courseResult.data || []
+  const { data: roomResult = { data: [], total: 0, hasNext: false } } =
+    useQuery({
+      ...trpc.room.getAll.queryOptions(),
+    })
+  const rooms = roomResult.data || []
+
   const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
   const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
   const { data: schedules = [], refetch } = useQuery(
@@ -211,7 +226,7 @@ const ClassScheduleTable = () => {
                                   className="w-full rounded bg-background p-1 text-sm"
                                 >
                                   <option value="">Select teacher</option>
-                                  {teachers.map((teacher) => (
+                                  {teachers?.map((teacher) => (
                                     <option key={teacher.id} value={teacher.id}>
                                       {teacher.name}
                                     </option>

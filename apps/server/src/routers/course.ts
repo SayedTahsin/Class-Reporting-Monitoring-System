@@ -1,13 +1,13 @@
 import { checkPermission } from "@/lib/helpers/checkPermission"
-import { and, eq, ilike, isNull, or, sql } from "drizzle-orm"
+import { and, eq, isNull, or, sql } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
 import { course } from "../db/schema/course"
 import { protectedProcedure, router } from "../lib/trpc"
 
 const paginationSchema = z.object({
-  page: z.number().min(1).optional(), // default: 1
-  limit: z.number().min(1).max(100).optional(), // default: 10
+  page: z.number().min(1).optional(),
+  limit: z.number().min(1).max(100).optional(),
 })
 
 export const courseRouter = router({
