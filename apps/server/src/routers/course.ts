@@ -15,7 +15,7 @@ export const courseRouter = router({
     .input(paginationSchema.optional())
     .query(async ({ input }) => {
       const hasPagination =
-        input?.page !== undefined && input?.limit !== undefined
+        typeof input?.page === "number" && typeof input?.limit === "number"
       const page = input?.page ?? 1
       const limit = input?.limit ?? 10
       const offset = (page - 1) * limit
@@ -55,7 +55,7 @@ export const courseRouter = router({
     )
     .query(async ({ input }) => {
       const hasPagination =
-        input.page !== undefined && input.limit !== undefined
+        typeof input?.page === "number" && typeof input?.limit === "number"
       const page = input.page ?? 1
       const limit = input.limit ?? 10
       const offset = (page - 1) * limit
@@ -105,7 +105,7 @@ export const courseRouter = router({
     )
     .query(async ({ input }) => {
       const hasPagination =
-        input.page !== undefined && input.limit !== undefined
+        typeof input?.page === "number" && typeof input?.limit === "number"
       const page = input.page ?? 1
       const limit = input.limit ?? 10
       const offset = (page - 1) * limit
@@ -156,7 +156,7 @@ export const courseRouter = router({
     )
     .query(async ({ input }) => {
       const hasPagination =
-        input?.page !== undefined && input?.limit !== undefined
+        typeof input?.page === "number" && typeof input?.limit === "number"
       const page = input?.page ?? 1
       const limit = input?.limit ?? 10
       const offset = (page - 1) * limit

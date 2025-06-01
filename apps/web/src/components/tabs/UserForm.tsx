@@ -137,63 +137,76 @@ const UserForm = () => {
             </TableRow>
           </TableHeader>
 
-          {isLoading && <div className="py-4 text-center">Loading...</div>}
-          {isError && (
-            <div className="py-4 text-center text-red-500">
-              Error loading users: {error?.message}
-            </div>
-          )}
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={6} className="py-4 text-center">
+                  Loading...
+                </TableCell>
+              </TableRow>
+            )}
+            {isError && (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="py-4 text-center text-red-500"
+                >
+                  Error loading users: {error?.message}
+                </TableCell>
+              </TableRow>
+            )}
 
-          {!isLoading && !isError && (
-            <TableBody>
-              {users?.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.name}</TableCell>
-                  <TableCell>{user.username ?? "-"}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.phone ?? "-"}</TableCell>
-                  <TableCell>
-                    {sections?.find((b) => b.id === user.sectionId)?.name ??
-                      "-"}
-                  </TableCell>
+            {!isLoading && !isError && (
+              <>
+                {users?.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.username ?? "-"}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.phone ?? "-"}</TableCell>
+                    <TableCell>
+                      {sections?.find((b) => b.id === user.sectionId)?.name ??
+                        "-"}
+                    </TableCell>
 
-                  <TableCell
-                    onDoubleClick={() =>
-                      setEditingCell({ userId: user.id, field: "roleId" })
-                    }
-                    className="cursor-pointer"
-                  >
-                    {editingCell?.userId === user.id &&
-                    editingCell.field === "roleId" ? (
-                      <select
-                        defaultValue={user.roleId ?? ""}
-                        onBlur={(e) =>
-                          handleUpdate(user.id, "roleId", e.target.value)
-                        }
-                        className="w-full rounded bg-background p-1 text-foreground"
-                      >
-                        {roles?.map((role) => (
-                          <option key={role.id} value={role.id}>
-                            {role.name}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      (roles?.find((r) => r.id === user.roleId)?.name ?? "-")
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
+                    <TableCell
+                      onDoubleClick={() =>
+                        setEditingCell({ userId: user.id, field: "roleId" })
+                      }
+                      className="cursor-pointer"
+                    >
+                      {editingCell?.userId === user.id &&
+                      editingCell.field === "roleId" ? (
+                        <select
+                          defaultValue={user.roleId ?? ""}
+                          onBlur={(e) =>
+                            handleUpdate(user.id, "roleId", e.target.value)
+                          }
+                          className="w-full rounded bg-background p-1 text-foreground"
+                        >
+                          {roles?.map((role) => (
+                            <option key={role.id} value={role.id}>
+                              {role.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        (roles?.find((r) => r.id === user.roleId)?.name ?? "-")
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
 
-              {users.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center">
-                    No users found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          )}
+                {users.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center">
+                      No users found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
+            )}
+          </TableBody>
         </Table>
 
         <div className="mt-4 flex items-center justify-between">
