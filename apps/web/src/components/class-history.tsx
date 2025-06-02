@@ -67,7 +67,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
           refetchHistory()
         },
         onError: (err) => toast.error(err.message),
-      })
+      }),
     )
 
   const fetchClassHistoryByDate = (date: Date) => {
@@ -78,7 +78,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
 
   const getClassHistoryItem = (slotId: string, sectionId: string) => {
     return classHistory.find(
-      (h) => h.slotId === slotId && h.sectionId === sectionId
+      (h) => h.slotId === slotId && h.sectionId === sectionId,
     )
   }
 
@@ -118,7 +118,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                     {sections.map((section) => {
                       const historyItem = getClassHistoryItem(
                         slot.id,
-                        section.id
+                        section.id,
                       )
                       const isEditing =
                         editingCell?.slotId === slot.id &&
@@ -184,19 +184,19 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                                 <div>
                                   Course:{" "}
                                   {courses.find(
-                                    (c) => c.id === historyItem.courseId
+                                    (c) => c.id === historyItem.courseId,
                                   )?.title || "-"}
                                 </div>
                                 <div>
                                   Teacher:{" "}
                                   {teachers.find(
-                                    (t) => t.id === historyItem.teacherId
+                                    (t) => t.id === historyItem.teacherId,
                                   )?.name || "-"}
                                 </div>
                                 <div>
                                   Room:{" "}
                                   {rooms.find(
-                                    (r) => r.id === historyItem.roomId
+                                    (r) => r.id === historyItem.roomId,
                                   )?.name || "-"}
                                 </div>
                               </div>
