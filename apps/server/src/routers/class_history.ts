@@ -1,5 +1,5 @@
 import { checkPermission } from "@/lib/helpers/checkPermission"
-import { and, eq, isNull } from "drizzle-orm"
+import { and, between, eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
 import { classHistory } from "../db/schema/class_history"
@@ -18,22 +18,104 @@ export const classHistoryRouter = router({
   }),
 
   getByDate: protectedProcedure
-    .input(
-      z.object({
-        date: z.string(),
-      }),
-    )
+    .input(z.object({ date: z.string() }))
     .query(async ({ input }) => {
+      const targetDate = new Date(Number(input.date) * 1000)
       return await db
         .select()
         .from(classHistory)
         .where(
           and(
-            eq(classHistory.date, new Date(Number(input.date) * 1000)),
+            eq(classHistory.date, targetDate),
             isNull(classHistory.deletedAt),
           ),
         )
     }),
+
+  getByTeacherId: protectedProcedure
+    .input(
+      z.object({
+        teacherId: z.string(),
+        from: z.string().optional(),
+        to: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const conditions = [
+        eq(classHistory.teacherId, input.teacherId),
+        isNull(classHistory.deletedAt),
+      ]
+
+      if (input.from) {
+        const fromDate = new Date(Number(input.from) * 1000)
+        const toDate = new Date(
+          Number(input.to ?? `${Math.floor(Date.now() / 1000)}`) * 1000,
+        )
+        conditions.push(between(classHistory.date, fromDate, toDate))
+      }
+
+      return await db
+        .select()
+        .from(classHistory)
+        .where(and(...conditions))
+    }),
+
+  getBySectionId: protectedProcedure
+    .input(
+      z.object({
+        sectionId: z.string(),
+        from: z.string().optional(),
+        to: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const conditions = [
+        eq(classHistory.sectionId, input.sectionId),
+        isNull(classHistory.deletedAt),
+      ]
+
+      if (input.from) {
+        const fromDate = new Date(Number(input.from) * 1000)
+        const toDate = new Date(
+          Number(input.to ?? `${Math.floor(Date.now() / 1000)}`) * 1000,
+        )
+        conditions.push(between(classHistory.date, fromDate, toDate))
+      }
+
+      return await db
+        .select()
+        .from(classHistory)
+        .where(and(...conditions))
+    }),
+
+  getByCourseId: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+        from: z.string().optional(),
+        to: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const conditions = [
+        eq(classHistory.courseId, input.courseId),
+        isNull(classHistory.deletedAt),
+      ]
+
+      if (input.from) {
+        const fromDate = new Date(Number(input.from) * 1000)
+        const toDate = new Date(
+          Number(input.to ?? `${Math.floor(Date.now() / 1000)}`) * 1000,
+        )
+        conditions.push(between(classHistory.date, fromDate, toDate))
+      }
+
+      return await db
+        .select()
+        .from(classHistory)
+        .where(and(...conditions))
+    }),
+
   create: protectedProcedure
     .input(
       z.object({

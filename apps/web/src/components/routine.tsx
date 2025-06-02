@@ -22,9 +22,22 @@ const weekdays = [
 ]
 
 const RoutineView = () => {
-  const { data: teachers = [] } = useQuery(trpc.user.getTeachers.queryOptions())
-  const { data: courses = [] } = useQuery(trpc.course.getAll.queryOptions())
-  const { data: rooms = [] } = useQuery(trpc.room.getAll.queryOptions())
+  const { data: teachersResult = { data: [], total: 0, hasNext: false } } =
+    useQuery({
+      ...trpc.user.getTeachers.queryOptions(),
+    })
+
+  const teachers = teachersResult.data || []
+  const { data: courseResult = { data: [], total: 0, hasNext: false } } =
+    useQuery({
+      ...trpc.course.getAll.queryOptions(),
+    })
+  const courses = courseResult.data || []
+  const { data: roomResult = { data: [], total: 0, hasNext: false } } =
+    useQuery({
+      ...trpc.room.getAll.queryOptions(),
+    })
+  const rooms = roomResult.data || []
   const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
   const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
   const { data: schedules = [], refetch } = useQuery(

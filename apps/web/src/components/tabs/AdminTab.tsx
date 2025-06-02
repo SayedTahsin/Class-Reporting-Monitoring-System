@@ -1,9 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
 import ClassScheduleForm from "./ClassScheduleTab"
 import CourseForm from "./CourseForm"
 import PBACForm from "./PbacForm"
 import PermissionForm from "./PermissionForm"
+import ReportTab from "./ReportTab"
 import RoleForm from "./RoleForm"
 import RoomForm from "./RoomForm"
 import SectionForm from "./SectionForm"
@@ -23,10 +23,13 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
       className="w-full"
     >
       <TabsList
-        className={`grid w-full ${isSuperAdmin ? "grid-cols-9" : isTeacher ? "grid-cols-5" : "grid-cols-6"}`}
+        className={`grid w-full ${isSuperAdmin ? "grid-cols-10" : isTeacher ? "grid-cols-5" : "grid-cols-7"}`}
       >
         {(isSuperAdmin || isChairman) && (
-          <TabsTrigger value="user">User</TabsTrigger>
+          <>
+            <TabsTrigger value="user">User</TabsTrigger>
+            <TabsTrigger value="report">Report</TabsTrigger>
+          </>
         )}
         <TabsTrigger value="class_schedule">Class Schedule</TabsTrigger>
         <TabsTrigger value="section">Section</TabsTrigger>
@@ -43,9 +46,14 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
       </TabsList>
 
       {(isSuperAdmin || isChairman) && (
-        <TabsContent value="user">
-          <UserForm />
-        </TabsContent>
+        <>
+          <TabsContent value="user">
+            <UserForm />
+          </TabsContent>
+          <TabsContent value="report">
+            <ReportTab />
+          </TabsContent>
+        </>
       )}
       <TabsContent value="class_schedule">
         <ClassScheduleForm />
