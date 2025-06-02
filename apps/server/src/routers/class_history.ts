@@ -176,6 +176,91 @@ export const classHistoryRouter = router({
         rescheduledCount,
       }
     }),
+
+  getByTeacherId: protectedProcedure
+    .input(
+      z.object({
+        teacherId: z.string(),
+        from: z.string().optional(),
+        to: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const conditions = [
+        eq(classHistory.teacherId, input.teacherId),
+        isNull(classHistory.deletedAt),
+      ]
+
+      if (input.from) {
+        const fromDate = new Date(Number(input.from) * 1000)
+        const toDate = new Date(
+          Number(input.to ?? `${Math.floor(Date.now() / 1000)}`) * 1000,
+        )
+        conditions.push(between(classHistory.date, fromDate, toDate))
+      }
+
+      return await db
+        .select()
+        .from(classHistory)
+        .where(and(...conditions))
+    }),
+
+  getBySectionId: protectedProcedure
+    .input(
+      z.object({
+        sectionId: z.string(),
+        from: z.string().optional(),
+        to: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const conditions = [
+        eq(classHistory.sectionId, input.sectionId),
+        isNull(classHistory.deletedAt),
+      ]
+
+      if (input.from) {
+        const fromDate = new Date(Number(input.from) * 1000)
+        const toDate = new Date(
+          Number(input.to ?? `${Math.floor(Date.now() / 1000)}`) * 1000,
+        )
+        conditions.push(between(classHistory.date, fromDate, toDate))
+      }
+
+      return await db
+        .select()
+        .from(classHistory)
+        .where(and(...conditions))
+    }),
+
+  getByCourseId: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+        from: z.string().optional(),
+        to: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const conditions = [
+        eq(classHistory.courseId, input.courseId),
+        isNull(classHistory.deletedAt),
+      ]
+
+      if (input.from) {
+        const fromDate = new Date(Number(input.from) * 1000)
+        const toDate = new Date(
+          Number(input.to ?? `${Math.floor(Date.now() / 1000)}`) * 1000,
+        )
+        conditions.push(between(classHistory.date, fromDate, toDate))
+      }
+
+      return await db
+        .select()
+        .from(classHistory)
+        .where(and(...conditions))
+    }),
+
   create: protectedProcedure
     .input(
       z.object({

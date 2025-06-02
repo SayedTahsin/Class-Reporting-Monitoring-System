@@ -44,10 +44,10 @@ const ReportTab = () => {
 
   const courseMap = Object.fromEntries(courses.map((c) => [c.id, c.title]))
   const sectionMap = Object.fromEntries(
-    sections?.map((s) => [s.id, s.name]) || [],
+    sections?.map((s) => [s.id, s.name]) || []
   )
   const slotMap = Object.fromEntries(
-    slots.map((slot) => [slot.id, `${slot.startTime} - ${slot.endTime}`]),
+    slots.map((slot) => [slot.id, `${slot.startTime} - ${slot.endTime}`])
   )
 
   const from = dateRange?.from
@@ -59,8 +59,8 @@ const ReportTab = () => {
           0,
           0,
           0,
-          0,
-        ) / 1000,
+          0
+        ) / 1000
       ).toString()
     : undefined
 
@@ -73,8 +73,8 @@ const ReportTab = () => {
           23,
           59,
           59,
-          999,
-        ) / 1000,
+          999
+        ) / 1000
       ).toString()
     : undefined
 
