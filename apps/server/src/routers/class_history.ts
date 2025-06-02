@@ -199,10 +199,27 @@ export const classHistoryRouter = router({
         conditions.push(between(classHistory.date, fromDate, toDate))
       }
 
-      return await db
+      const results = await db
         .select()
         .from(classHistory)
         .where(and(...conditions))
+
+      const deliveredCount = results.filter(
+        (r) => r.status === "delivered",
+      ).length
+      const notDeliveredCount = results.filter(
+        (r) => r.status === "notdelivered",
+      ).length
+      const rescheduledCount = results.filter(
+        (r) => r.status === "rescheduled",
+      ).length
+
+      return {
+        list: results,
+        deliveredCount,
+        notDeliveredCount,
+        rescheduledCount,
+      }
     }),
 
   getBySectionId: protectedProcedure
@@ -227,12 +244,28 @@ export const classHistoryRouter = router({
         conditions.push(between(classHistory.date, fromDate, toDate))
       }
 
-      return await db
+      const results = await db
         .select()
         .from(classHistory)
         .where(and(...conditions))
-    }),
 
+      const deliveredCount = results.filter(
+        (r) => r.status === "delivered",
+      ).length
+      const notDeliveredCount = results.filter(
+        (r) => r.status === "notdelivered",
+      ).length
+      const rescheduledCount = results.filter(
+        (r) => r.status === "rescheduled",
+      ).length
+
+      return {
+        list: results,
+        deliveredCount,
+        notDeliveredCount,
+        rescheduledCount,
+      }
+    }),
   getByCourseId: protectedProcedure
     .input(
       z.object({
@@ -255,10 +288,27 @@ export const classHistoryRouter = router({
         conditions.push(between(classHistory.date, fromDate, toDate))
       }
 
-      return await db
+      const results = await db
         .select()
         .from(classHistory)
         .where(and(...conditions))
+
+      const deliveredCount = results.filter(
+        (r) => r.status === "delivered",
+      ).length
+      const notDeliveredCount = results.filter(
+        (r) => r.status === "notdelivered",
+      ).length
+      const rescheduledCount = results.filter(
+        (r) => r.status === "rescheduled",
+      ).length
+
+      return {
+        list: results,
+        deliveredCount,
+        notDeliveredCount,
+        rescheduledCount,
+      }
     }),
 
   create: protectedProcedure
