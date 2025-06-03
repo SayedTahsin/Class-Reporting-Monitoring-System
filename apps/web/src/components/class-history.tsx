@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Table,
@@ -8,55 +7,126 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { trpc } from "@/utils/trpc"
+import { Button } from "@/components/ui/button"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useState } from "react"
+import type { DateRange } from "react-day-picker"
+import { DatePickerWithRange } from "./ui/date-picker-range"
+import { trpc } from "@/utils/trpc"
 import { toast } from "sonner"
-import { DatePicker } from "./ui/date-picker"
+
+type OverviewType = "section" | "teacher" | "room"
 
 type AdminTabProps = {
   userRoleName: string
 }
+
 const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
   const isSuperAdmin = userRoleName === "SuperAdmin"
   const isCR = userRoleName === "CR"
   const isTeacher = userRoleName === "Teacher"
   const canEdit = isSuperAdmin || isCR || isTeacher
 
+  const [overview, setOverview] = useState<OverviewType>("section")
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const today = new Date()
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: today,
+    to: today,
+  })
   const [editingCell, setEditingCell] = useState<{
     slotId: string
     sectionId: string
   } | null>(null)
 
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const from = dateRange?.from
+    ? Math.floor(
+        new Date(dateRange.from).setHours(0, 0, 0, 0) / 1000
+      ).toString()
+    : undefined
+  const to = dateRange?.to
+    ? Math.floor(
+        new Date(dateRange.to).setHours(23, 59, 59, 999) / 1000
+      ).toString()
+    : undefined
 
-  const { data: teachersResult = { data: [], total: 0, hasNext: false } } =
-    useQuery({
-      ...trpc.user.getTeachers.queryOptions(),
-    })
-
-  const teachers = teachersResult.data || []
-  const { data: courseResult = { data: [], total: 0, hasNext: false } } =
-    useQuery({
-      ...trpc.course.getAll.queryOptions(),
-    })
-  const courses = courseResult.data || []
-  const { data: roomResult = { data: [], total: 0, hasNext: false } } =
-    useQuery({
-      ...trpc.room.getAll.queryOptions(),
-    })
-  const rooms = roomResult.data || []
+  const { data: teachersResult = { data: [] } } = useQuery(
+    trpc.user.getTeachers.queryOptions()
+  )
+  const { data: coursesResult = { data: [] } } = useQuery(
+    trpc.course.getAll.queryOptions()
+  )
+  const { data: roomsResult = { data: [] } } = useQuery(
+    trpc.room.getAll.queryOptions()
+  )
   const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
   const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
 
-  const { data: classHistory = [], refetch: refetchHistory } = useQuery({
-    ...trpc.classHistory.getByDate.queryOptions({
-      date: selectedDate
-        ? Math.floor(selectedDate.getTime() / 1000).toString()
-        : "",
-    }),
-    enabled: !!selectedDate && !Number.isNaN(selectedDate.getTime()),
+  const teachers = teachersResult.data
+  const courses = coursesResult.data
+  const rooms = roomsResult.data
+
+  const {
+    data: classHistory = [],
+    isLoading,
+    isError,
+    refetch: refetchHistory,
+  } = useQuery({
+    ...trpc.classHistory.getByDate.queryOptions({ from, to }),
+    enabled: !!from && !!to,
   })
+
+  const filteredHistory = selectedId
+    ? classHistory.filter((item) => {
+        if (overview === "section") return item.sectionId === selectedId
+        if (overview === "teacher") return item.teacherId === selectedId
+        if (overview === "room") return item.roomId === selectedId
+        return true
+      })
+    : classHistory
+
+  const cellMap: Record<
+    string,
+    Array<{
+      id: string
+      slotId: string
+      courseId: string
+      teacherId: string
+      sectionId: string
+      roomId: string
+      status: "delivered" | "notdelivered" | "rescheduled"
+    }>
+  > = {}
+
+  filteredHistory.forEach((item) => {
+    const date = item.date.split("T")[0]
+    if (!cellMap[date]) cellMap[date] = []
+    cellMap[date].push({
+      id: item.id,
+      slotId: item.slotId,
+      courseId: item.courseId,
+      teacherId: item.teacherId,
+      sectionId: item.sectionId,
+      roomId: item.roomId,
+      status: item.status,
+    })
+  })
+
+  const getName = (
+    list: { id: string; name?: string; code?: string; title?: string }[],
+    id?: string
+  ) =>
+    list.find((x) => x.id === id)?.name ??
+    list.find((x) => x.id === id)?.code ??
+    list.find((x) => x.id === id)?.title ??
+    ""
+
+  const overviewList =
+    overview === "section"
+      ? sections
+      : overview === "teacher"
+        ? teachers
+        : rooms
 
   const { mutate: updateClassHistoryStatus, isPending: isStatusUpdating } =
     useMutation(
@@ -67,97 +137,130 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
           refetchHistory()
         },
         onError: (err) => toast.error(err.message),
-      }),
+      })
     )
-
-  const fetchClassHistoryByDate = (date: Date) => {
-    const nDate = new Date(date)
-    nDate.setHours(0, 0, 0, 0)
-    setSelectedDate(nDate)
-  }
-
-  const getClassHistoryItem = (slotId: string, sectionId: string) => {
-    return classHistory.find(
-      (h) => h.slotId === slotId && h.sectionId === sectionId,
-    )
-  }
 
   return (
     <Card>
-      <CardContent>
-        <DatePicker
-          date={selectedDate}
-          onDateChange={fetchClassHistoryByDate}
-        />
-      </CardContent>
-      <CardContent className="space-y-8">
-        <div className="flex items-start">
-          <div className="flex-1 overflow-x-auto">
+      <CardContent className="flex flex-col gap-4 py-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <DatePickerWithRange date={dateRange} onDateChange={setDateRange} />
+          <div className="flex items-end gap-2">
+            <label className="font-medium">Overview of:</label>
+            <select
+              value={overview}
+              onChange={(e) => {
+                setOverview(e.target.value as OverviewType)
+                setSelectedId(null)
+              }}
+              className="rounded bg-background p-1 text-sm"
+            >
+              <option value="section">Section</option>
+              <option value="teacher">Teacher</option>
+              <option value="room">Room</option>
+            </select>
+
+            <select
+              value={selectedId ?? ""}
+              onChange={(e) => setSelectedId(e.target.value)}
+              className="rounded bg-background p-1 text-sm"
+            >
+              <option value="">All</option>
+              {overviewList.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name ?? item.title ?? "Unnamed"}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {
+          <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="border border-gray-300 px-4 py-2">
-                    Slot / Section
-                  </TableHead>
-                  {sections.map((section) => (
+                  <TableHead className="border px-4 py-2">Date/Slot</TableHead>
+                  {slots.map((slot) => (
                     <TableHead
-                      key={section.id}
-                      className="border border-gray-300 px-4 py-2"
+                      key={slot.id}
+                      className="border px-4 py-2 whitespace-nowrap"
                     >
-                      {section.name}
+                      {slot.startTime} - {slot.endTime}
                     </TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {slots.map((slot) => (
-                  <TableRow key={slot.id}>
-                    <TableCell className="border border-gray-300 px-4 py-2 font-medium">
-                      {slot.startTime} - {slot.endTime}
-                    </TableCell>
-                    {sections.map((section) => {
-                      const historyItem = getClassHistoryItem(
-                        slot.id,
-                        section.id,
-                      )
-                      const isEditing =
-                        editingCell?.slotId === slot.id &&
-                        editingCell?.sectionId === section.id
+              {isLoading ? (
+                <div className="text-center text-muted-foreground text-sm">
+                  Loading...
+                </div>
+              ) : isError ? (
+                <div className="text-center text-red-500 text-sm">
+                  Failed to load data.
+                </div>
+              ) : (
+                <TableBody>
+                  {Object.entries(cellMap).length === 0 && (
+                    <div className="text-center text-muted-foreground text-sm">
+                      No Data
+                    </div>
+                  )}
+                  {Object.entries(cellMap).map(([date, entries]) => (
+                    <TableRow key={date}>
+                      <TableCell className="border px-4 py-2 font-medium">
+                        {date}
+                      </TableCell>
+                      {slots.map((slot) => {
+                        const entry = entries.find((e) => e.slotId === slot.id)
+                        if (!entry) {
+                          return (
+                            <TableCell
+                              key={slot.id}
+                              className="border px-4 py-2 text-muted-foreground"
+                            >
+                              -
+                            </TableCell>
+                          )
+                        }
 
-                      return (
-                        <TableCell
-                          key={section.id}
-                          className={`border border-gray-300 px-4 py-2 ${
-                            historyItem?.status === "delivered"
-                              ? "bg-green-700"
-                              : historyItem?.status === "notdelivered"
-                                ? "bg-red-800"
-                                : historyItem?.status === "rescheduled"
-                                  ? "bg-yellow-700"
-                                  : ""
-                          }`}
-                          onDoubleClick={() =>
-                            historyItem &&
-                            canEdit &&
-                            setEditingCell({
-                              slotId: slot.id,
-                              sectionId: section.id,
-                            })
-                          }
-                        >
-                          {historyItem ? (
-                            isEditing ? (
+                        const course = getName(courses, entry.courseId)
+                        const teacher = getName(teachers, entry.teacherId)
+                        const section = getName(sections, entry.sectionId)
+                        const room = getName(rooms, entry.roomId)
+
+                        const statusBg: Record<typeof entry.status, string> = {
+                          delivered: "bg-green-700",
+                          rescheduled: "bg-yellow-700",
+                          notdelivered: "bg-red-700",
+                        }
+                        const isEditing =
+                          editingCell?.slotId === slot.id &&
+                          editingCell?.sectionId === entry.sectionId
+                        return (
+                          <TableCell
+                            key={slot.id}
+                            className={`border px-4 py-2 text-sm space-y-1 ${statusBg[entry.status]}`}
+                            onDoubleClick={() =>
+                              canEdit &&
+                              setEditingCell({
+                                slotId: slot.id,
+                                sectionId: entry.sectionId,
+                              })
+                            }
+                          >
+                            {isEditing ? (
                               <div className="flex flex-col space-y-1">
                                 <select
-                                  value={historyItem.status}
+                                  value={entry.status}
                                   onChange={(e) =>
                                     updateClassHistoryStatus({
-                                      id: historyItem.id,
+                                      id: entry.id,
                                       status: e.target.value as
                                         | "delivered"
                                         | "notdelivered"
                                         | "rescheduled",
-                                      sectionId: section.id,
+                                      sectionId: entry.sectionId,
                                     })
                                   }
                                   className="w-full rounded bg-background p-1 text-sm"
@@ -180,41 +283,23 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                                 </Button>
                               </div>
                             ) : (
-                              <div className="space-y-1 whitespace-nowrap text-sm">
-                                <div>
-                                  Course:{" "}
-                                  {courses.find(
-                                    (c) => c.id === historyItem.courseId,
-                                  )?.title || "-"}
-                                </div>
-                                <div>
-                                  Teacher:{" "}
-                                  {teachers.find(
-                                    (t) => t.id === historyItem.teacherId,
-                                  )?.name || "-"}
-                                </div>
-                                <div>
-                                  Room:{" "}
-                                  {rooms.find(
-                                    (r) => r.id === historyItem.roomId,
-                                  )?.name || "-"}
-                                </div>
+                              <div>
+                                <div>{course}</div>
+                                <div>{teacher}</div>
+                                <div>{section}</div>
+                                <div>{room}</div>
                               </div>
-                            )
-                          ) : (
-                            <span className="text-muted-foreground text-xs">
-                              No data
-                            </span>
-                          )}
-                        </TableCell>
-                      )
-                    })}
-                  </TableRow>
-                ))}
-              </TableBody>
+                            )}
+                          </TableCell>
+                        )
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              )}{" "}
             </Table>
           </div>
-        </div>
+        }
       </CardContent>
     </Card>
   )

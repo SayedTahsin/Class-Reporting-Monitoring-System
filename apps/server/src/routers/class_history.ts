@@ -18,19 +18,27 @@ export const classHistoryRouter = router({
   }),
 
   getByDate: protectedProcedure
-    .input(z.object({ date: z.string() }))
-    .query(async ({ input }) => {
-      const targetDate = new Date(Number(input.date) * 1000)
-      return await db
-        .select()
-        .from(classHistory)
-        .where(
-          and(
-            eq(classHistory.date, targetDate),
-            isNull(classHistory.deletedAt),
-          ),
-        )
+  .input(
+    z.object({
+      from: z.string().optional(),
+      to: z.string().optional(),
     }),
+  )
+  .query(async ({ input }) => {
+    const conditions = [isNull(classHistory.deletedAt)]
+
+    if (input.from) {
+      const fromDate = new Date(Number(input.from) * 1000)
+      const toDate = new Date(
+        Number(input.to ?? `${Math.floor(Date.now() / 1000)}`) * 1000,
+      )
+      conditions.push(between(classHistory.date, fromDate, toDate))
+    }
+
+    const results = await db.select().from(classHistory).where(and(...conditions))
+    
+    return results
+  }),
 
   getByTeacherId: protectedProcedure
     .input(
