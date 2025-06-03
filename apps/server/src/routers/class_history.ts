@@ -176,9 +176,26 @@ export const classHistoryRouter = router({
         rescheduledCount,
       }
     }),
+  )
+  .query(async ({ input }) => {
+    const conditions = [isNull(classHistory.deletedAt)]
+
+    if (input.from) {
+      const fromDate = new Date(Number(input.from) * 1000)
+      const toDate = new Date(
+        Number(input.to ?? `${Math.floor(Date.now() / 1000)}`) * 1000,
+      )
+      conditions.push(between(classHistory.date, fromDate, toDate))
+    }
+
+    const results = await db.select().from(classHistory).where(and(...conditions))
+    
+    return results
+  }),
 
   getByTeacherId: protectedProcedure
-    .input(
+    .input
+(
       z.object({
         teacherId: z.string(),
         from: z.string().optional(),
@@ -222,98 +239,112 @@ export const classHistoryRouter = router({
       }
     }),
 
-  getBySectionId: protectedProcedure
+  getBySectionId
+: protectedProcedure
     .input(
-      z.object({
-        sectionId: z.string(),
-        from: z.string().optional(),
+      z.object(
+{
+  sectionId: z.string(), from
+  : z.string().optional(),
         to: z.string().optional(),
-      }),
+}
+),
     )
-    .query(async ({ input }) => {
-      const conditions = [
-        eq(classHistory.sectionId, input.sectionId),
-        isNull(classHistory.deletedAt),
-      ]
+    .query(async (
+{
+  input
+}
+) =>
+{
+  const conditions = [
+    eq(classHistory.sectionId, input.sectionId),
+    isNull(classHistory.deletedAt),
+  ]
 
-      if (input.from) {
-        const fromDate = new Date(Number(input.from) * 1000)
-        const toDate = new Date(
-          Number(input.to ?? `${Math.floor(Date.now() / 1000)}`) * 1000,
-        )
-        conditions.push(between(classHistory.date, fromDate, toDate))
-      }
+  if (input.from) {
+    const fromDate = new Date(Number(input.from) * 1000)
+    const toDate = new Date(
+      Number(input.to ?? `${Math.floor(Date.now() / 1000)}`) * 1000,
+    )
+    conditions.push(between(classHistory.date, fromDate, toDate))
+  }
 
-      const results = await db
-        .select()
-        .from(classHistory)
-        .where(and(...conditions))
+  const results = await db
+    .select()
+    .from(classHistory)
+    .where(and(...conditions))
 
-      const deliveredCount = results.filter(
-        (r) => r.status === "delivered",
-      ).length
-      const notDeliveredCount = results.filter(
-        (r) => r.status === "notdelivered",
-      ).length
-      const rescheduledCount = results.filter(
-        (r) => r.status === "rescheduled",
-      ).length
+  const deliveredCount = results.filter((r) => r.status === "delivered").length
+  const notDeliveredCount = results.filter(
+    (r) => r.status === "notdelivered",
+  ).length
+  const rescheduledCount = results.filter(
+    (r) => r.status === "rescheduled",
+  ).length
 
-      return {
+  return {
         list: results,
         deliveredCount,
         notDeliveredCount,
         rescheduledCount,
       }
-    }),
+}
+),
   getByCourseId: protectedProcedure
     .input(
-      z.object({
-        courseId: z.string(),
-        from: z.string().optional(),
+      z.object(
+{
+  courseId: z.string(), from
+  : z.string().optional(),
         to: z.string().optional(),
-      }),
+}
+),
     )
-    .query(async ({ input }) => {
-      const conditions = [
-        eq(classHistory.courseId, input.courseId),
-        isNull(classHistory.deletedAt),
-      ]
+    .query(async (
+{
+  input
+}
+) =>
+{
+  const conditions = [
+    eq(classHistory.courseId, input.courseId),
+    isNull(classHistory.deletedAt),
+  ]
 
-      if (input.from) {
-        const fromDate = new Date(Number(input.from) * 1000)
-        const toDate = new Date(
-          Number(input.to ?? `${Math.floor(Date.now() / 1000)}`) * 1000,
-        )
-        conditions.push(between(classHistory.date, fromDate, toDate))
-      }
+  if (input.from) {
+    const fromDate = new Date(Number(input.from) * 1000)
+    const toDate = new Date(
+      Number(input.to ?? `${Math.floor(Date.now() / 1000)}`) * 1000,
+    )
+    conditions.push(between(classHistory.date, fromDate, toDate))
+  }
 
-      const results = await db
-        .select()
-        .from(classHistory)
-        .where(and(...conditions))
+  const results = await db
+    .select()
+    .from(classHistory)
+    .where(and(...conditions))
 
-      const deliveredCount = results.filter(
-        (r) => r.status === "delivered",
-      ).length
-      const notDeliveredCount = results.filter(
-        (r) => r.status === "notdelivered",
-      ).length
-      const rescheduledCount = results.filter(
-        (r) => r.status === "rescheduled",
-      ).length
+  const deliveredCount = results.filter((r) => r.status === "delivered").length
+  const notDeliveredCount = results.filter(
+    (r) => r.status === "notdelivered",
+  ).length
+  const rescheduledCount = results.filter(
+    (r) => r.status === "rescheduled",
+  ).length
 
-      return {
+  return {
         list: results,
         deliveredCount,
         notDeliveredCount,
         rescheduledCount,
       }
-    }),
+}
+),
 
   create: protectedProcedure
     .input(
-      z.object({
+      z.object(
+{
         date: z.string(),
         slotId: z.string(),
         sectionId: z.string(),
@@ -324,7 +355,7 @@ export const classHistoryRouter = router({
         notes: z.string().optional(),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async (input, ctx ) => {
       try {
         await checkPermission(ctx.session.user.id, "*")
       } catch {
@@ -351,7 +382,7 @@ export const classHistoryRouter = router({
 
   update: protectedProcedure
     .input(
-      z.object({
+      z.object(
         id: z.string(),
         status: z.enum(["delivered", "notdelivered", "rescheduled"]).optional(),
         notes: z.string().optional(),
@@ -362,7 +393,7 @@ export const classHistoryRouter = router({
         courseId: z.string().optional(),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async (input, ctx ) => {
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -405,7 +436,7 @@ export const classHistoryRouter = router({
 
   delete: protectedProcedure
     .input(classHistoryKeySchema)
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async (input, ctx ) => {
       await checkPermission(ctx.session.user.id, "*")
       const now = new Date()
 
@@ -422,5 +453,4 @@ export const classHistoryRouter = router({
         )
 
       return { success: true }
-    }),
-})
+    }),)

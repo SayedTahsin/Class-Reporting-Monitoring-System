@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import type { DateRange } from "react-day-picker"
@@ -20,6 +19,7 @@ type OverviewType = "section" | "teacher" | "room"
 type AdminTabProps = {
   userRoleName: string
 }
+
 const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
   const isSuperAdmin = userRoleName === "SuperAdmin"
   const isCR = userRoleName === "CR"
@@ -63,6 +63,13 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
     to: today,
   })
 
+  const [overview, setOverview] = useState<OverviewType>("section")
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const today = new Date()
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: today,
+    to: today,
+  })
   const [editingCell, setEditingCell] = useState<{
     slotId: string
     sectionId: string
