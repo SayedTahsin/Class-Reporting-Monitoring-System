@@ -34,7 +34,7 @@ app.use(
   }),
 )
 
-new Cron("0 0 * * 6", () => {
+new Cron("50 23 * * 5", () => {
   generateWeeklyClassHistory()
 })
 

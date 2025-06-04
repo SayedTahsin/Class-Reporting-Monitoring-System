@@ -44,20 +44,37 @@ const ReportTab = () => {
 
   const courseMap = Object.fromEntries(courses.map((c) => [c.id, c.title]))
   const sectionMap = Object.fromEntries(
-    sections?.map((s) => [s.id, s.name]) || [],
+    sections?.map((s) => [s.id, s.name]) || []
   )
   const slotMap = Object.fromEntries(
-    slots.map((slot) => [slot.id, `${slot.startTime} - ${slot.endTime}`]),
+    slots.map((slot) => [slot.id, `${slot.startTime} - ${slot.endTime}`])
   )
 
   const from = dateRange?.from
     ? Math.floor(
-        new Date(dateRange.from).setHours(0, 0, 0, 0) / 1000,
+        Date.UTC(
+          dateRange.from.getFullYear(),
+          dateRange.from.getMonth(),
+          dateRange.from.getDate(),
+          0,
+          0,
+          0,
+          0
+        ) / 1000
       ).toString()
     : undefined
+
   const to = dateRange?.to
     ? Math.floor(
-        new Date(dateRange.to).setHours(23, 59, 59, 999) / 1000,
+        Date.UTC(
+          dateRange.to.getFullYear(),
+          dateRange.to.getMonth(),
+          dateRange.to.getDate(),
+          23,
+          59,
+          59,
+          999
+        ) / 1000
       ).toString()
     : undefined
 

@@ -41,23 +41,40 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
 
   const from = dateRange?.from
     ? Math.floor(
-        new Date(dateRange.from).setHours(0, 0, 0, 0) / 1000,
+        Date.UTC(
+          dateRange.from.getFullYear(),
+          dateRange.from.getMonth(),
+          dateRange.from.getDate(),
+          0,
+          0,
+          0,
+          0
+        ) / 1000
       ).toString()
     : undefined
+
   const to = dateRange?.to
     ? Math.floor(
-        new Date(dateRange.to).setHours(23, 59, 59, 999) / 1000,
+        Date.UTC(
+          dateRange.to.getFullYear(),
+          dateRange.to.getMonth(),
+          dateRange.to.getDate(),
+          23,
+          59,
+          59,
+          999
+        ) / 1000
       ).toString()
     : undefined
 
   const { data: teachersResult = { data: [] } } = useQuery(
-    trpc.user.getTeachers.queryOptions(),
+    trpc.user.getTeachers.queryOptions()
   )
   const { data: coursesResult = { data: [] } } = useQuery(
-    trpc.course.getAll.queryOptions(),
+    trpc.course.getAll.queryOptions()
   )
   const { data: roomsResult = { data: [] } } = useQuery(
-    trpc.room.getAll.queryOptions(),
+    trpc.room.getAll.queryOptions()
   )
   const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
   const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
@@ -114,7 +131,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
 
   const getName = (
     list: { id: string; name?: string; code?: string; title?: string }[],
-    id?: string,
+    id?: string
   ) =>
     list.find((x) => x.id === id)?.name ??
     list.find((x) => x.id === id)?.code ??
@@ -137,7 +154,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
           refetchHistory()
         },
         onError: (err) => toast.error(err.message),
-      }),
+      })
     )
 
   return (
