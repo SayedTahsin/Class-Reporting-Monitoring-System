@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Table,
@@ -7,13 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import type { DateRange } from "react-day-picker"
-import { DatePickerWithRange } from "./ui/date-picker-range"
-import { trpc } from "@/utils/trpc"
 import { toast } from "sonner"
+import { DatePickerWithRange } from "./ui/date-picker-range"
 
 type OverviewType = "section" | "teacher" | "room"
 
@@ -41,23 +41,23 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
 
   const from = dateRange?.from
     ? Math.floor(
-        new Date(dateRange.from).setHours(0, 0, 0, 0) / 1000
+        new Date(dateRange.from).setHours(0, 0, 0, 0) / 1000,
       ).toString()
     : undefined
   const to = dateRange?.to
     ? Math.floor(
-        new Date(dateRange.to).setHours(23, 59, 59, 999) / 1000
+        new Date(dateRange.to).setHours(23, 59, 59, 999) / 1000,
       ).toString()
     : undefined
 
   const { data: teachersResult = { data: [] } } = useQuery(
-    trpc.user.getTeachers.queryOptions()
+    trpc.user.getTeachers.queryOptions(),
   )
   const { data: coursesResult = { data: [] } } = useQuery(
-    trpc.course.getAll.queryOptions()
+    trpc.course.getAll.queryOptions(),
   )
   const { data: roomsResult = { data: [] } } = useQuery(
-    trpc.room.getAll.queryOptions()
+    trpc.room.getAll.queryOptions(),
   )
   const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
   const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
@@ -98,7 +98,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
     }>
   > = {}
 
-  filteredHistory.forEach((item) => {
+  for (const item of filteredHistory) {
     const date = item.date.split("T")[0]
     if (!cellMap[date]) cellMap[date] = []
     cellMap[date].push({
@@ -110,11 +110,11 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
       roomId: item.roomId,
       status: item.status,
     })
-  })
+  }
 
   const getName = (
     list: { id: string; name?: string; code?: string; title?: string }[],
-    id?: string
+    id?: string,
   ) =>
     list.find((x) => x.id === id)?.name ??
     list.find((x) => x.id === id)?.code ??
@@ -137,7 +137,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
           refetchHistory()
         },
         onError: (err) => toast.error(err.message),
-      })
+      }),
     )
 
   return (
@@ -146,8 +146,11 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
         <div className="flex flex-wrap items-center gap-4">
           <DatePickerWithRange date={dateRange} onDateChange={setDateRange} />
           <div className="flex items-end gap-2">
-            <label className="font-medium">Overview of:</label>
+            <label htmlFor="overview-select" className="font-medium">
+              Overview of:
+            </label>
             <select
+              id="overview-select"
               value={overview}
               onChange={(e) => {
                 setOverview(e.target.value as OverviewType)
@@ -184,7 +187,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                   {slots.map((slot) => (
                     <TableHead
                       key={slot.id}
-                      className="border px-4 py-2 whitespace-nowrap"
+                      className="whitespace-nowrap border px-4 py-2"
                     >
                       {slot.startTime} - {slot.endTime}
                     </TableHead>
@@ -240,7 +243,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                         return (
                           <TableCell
                             key={slot.id}
-                            className={`border px-4 py-2 text-sm space-y-1 ${statusBg[entry.status]}`}
+                            className={`space-y-1 border px-4 py-2 text-sm ${statusBg[entry.status]}`}
                             onDoubleClick={() =>
                               canEdit &&
                               setEditingCell({

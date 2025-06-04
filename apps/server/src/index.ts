@@ -1,10 +1,12 @@
 import "dotenv/config"
 import { trpcServer } from "@hono/trpc-server"
+import { Cron } from "croner"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { logger } from "hono/logger"
 import { auth } from "./lib/auth"
 import { createContext } from "./lib/context"
+import { generateWeeklyClassHistory } from "./lib/cron-function"
 import { appRouter } from "./routers/index"
 
 const app = new Hono()
@@ -32,7 +34,11 @@ app.use(
   }),
 )
 
-app.get("/", (c) => {
+new Cron("0 0 * * 6", () => {
+  generateWeeklyClassHistory()
+})
+
+app.get("/healthz", (c) => {
   return c.text("OK")
 })
 
