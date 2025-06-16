@@ -64,12 +64,40 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
   })
 
   const [overview, setOverview] = useState<OverviewType>("section")
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+
+  const { data: teachersResult = { data: [] } } = useQuery(
+    trpc.user.getTeachers.queryOptions()
+  )
+  const { data: coursesResult = { data: [] } } = useQuery(
+    trpc.course.getAll.queryOptions()
+  )
+  const { data: roomsResult = { data: [] } } = useQuery(
+    trpc.room.getAll.queryOptions()
+  )
+  const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
+  const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
+
+  const teachers = teachersResult.data
+  const courses = coursesResult.data
+  const rooms = roomsResult.data
+
+  const overviewList =
+    overview === "section"
+      ? sections
+      : overview === "teacher"
+        ? teachers
+        : rooms
+
+  const [selectedId, setSelectedId] = useState<string | null>(
+    overviewList.length > 0 ? overviewList[0].id : null
+  )
+
   const today = new Date()
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: today,
     to: today,
   })
+
   const [editingCell, setEditingCell] = useState<{
     slotId: string
     sectionId: string
@@ -407,7 +435,6 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                         rescheduled: "bg-yellow-700",
                         notdelivered: "bg-red-700",
                       }
-
                       return (
                         <TableCell
                           key={slot.id}
