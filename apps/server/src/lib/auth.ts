@@ -15,14 +15,18 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
-      await sendEmail({
-        to: user.email,
-        subject: "Reset your password",
-        html: `
-          <p>Hello ${user.email},</p>
-          <p>Please click this <a href="${url}">Link</a> to reset your password.</p>
-        `,
-      })
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: "Reset your password",
+          html: `
+        <p>Hello ${user.email},</p>
+        <p>Please click this <a href="${url}">Link</a> to reset your password.</p>
+      `,
+        })
+      } catch (err) {
+        console.error("Failed to send reset password email:", err)
+      }
     },
   },
   plugins: [passkey()],
@@ -30,14 +34,18 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      await sendEmail({
-        to: user.email,
-        subject: "Verify your email address",
-        html: `
-          <p>Hello ${user.email},</p>
-          <p>Please click this <a href="${url}">Link</a> to verify.</p>
-        `,
-      })
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: "Verify your email address",
+          html: `
+        <p>Hello ${user.email},</p>
+        <p>Please click this <a href="${url}">Link</a> to verify.</p>
+      `,
+        })
+      } catch (err) {
+        console.error("Failed to send verification email:", err)
+      }
     },
   },
 })

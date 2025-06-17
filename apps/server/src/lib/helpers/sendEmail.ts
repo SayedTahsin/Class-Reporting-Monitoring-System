@@ -32,7 +32,7 @@ export async function sendEmail(opts: {
   html?: string
 }) {
   const info = await transporter.sendMail({
-    from: "CRMS",
+    from: process.env.SMTP_FROM || "CRMS <no-reply@example.com>",
     to: opts.to,
     subject: opts.subject,
     text: opts.text,
