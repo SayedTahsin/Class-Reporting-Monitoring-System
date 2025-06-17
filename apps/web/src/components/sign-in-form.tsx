@@ -39,7 +39,7 @@ export default function SignInForm({
           onError: (error) => {
             toast.error(error.error.message)
           },
-        },
+        }
       )
     },
     validators: {
@@ -49,6 +49,18 @@ export default function SignInForm({
       }),
     },
   })
+
+  const signWithPasskey = async () => {
+    try {
+      await authClient.signIn.passkey()
+      navigate({
+        to: "/",
+      })
+      toast.success("Sign in successful")
+    } catch (error) {
+      toast.error("Login failed")
+    }
+  }
 
   if (isPending) {
     return <Loader />
@@ -124,7 +136,15 @@ export default function SignInForm({
           )}
         </form.Subscribe>
       </form>
-
+      <div className="mt-4 text-center">
+        <Button
+          variant="link"
+          onClick={signWithPasskey}
+          className="text-indigo-600 hover:text-indigo-800"
+        >
+          Sign in with passkey
+        </Button>
+      </div>
       <div className="mt-4 text-center">
         <Button
           variant="link"

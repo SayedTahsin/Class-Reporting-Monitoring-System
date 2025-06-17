@@ -81,18 +81,22 @@ function ProfilePage() {
       onError: (error) => {
         toast.error(error.message)
       },
-    }),
+    })
   )
 
   const onSubmit = handleSubmit((data) => {
     const updatedData = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value !== ""),
+      Object.entries(data).filter(([_, value]) => value !== "")
     )
     updateUser.mutate({
       ...updatedData,
       id: session?.user.id || "",
     })
   })
+
+  const addPasskey = async () => {
+    await authClient.passkey.addPasskey()
+  }
 
   const handleSendVerification = () => {
     toast.info("Verification email sent.")
@@ -178,6 +182,13 @@ function ProfilePage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <Button onClick={addPasskey} type="button">
+                  {" "}
+                  Add Passkey
+                </Button>
               </div>
 
               <Button type="submit">Save Changes</Button>
