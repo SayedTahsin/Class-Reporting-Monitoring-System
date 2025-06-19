@@ -377,6 +377,7 @@ export const classHistoryRouter = router({
         updatedAt: now,
         updatedBy: ctx.session.user.id,
       })
+
       return { success: true }
     }),
 
