@@ -25,18 +25,20 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
   const isSuperAdmin = userRoleName === "SuperAdmin"
   const isCR = userRoleName === "CR"
   const isTeacher = userRoleName === "Teacher"
-  const canEdit = isSuperAdmin || isCR || isTeacher
+  const isChairman = userRoleName === "Chairman"
+  const canEdit = isSuperAdmin || isCR || isTeacher || isChairman
+  const canCreate = isSuperAdmin || isTeacher || isChairman
 
   const [overview, setOverview] = useState<OverviewType>("section")
 
   const { data: teachersResult = { data: [] } } = useQuery(
-    trpc.user.getTeachers.queryOptions(),
+    trpc.user.getTeachers.queryOptions()
   )
   const { data: coursesResult = { data: [] } } = useQuery(
-    trpc.course.getAll.queryOptions(),
+    trpc.course.getAll.queryOptions()
   )
   const { data: roomsResult = { data: [] } } = useQuery(
-    trpc.room.getAll.queryOptions(),
+    trpc.room.getAll.queryOptions()
   )
   const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
   const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
@@ -52,8 +54,8 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
         ? teachers
         : rooms
 
-  const [selectedId, setSelectedId] = useState<string | null>(
-    overviewList.length > 0 ? overviewList[0].id : null,
+  const [selectedId, setSelectedId] = useState<string>(
+    overviewList.length > 0 ? overviewList[0].id : ""
   )
 
   const today = new Date()
@@ -65,7 +67,19 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
   const [editingCell, setEditingCell] = useState<{
     slotId: string
     sectionId: string
+    date: string
+    mode: "edit" | "create"
   } | null>(null)
+
+  const [newClassData, setNewClassData] = useState<{
+    courseId: string
+    teacherId: string
+    roomId: string
+  }>({
+    courseId: "",
+    teacherId: "",
+    roomId: "",
+  })
 
   const from = dateRange?.from
     ? Math.floor(
@@ -76,8 +90,8 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
           0,
           0,
           0,
-          0,
-        ) / 1000,
+          0
+        ) / 1000
       ).toString()
     : undefined
 
@@ -90,8 +104,8 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
           23,
           59,
           59,
-          999,
-        ) / 1000,
+          999
+        ) / 1000
       ).toString()
     : undefined
 
@@ -143,7 +157,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
 
   const getName = (
     list: { id: string; name?: string; code?: string; title?: string }[],
-    id?: string,
+    id?: string
   ) =>
     list.find((x) => x.id === id)?.name ??
     list.find((x) => x.id === id)?.code ??
@@ -159,7 +173,19 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
           refetchHistory()
         },
         onError: (err) => toast.error(err.message),
-      }),
+      })
+    )
+
+  const { mutate: createClassHistory, isPending: isClassCreating } =
+    useMutation(
+      trpc.classHistory.create.mutationOptions({
+        onSuccess: () => {
+          toast.success("Class created")
+          setEditingCell(null)
+          refetchHistory()
+        },
+        onError: (err) => toast.error(err.message),
+      })
     )
 
   return (
@@ -221,7 +247,6 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                 ))}
               </TableRow>
             </TableHeader>
-
             {isLoading ? (
               <div className="text-center text-muted-foreground text-sm">
                 Loading...
@@ -233,9 +258,14 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
             ) : (
               <TableBody>
                 {Object.entries(cellMap).length === 0 && (
-                  <div className="text-center text-muted-foreground text-sm">
-                    No Data
-                  </div>
+                  <TableRow>
+                    <TableCell
+                      colSpan={slots.length + 1}
+                      className="text-center"
+                    >
+                      No Data
+                    </TableCell>
+                  </TableRow>
                 )}
                 {Object.entries(cellMap).map(([date, entries]) => (
                   <TableRow key={date}>
@@ -244,13 +274,119 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                     </TableCell>
                     {slots.map((slot) => {
                       const entry = entries.find((e) => e.slotId === slot.id)
+                      const isCreating =
+                        !entry &&
+                        editingCell?.slotId === slot.id &&
+                        editingCell?.sectionId === selectedId &&
+                        editingCell?.date === date &&
+                        editingCell?.mode === "create"
+
+                      const isEditing =
+                        entry &&
+                        editingCell?.slotId === slot.id &&
+                        editingCell?.sectionId === entry.sectionId &&
+                        editingCell?.date === date &&
+                        editingCell?.mode === "edit"
+
                       if (!entry) {
                         return (
                           <TableCell
                             key={slot.id}
                             className="border px-4 py-2 text-muted-foreground"
+                            onDoubleClick={() =>
+                              canCreate &&
+                              setEditingCell({
+                                slotId: slot.id,
+                                sectionId: selectedId,
+                                date,
+                                mode: "create",
+                              })
+                            }
                           >
-                            -
+                            {isCreating ? (
+                              <div className="flex flex-col space-y-1">
+                                <select
+                                  value={newClassData.courseId}
+                                  onChange={(e) =>
+                                    setNewClassData((prev) => ({
+                                      ...prev,
+                                      courseId: e.target.value,
+                                    }))
+                                  }
+                                  className="w-full rounded bg-background p-1 text-sm"
+                                >
+                                  <option value="">Select Course</option>
+                                  {courses.map((c) => (
+                                    <option key={c.id} value={c.id}>
+                                      {c.title}
+                                    </option>
+                                  ))}
+                                </select>
+
+                                <select
+                                  value={newClassData.teacherId}
+                                  onChange={(e) =>
+                                    setNewClassData((prev) => ({
+                                      ...prev,
+                                      teacherId: e.target.value,
+                                    }))
+                                  }
+                                  className="w-full rounded bg-background p-1 text-sm"
+                                >
+                                  <option value="">Select Teacher</option>
+                                  {teachers.map((t) => (
+                                    <option key={t.id} value={t.id}>
+                                      {t.name}
+                                    </option>
+                                  ))}
+                                </select>
+
+                                <select
+                                  value={newClassData.roomId}
+                                  onChange={(e) =>
+                                    setNewClassData((prev) => ({
+                                      ...prev,
+                                      roomId: e.target.value,
+                                    }))
+                                  }
+                                  className="w-full rounded bg-background p-1 text-sm"
+                                >
+                                  <option value="">Select Room</option>
+                                  {rooms.map((r) => (
+                                    <option key={r.id} value={r.id}>
+                                      {r.name}
+                                    </option>
+                                  ))}
+                                </select>
+
+                                <Button
+                                  size="sm"
+                                  className="w-full"
+                                  onClick={() => {
+                                    if (
+                                      newClassData.courseId &&
+                                      newClassData.teacherId &&
+                                      newClassData.roomId
+                                    ) {
+                                      createClassHistory({
+                                        date: date,
+                                        slotId: slot.id,
+                                        sectionId: selectedId,
+                                        ...newClassData,
+                                        status: "delivered",
+                                      })
+                                    } else {
+                                      toast.error("All fields are required")
+                                    }
+                                  }}
+                                  disabled={isClassCreating}
+                                >
+                                  Save
+                                </Button>
+                              </div>
+                            ) : (
+                              "-"
+                            )}
                           </TableCell>
                         )
                       }
@@ -265,9 +401,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                         rescheduled: "bg-yellow-700",
                         notdelivered: "bg-red-700",
                       }
-                      const isEditing =
-                        editingCell?.slotId === slot.id &&
-                        editingCell?.sectionId === entry.sectionId
+
                       return (
                         <TableCell
                           key={slot.id}
@@ -277,6 +411,8 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                             setEditingCell({
                               slotId: slot.id,
                               sectionId: entry.sectionId,
+                              date,
+                              mode: "edit",
                             })
                           }
                         >

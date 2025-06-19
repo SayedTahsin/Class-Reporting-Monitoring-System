@@ -180,7 +180,7 @@ export const classHistoryRouter = router({
   create: protectedProcedure
     .input(
       z.object({
-        date: z.date(),
+        date: z.string(),
         slotId: z.string(),
         sectionId: z.string(),
         teacherId: z.string(),
@@ -202,13 +202,17 @@ export const classHistoryRouter = router({
         }
       }
 
+      const dateObj = new Date(input.date)
+
       const now = new Date()
       await db.insert(classHistory).values({
         ...input,
+        date: dateObj,
         createdAt: now,
         updatedAt: now,
         updatedBy: ctx.session.user.id,
       })
+
       return { success: true }
     }),
 
