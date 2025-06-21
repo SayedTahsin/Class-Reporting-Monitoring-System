@@ -1,22 +1,22 @@
-import { authClient } from "@/lib/auth-client";
-import { useForm } from "@tanstack/react-form";
-import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
-import { z } from "zod";
-import Loader from "./loader";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { authClient } from "@/lib/auth-client"
+import { useForm } from "@tanstack/react-form"
+import { useNavigate } from "@tanstack/react-router"
+import { toast } from "sonner"
+import { z } from "zod"
+import Loader from "./loader"
+import { Button } from "./ui/button"
+import { Input } from "./ui/input"
+import { Label } from "./ui/label"
 
 export default function SignInForm({
   onSwitchToSignUp,
 }: {
-  onSwitchToSignUp: () => void;
+  onSwitchToSignUp: () => void
 }) {
   const navigate = useNavigate({
     from: "/",
-  });
-  const { isPending } = authClient.useSession();
+  })
+  const { isPending } = authClient.useSession()
 
   const form = useForm({
     defaultValues: {
@@ -32,15 +32,15 @@ export default function SignInForm({
         {
           onSuccess: () => {
             navigate({
-              to: "/dashboard",
-            });
-            toast.success("Sign in successful");
+              to: "/",
+            })
+            toast.success("Sign in successful")
           },
           onError: (error) => {
-            toast.error(error.error.message);
+            toast.error(error.error.message)
           },
-        },
-      );
+        }
+      )
     },
     validators: {
       onSubmit: z.object({
@@ -48,10 +48,22 @@ export default function SignInForm({
         password: z.string().min(6, "Password must be at least 6 characters"),
       }),
     },
-  });
+  })
+
+  const signWithPasskey = async () => {
+    try {
+      await authClient.signIn.passkey()
+      navigate({
+        to: "/",
+      })
+      toast.success("Sign in successful")
+    } catch (error) {
+      toast.error("Login failed")
+    }
+  }
 
   if (isPending) {
-    return <Loader />;
+    return <Loader />
   }
 
   return (
@@ -60,9 +72,9 @@ export default function SignInForm({
 
       <form
         onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          void form.handleSubmit();
+          e.preventDefault()
+          e.stopPropagation()
+          void form.handleSubmit()
         }}
         className="space-y-4"
       >
@@ -124,7 +136,15 @@ export default function SignInForm({
           )}
         </form.Subscribe>
       </form>
-
+      <div className="mt-4 text-center">
+        <Button
+          variant="link"
+          onClick={signWithPasskey}
+          className="text-indigo-600 hover:text-indigo-800"
+        >
+          Sign in with passkey
+        </Button>
+      </div>
       <div className="mt-4 text-center">
         <Button
           variant="link"
@@ -135,5 +155,5 @@ export default function SignInForm({
         </Button>
       </div>
     </div>
-  );
+  )
 }

@@ -9,24 +9,30 @@
 		"dev": "bun run --hot src/index.ts",
 		"start": "bun run dist/src/index.js",
 		"db:local": "turso dev --db-file local.db",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
 		"db:push": "drizzle-kit push",
-		"db:studio": "drizzle-kit studio"
+		"db:studio": "drizzle-kit studio",
+		"check": "biome check --write ."
 	},
 	"dependencies": {
-		"dotenv": "^16.4.7",
-		"zod": "^3.24.2",
-		"hono": "^4.7.6",
 		"@hono/trpc-server": "^0.3.4",
-		"drizzle-orm": "^0.38.4",
 		"@libsql/client": "^0.14.0",
-		"better-auth": "^1.2.6",
+		"@trpc/client": "^11.0.0",
 		"@trpc/server": "^11.0.0",
-		"@trpc/client": "^11.0.0"
+		"better-auth": "^1.2.6",
+		"dotenv": "^16.4.7",
+		"drizzle-orm": "^0.38.4",
+		"hono": "^4.7.6",
+		"nodemailer": "^7.0.3",
+		"ulid": "^3.0.0",
+		"zod": "^3.24.2"
 	},
 	"devDependencies": {
-		"tsc-alias": "^1.8.11",
-		"typescript": "^5.8.2",
 		"@types/bun": "^1.2.6",
-		"drizzle-kit": "^0.30.5"
+		"@types/nodemailer": "^6.4.17",
+		"drizzle-kit": "^0.31.0",
+		"tsc-alias": "^1.8.11",
+		"typescript": "^5.8.2"
 	}
 }

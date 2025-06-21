@@ -13,7 +13,6 @@
 		"db:studio": "turbo -F server db:studio",
 		"check": "biome check --write ."
 	},
-	"dependencies": {},
 	"devDependencies": {
 		"turbo": "^2.4.2",
 		"@biomejs/biome": "1.9.4",
@@ -25,5 +24,8 @@
 			"biome check --write ."
 		]
 	},
-	"packageManager": "bun@1.2.10"
+	"packageManager": "bun@1.2.10",
+	"dependencies": {
+		"croner": "^9.0.0"
+	}
 }

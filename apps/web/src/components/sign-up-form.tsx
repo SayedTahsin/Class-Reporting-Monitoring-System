@@ -1,22 +1,33 @@
-import { authClient } from "@/lib/auth-client";
-import { useForm } from "@tanstack/react-form";
-import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
-import { z } from "zod";
-import Loader from "./loader";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { authClient } from "@/lib/auth-client"
+import { trpc } from "@/utils/trpc"
+import { useForm } from "@tanstack/react-form"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
+import { toast } from "sonner"
+import { z } from "zod"
+import Loader from "./loader"
+import { Button } from "./ui/button"
+import { Input } from "./ui/input"
+import { Label } from "./ui/label"
 
 export default function SignUpForm({
   onSwitchToSignIn,
 }: {
-  onSwitchToSignIn: () => void;
+  onSwitchToSignIn: () => void
 }) {
   const navigate = useNavigate({
     from: "/",
-  });
-  const { isPending } = authClient.useSession();
+  })
+  const { isPending } = authClient.useSession()
+
+  const updateUser = useMutation(trpc.user.update.mutationOptions())
+
+  const { data: role } = useQuery({
+    ...trpc.role.getByName.queryOptions({
+      name: "Student",
+    }),
+    enabled: true,
+  })
 
   const form = useForm({
     defaultValues: {
@@ -32,17 +43,22 @@ export default function SignUpForm({
           name: value.name,
         },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
+            const newSession = await authClient.getSession()
+            updateUser.mutate({
+              roleId: role?.[0]?.id ?? "",
+              id: newSession.data?.user.id || "",
+            })
             navigate({
-              to: "/dashboard",
-            });
-            toast.success("Sign up successful");
+              to: "/profile",
+            })
+            toast.success("Sign up successful")
           },
           onError: (error) => {
-            toast.error(error.error.message);
+            toast.error(error.error.message)
           },
         },
-      );
+      )
     },
     validators: {
       onSubmit: z.object({
@@ -51,10 +67,10 @@ export default function SignUpForm({
         password: z.string().min(6, "Password must be at least 6 characters"),
       }),
     },
-  });
+  })
 
   if (isPending) {
-    return <Loader />;
+    return <Loader />
   }
 
   return (
@@ -63,9 +79,9 @@ export default function SignUpForm({
 
       <form
         onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          void form.handleSubmit();
+          e.preventDefault()
+          e.stopPropagation()
+          void form.handleSubmit()
         }}
         className="space-y-4"
       >
@@ -142,9 +158,13 @@ export default function SignUpForm({
             <Button
               type="submit"
               className="w-full"
-              disabled={!state.canSubmit || state.isSubmitting}
+              disabled={
+                !state.canSubmit || state.isSubmitting || !role?.[0]?.id
+              }
             >
-              {state.isSubmitting ? "Submitting..." : "Sign Up"}
+              {state.isSubmitting || !role?.[0]?.id
+                ? "Submitting..."
+                : "Sign Up"}
             </Button>
           )}
         </form.Subscribe>
@@ -160,5 +180,5 @@ export default function SignUpForm({
         </Button>
       </div>
     </div>
-  );
+  )
 }

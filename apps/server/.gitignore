@@ -27,6 +27,7 @@ node_modules/
 
 # env
 .env*
+!.env.example
 .env.production
 .dev.vars
 
@@ -49,3 +50,4 @@ lerna-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+*.lock
