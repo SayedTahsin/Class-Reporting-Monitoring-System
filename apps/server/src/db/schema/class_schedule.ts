@@ -1,59 +1,65 @@
-import {
-  index,
-  integer,
-  primaryKey,
-  sqliteTable,
-  text,
-  uniqueIndex,
-} from "drizzle-orm/sqlite-core"
+import { createId } from "@/lib/helpers/createId"
+import { index, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
 import { auditColumns } from "./audit_column"
 import { user } from "./auth"
-import { batch } from "./batch"
 import { course } from "./course"
 import { room } from "./room"
+import { section } from "./section"
 import { slot } from "./slot"
 
 export const classSchedule = sqliteTable(
   "class_schedule",
   {
-    date: integer("date", { mode: "timestamp_ms" }).notNull(),
-    slotId: integer("slot_id")
+    id: text("id").primaryKey().$defaultFn(createId),
+    day: text("day", {
+      enum: [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+      ],
+    }).notNull(),
+
+    slotId: text("slot_id")
       .notNull()
-      .references(() => slot.id),
-    batchId: text("batch_id")
+      .references(() => slot.id, { onDelete: "set null" }),
+    sectionId: text("section_id")
       .notNull()
-      .references(() => batch.id),
+      .references(() => section.id, { onDelete: "set null" }),
     courseId: text("course_id")
       .notNull()
-      .references(() => course.id),
+      .references(() => course.id, { onDelete: "set null" }),
     teacherId: text("teacher_id")
       .notNull()
-      .references(() => user.id),
+      .references(() => user.id, { onDelete: "set null" }),
     roomId: text("room_id")
       .notNull()
-      .references(() => room.id),
-    status: text("status", {
-      enum: ["delivered", "notdelivered", "rescheduled"],
-    })
-      .notNull()
-      .default("notdelivered"),
+      .references(() => room.id, { onDelete: "set null" }),
 
     ...auditColumns,
   },
   (table) => {
     return [
-      primaryKey({ columns: [table.date, table.slotId] }),
-      uniqueIndex("data_slot_room").on(table.date, table.slotId, table.roomId),
-      uniqueIndex("date_slot_teacher").on(
-        table.date,
+      uniqueIndex("day_slot_room").on(table.day, table.slotId, table.roomId),
+      uniqueIndex("day_slot_teacher").on(
+        table.day,
         table.slotId,
         table.teacherId,
       ),
-      index("schedule_batch").on(table.batchId),
+      uniqueIndex("day_slot_section").on(
+        table.day,
+        table.slotId,
+        table.sectionId,
+      ),
+      index("schedule_section").on(table.sectionId),
       index("schedule_course").on(table.courseId),
       index("schedule_teacher").on(table.teacherId),
       index("schedule_room").on(table.roomId),
       index("schedule_slot").on(table.slotId),
+      index("schedule_day").on(table.day),
     ]
   },
 )

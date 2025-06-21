@@ -1,7 +1,7 @@
 {
 	"version": "6",
 	"dialect": "sqlite",
-	"id": "16b06070-f2f2-4cea-b63f-57b85bc8114c",
+	"id": "cd416502-7273-4701-8171-9180918a2f22",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"tables": {
 		"account": {
@@ -242,8 +242,8 @@
 					"notNull": false,
 					"autoincrement": false
 				},
-				"batch_id": {
-					"name": "batch_id",
+				"section_id": {
+					"name": "section_id",
 					"type": "text",
 					"primaryKey": false,
 					"notNull": false,
@@ -312,13 +312,13 @@
 				}
 			},
 			"foreignKeys": {
-				"user_batch_id_batch_id_fk": {
-					"name": "user_batch_id_batch_id_fk",
+				"user_section_id_section_id_fk": {
+					"name": "user_section_id_section_id_fk",
 					"tableFrom": "user",
-					"tableTo": "batch",
-					"columnsFrom": ["batch_id"],
+					"tableTo": "section",
+					"columnsFrom": ["section_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "set null",
 					"onUpdate": "no action"
 				},
 				"user_role_id_role_id_fk": {
@@ -327,7 +327,7 @@
 					"tableTo": "role",
 					"columnsFrom": ["role_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "set null",
 					"onUpdate": "no action"
 				}
 			},
@@ -387,8 +387,8 @@
 			"uniqueConstraints": {},
 			"checkConstraints": {}
 		},
-		"batch": {
-			"name": "batch",
+		"class_history": {
+			"name": "class_history",
 			"columns": {
 				"id": {
 					"name": "id",
@@ -397,11 +397,61 @@
 					"notNull": true,
 					"autoincrement": false
 				},
-				"name": {
-					"name": "name",
+				"date": {
+					"name": "date",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"slot_id": {
+					"name": "slot_id",
 					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
+					"autoincrement": false
+				},
+				"section_id": {
+					"name": "section_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"teacher_id": {
+					"name": "teacher_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"room_id": {
+					"name": "room_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"course_id": {
+					"name": "course_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"status": {
+					"name": "status",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": "'notdelivered'"
+				},
+				"notes": {
+					"name": "notes",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
 					"autoincrement": false
 				},
 				"created_at": {
@@ -443,13 +493,79 @@
 				}
 			},
 			"indexes": {
-				"batch_name_unique": {
-					"name": "batch_name_unique",
-					"columns": ["name"],
+				"unique_class_session": {
+					"name": "unique_class_session",
+					"columns": ["date", "slot_id", "section_id"],
 					"isUnique": true
+				},
+				"classhistory_teacher": {
+					"name": "classhistory_teacher",
+					"columns": ["teacher_id"],
+					"isUnique": false
+				},
+				"classhistory_room": {
+					"name": "classhistory_room",
+					"columns": ["room_id"],
+					"isUnique": false
+				},
+				"classhistory_section": {
+					"name": "classhistory_section",
+					"columns": ["section_id"],
+					"isUnique": false
+				},
+				"classsession_course": {
+					"name": "classsession_course",
+					"columns": ["course_id"],
+					"isUnique": false
 				}
 			},
-			"foreignKeys": {},
+			"foreignKeys": {
+				"class_history_slot_id_slot_id_fk": {
+					"name": "class_history_slot_id_slot_id_fk",
+					"tableFrom": "class_history",
+					"tableTo": "slot",
+					"columnsFrom": ["slot_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				},
+				"class_history_section_id_section_id_fk": {
+					"name": "class_history_section_id_section_id_fk",
+					"tableFrom": "class_history",
+					"tableTo": "section",
+					"columnsFrom": ["section_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				},
+				"class_history_teacher_id_user_id_fk": {
+					"name": "class_history_teacher_id_user_id_fk",
+					"tableFrom": "class_history",
+					"tableTo": "user",
+					"columnsFrom": ["teacher_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				},
+				"class_history_room_id_room_id_fk": {
+					"name": "class_history_room_id_room_id_fk",
+					"tableFrom": "class_history",
+					"tableTo": "room",
+					"columnsFrom": ["room_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				},
+				"class_history_course_id_course_id_fk": {
+					"name": "class_history_course_id_course_id_fk",
+					"tableFrom": "class_history",
+					"tableTo": "course",
+					"columnsFrom": ["course_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
 			"checkConstraints": {}
@@ -457,22 +573,29 @@
 		"class_schedule": {
 			"name": "class_schedule",
 			"columns": {
-				"date": {
-					"name": "date",
-					"type": "integer",
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"day": {
+					"name": "day",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
 				},
 				"slot_id": {
 					"name": "slot_id",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
 				},
-				"batch_id": {
-					"name": "batch_id",
+				"section_id": {
+					"name": "section_id",
 					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
@@ -499,14 +622,6 @@
 					"notNull": true,
 					"autoincrement": false
 				},
-				"status": {
-					"name": "status",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true,
-					"autoincrement": false,
-					"default": "'notdelivered'"
-				},
 				"created_at": {
 					"name": "created_at",
 					"type": "integer",
@@ -546,19 +661,24 @@
 				}
 			},
 			"indexes": {
-				"data_slot_room": {
-					"name": "data_slot_room",
-					"columns": ["date", "slot_id", "room_id"],
+				"day_slot_room": {
+					"name": "day_slot_room",
+					"columns": ["day", "slot_id", "room_id"],
 					"isUnique": true
 				},
-				"date_slot_teacher": {
-					"name": "date_slot_teacher",
-					"columns": ["date", "slot_id", "teacher_id"],
+				"day_slot_teacher": {
+					"name": "day_slot_teacher",
+					"columns": ["day", "slot_id", "teacher_id"],
 					"isUnique": true
 				},
-				"schedule_batch": {
-					"name": "schedule_batch",
-					"columns": ["batch_id"],
+				"day_slot_section": {
+					"name": "day_slot_section",
+					"columns": ["day", "slot_id", "section_id"],
+					"isUnique": true
+				},
+				"schedule_section": {
+					"name": "schedule_section",
+					"columns": ["section_id"],
 					"isUnique": false
 				},
 				"schedule_course": {
@@ -580,6 +700,11 @@
 					"name": "schedule_slot",
 					"columns": ["slot_id"],
 					"isUnique": false
+				},
+				"schedule_day": {
+					"name": "schedule_day",
+					"columns": ["day"],
+					"isUnique": false
 				}
 			},
 			"foreignKeys": {
@@ -589,16 +714,16 @@
 					"tableTo": "slot",
 					"columnsFrom": ["slot_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "set null",
 					"onUpdate": "no action"
 				},
-				"class_schedule_batch_id_batch_id_fk": {
-					"name": "class_schedule_batch_id_batch_id_fk",
+				"class_schedule_section_id_section_id_fk": {
+					"name": "class_schedule_section_id_section_id_fk",
 					"tableFrom": "class_schedule",
-					"tableTo": "batch",
-					"columnsFrom": ["batch_id"],
+					"tableTo": "section",
+					"columnsFrom": ["section_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "set null",
 					"onUpdate": "no action"
 				},
 				"class_schedule_course_id_course_id_fk": {
@@ -607,7 +732,7 @@
 					"tableTo": "course",
 					"columnsFrom": ["course_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "set null",
 					"onUpdate": "no action"
 				},
 				"class_schedule_teacher_id_user_id_fk": {
@@ -616,7 +741,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["teacher_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "set null",
 					"onUpdate": "no action"
 				},
 				"class_schedule_room_id_room_id_fk": {
@@ -625,16 +750,11 @@
 					"tableTo": "room",
 					"columnsFrom": ["room_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "set null",
 					"onUpdate": "no action"
 				}
 			},
-			"compositePrimaryKeys": {
-				"class_schedule_date_slot_id_pk": {
-					"columns": ["date", "slot_id"],
-					"name": "class_schedule_date_slot_id_pk"
-				}
-			},
+			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
 			"checkConstraints": {}
 		},
@@ -893,7 +1013,7 @@
 					"tableTo": "role",
 					"columnsFrom": ["role_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "set null",
 					"onUpdate": "no action"
 				},
 				"role_permission_permission_id_permission_id_fk": {
@@ -902,7 +1022,7 @@
 					"tableTo": "permission",
 					"columnsFrom": ["permission_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "set null",
 					"onUpdate": "no action"
 				}
 			},
@@ -941,7 +1061,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["user_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "set null",
 					"onUpdate": "no action"
 				},
 				"user_role_role_id_role_id_fk": {
@@ -950,7 +1070,7 @@
 					"tableTo": "role",
 					"columnsFrom": ["role_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "set null",
 					"onUpdate": "no action"
 				}
 			},
@@ -965,6 +1085,80 @@
 		},
 		"room": {
 			"name": "room",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": "(strftime('%s','now'))"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": "(strftime('%s','now'))"
+				},
+				"deleted_at": {
+					"name": "deleted_at",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false
+				},
+				"updated_by": {
+					"name": "updated_by",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false
+				},
+				"deleted_by": {
+					"name": "deleted_by",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false
+				}
+			},
+			"indexes": {
+				"room_name_unique": {
+					"name": "room_name_unique",
+					"columns": ["name"],
+					"isUnique": true
+				}
+			},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
+		"section": {
+			"name": "section",
 			"columns": {
 				"id": {
 					"name": "id",
@@ -1019,8 +1213,8 @@
 				}
 			},
 			"indexes": {
-				"room_name_unique": {
-					"name": "room_name_unique",
+				"section_name_unique": {
+					"name": "section_name_unique",
 					"columns": ["name"],
 					"isUnique": true
 				}
@@ -1035,24 +1229,33 @@
 			"columns": {
 				"id": {
 					"name": "id",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": true,
 					"notNull": true,
-					"autoincrement": true
+					"autoincrement": false
+				},
+				"slot_number": {
+					"name": "slot_number",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false
 				},
 				"start_time": {
 					"name": "start_time",
 					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
-					"autoincrement": false
+					"autoincrement": false,
+					"default": "'00:00'"
 				},
 				"end_time": {
 					"name": "end_time",
 					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
-					"autoincrement": false
+					"autoincrement": false,
+					"default": "'00:00'"
 				},
 				"created_at": {
 					"name": "created_at",
@@ -1092,7 +1295,13 @@
 					"autoincrement": false
 				}
 			},
-			"indexes": {},
+			"indexes": {
+				"slot_slot_number_unique": {
+					"name": "slot_slot_number_unique",
+					"columns": ["slot_number"],
+					"isUnique": true
+				}
+			},
 			"foreignKeys": {},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},

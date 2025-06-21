@@ -24,11 +24,13 @@
 		"dotenv": "^16.4.7",
 		"drizzle-orm": "^0.38.4",
 		"hono": "^4.7.6",
+		"nodemailer": "^7.0.3",
 		"ulid": "^3.0.0",
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.2.6",
+		"@types/nodemailer": "^6.4.17",
 		"drizzle-kit": "^0.31.0",
 		"tsc-alias": "^1.8.11",
 		"typescript": "^5.8.2"

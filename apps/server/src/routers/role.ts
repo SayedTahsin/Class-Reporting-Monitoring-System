@@ -1,33 +1,32 @@
+import { checkPermission } from "@/lib/helpers/checkPermission"
 import { eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
 import { role } from "../db/schema/pbac"
-import { protectedProcedure, router } from "../lib/trpc"
+import { protectedProcedure, publicProcedure, router } from "../lib/trpc"
 
 export const roleRouter = router({
-  getAll: protectedProcedure.query(async () => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
     return await db.select().from(role).where(isNull(role.deletedAt))
   }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       return await db.select().from(role).where(eq(role.id, input.id))
+    }),
+
+  getByName: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ input }) => {
+      return await db.select().from(role).where(eq(role.name, input.name))
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const now = new Date()
-      await db
-        .update(role)
-        .set({
-          deletedAt: now,
-          updatedAt: now,
-          updatedBy: ctx.session.user.id,
-          deletedBy: ctx.session.user.id,
-        })
-        .where(eq(role.id, input.id))
+      await checkPermission(ctx.session.user.id, "*")
+      await db.delete(role).where(eq(role.id, input.id))
       return { success: true }
     }),
 
@@ -40,6 +39,7 @@ export const roleRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "*")
       const { id, ...updateData } = input
       const now = new Date()
 
@@ -67,6 +67,7 @@ export const roleRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await checkPermission(ctx.session.user.id, "*")
       const now = new Date()
       const newRole = await db.insert(role).values({
         name: input.name,
