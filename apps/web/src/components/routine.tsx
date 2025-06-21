@@ -1,5 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -7,9 +7,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { trpc } from "@/utils/trpc"
-import { useQuery } from "@tanstack/react-query"
+} from "@/components/ui/table";
+import { trpc } from "@/utils/trpc";
+import { useQuery } from "@tanstack/react-query";
 
 const weekdays = [
   "Saturday",
@@ -19,39 +19,39 @@ const weekdays = [
   "Wednesday",
   "Thursday",
   "Friday",
-]
+];
 
 const RoutineView = () => {
   const { data: teachersResult = { data: [], total: 0, hasNext: false } } =
     useQuery({
       ...trpc.user.getTeachers.queryOptions(),
-    })
+    });
 
-  const teachers = teachersResult.data || []
+  const teachers = teachersResult.data || [];
   const { data: courseResult = { data: [], total: 0, hasNext: false } } =
     useQuery({
       ...trpc.course.getAll.queryOptions(),
-    })
-  const courses = courseResult.data || []
+    });
+  const courses = courseResult.data || [];
   const { data: roomResult = { data: [], total: 0, hasNext: false } } =
     useQuery({
       ...trpc.room.getAll.queryOptions(),
-    })
-  const rooms = roomResult.data || []
-  const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
-  const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
+    });
+  const rooms = roomResult.data || [];
+  const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions());
+  const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions());
   const { data: schedules = [], refetch } = useQuery(
-    trpc.classSchedule.getAll.queryOptions(),
-  )
+    trpc.classSchedule.getAll.queryOptions()
+  );
 
   const getScheduleItem = (day: string, slotId: string, sectionId: string) => {
     return schedules.find(
       (s) =>
         s.day.toLowerCase() === day.toLowerCase() &&
         s.slotId === slotId &&
-        s.sectionId === sectionId,
-    )
-  }
+        s.sectionId === sectionId
+    );
+  };
 
   return (
     <Card>
@@ -97,15 +97,15 @@ const RoutineView = () => {
                       </TableCell>
 
                       {sections.map((section) => {
-                        const item = getScheduleItem(day, slot.id, section.id)
+                        const item = getScheduleItem(day, slot.id, section.id);
                         const courseTitle =
                           courses.find((c) => c.id === item?.courseId)?.title ||
-                          "-"
+                          "-";
                         const teacherName =
                           teachers.find((t) => t.id === item?.teacherId)
-                            ?.name || "-"
+                            ?.name || "-";
                         const roomName =
-                          rooms.find((r) => r.id === item?.roomId)?.name || "-"
+                          rooms.find((r) => r.id === item?.roomId)?.name || "-";
 
                         return (
                           <TableCell
@@ -122,7 +122,7 @@ const RoutineView = () => {
                               <div className="text-muted-foreground">-</div>
                             )}
                           </TableCell>
-                        )
+                        );
                       })}
                     </TableRow>
                   ))}
@@ -133,7 +133,7 @@ const RoutineView = () => {
         ))}
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default RoutineView
+export default RoutineView;

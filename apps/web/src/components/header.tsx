@@ -1,16 +1,16 @@
-import { Link, useRouterState } from "@tanstack/react-router"
+import { Link, useRouterState } from "@tanstack/react-router";
 
-import { ModeToggle } from "./mode-toggle"
-import UserMenu from "./user-menu"
+import { ModeToggle } from "./mode-toggle";
+import UserMenu from "./user-menu";
 
 export default function Header() {
-  const location = useRouterState({ select: (s) => s.location.pathname })
+  const location = useRouterState({ select: (s) => s.location.pathname });
   const links = [
     { to: "/", label: "Home" },
     { to: "/routine", label: "Routine" },
-  ]
+  ];
 
-  const shouldHideLinks = location === "/login" || location === "/verification"
+  const shouldHideLinks = location === "/login" || location === "/verification";
 
   return (
     <div>
@@ -31,5 +31,5 @@ export default function Header() {
       </div>
       <hr />
     </div>
-  )
+  );
 }

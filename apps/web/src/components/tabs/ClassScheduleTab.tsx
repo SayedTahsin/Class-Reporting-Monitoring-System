@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -8,11 +8,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { trpc } from "@/utils/trpc"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { useState } from "react"
-import { toast } from "sonner"
+} from "@/components/ui/table";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const weekdays = [
   "Saturday",
@@ -22,7 +22,7 @@ const weekdays = [
   "Wednesday",
   "Thursday",
   "Friday",
-]
+];
 
 type WeekDay =
   | "sunday"
@@ -31,94 +31,94 @@ type WeekDay =
   | "wednesday"
   | "thursday"
   | "friday"
-  | "saturday"
+  | "saturday";
 
 const ClassScheduleTable = () => {
   const [editingCell, setEditingCell] = useState<{
-    day: string
-    slotId: string
-    sectionId: string
-  } | null>(null)
+    day: string;
+    slotId: string;
+    sectionId: string;
+  } | null>(null);
 
   const [editFormData, setEditFormData] = useState<{
-    courseId: string
-    teacherId: string
-    roomId: string
-  }>({ courseId: "", teacherId: "", roomId: "" })
+    courseId: string;
+    teacherId: string;
+    roomId: string;
+  }>({ courseId: "", teacherId: "", roomId: "" });
 
-  const [isNewSchedule, SetIsNewSchedule] = useState<boolean>(false)
+  const [isNewSchedule, SetIsNewSchedule] = useState<boolean>(false);
 
   const { data: courseResult = { data: [], total: 0, hasNext: false } } =
     useQuery({
       ...trpc.course.getAll.queryOptions(),
-    })
+    });
 
   const { data: teachersResult = { data: [], total: 0, hasNext: false } } =
     useQuery({
       ...trpc.user.getTeachers.queryOptions(),
-    })
+    });
 
-  const teachers = teachersResult.data || []
-  const courses = courseResult.data || []
+  const teachers = teachersResult.data || [];
+  const courses = courseResult.data || [];
   const { data: roomResult = { data: [], total: 0, hasNext: false } } =
     useQuery({
       ...trpc.room.getAll.queryOptions(),
-    })
-  const rooms = roomResult.data || []
+    });
+  const rooms = roomResult.data || [];
 
-  const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
-  const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
+  const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions());
+  const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions());
   const { data: schedules = [], refetch } = useQuery(
-    trpc.classSchedule.getAll.queryOptions(),
-  )
+    trpc.classSchedule.getAll.queryOptions()
+  );
 
   const { mutate: createSchedule, isPending: isCreating } = useMutation(
     trpc.classSchedule.create.mutationOptions({
       onSuccess: () => {
-        toast.success("Schedule created!")
-        refetch()
-        setEditingCell(null)
+        toast.success("Schedule created!");
+        refetch();
+        setEditingCell(null);
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const { mutate: updateSchedule, isPending: isUpdating } = useMutation(
     trpc.classSchedule.update.mutationOptions({
       onSuccess: () => {
-        toast.success("Schedule updated!")
-        setEditingCell(null)
-        refetch()
+        toast.success("Schedule updated!");
+        setEditingCell(null);
+        refetch();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const getScheduleItem = (day: string, slotId: string, sectionId: string) => {
     return schedules.find(
       (s) =>
         s.day.toLowerCase() === day.toLowerCase() &&
         s.slotId === slotId &&
-        s.sectionId === sectionId,
-    )
-  }
+        s.sectionId === sectionId
+    );
+  };
 
   const handleEditStart = (day: string, slotId: string, sectionId: string) => {
-    const item = getScheduleItem(day, slotId, sectionId)
+    const item = getScheduleItem(day, slotId, sectionId);
 
-    if (!item) SetIsNewSchedule(true)
+    if (!item) SetIsNewSchedule(true);
 
-    setEditingCell({ day, slotId, sectionId })
+    setEditingCell({ day, slotId, sectionId });
     setEditFormData({
       courseId: item?.courseId || "",
       teacherId: item?.teacherId || "",
       roomId: item?.roomId || "",
-    })
-  }
+    });
+  };
 
   const handleCellUpdate = () => {
-    if (!editingCell) return
-    const { day, slotId, sectionId } = editingCell
+    if (!editingCell) return;
+    const { day, slotId, sectionId } = editingCell;
     if (isNewSchedule) {
       createSchedule({
         day: day.toLowerCase() as WeekDay,
@@ -127,7 +127,7 @@ const ClassScheduleTable = () => {
         courseId: editFormData.courseId,
         teacherId: editFormData.teacherId,
         roomId: editFormData.roomId,
-      })
+      });
     } else {
       updateSchedule({
         day: day.toLowerCase() as WeekDay,
@@ -136,9 +136,9 @@ const ClassScheduleTable = () => {
         courseId: editFormData.courseId,
         teacherId: editFormData.teacherId,
         roomId: editFormData.roomId,
-      })
+      });
     }
-  }
+  };
 
   return (
     <Card>
@@ -174,11 +174,11 @@ const ClassScheduleTable = () => {
                       </TableCell>
 
                       {sections.map(({ id: sectionId }) => {
-                        const item = getScheduleItem(day, slotId, sectionId)
+                        const item = getScheduleItem(day, slotId, sectionId);
                         const isEditing =
                           editingCell?.day === day &&
                           editingCell.slotId === slotId &&
-                          editingCell.sectionId === sectionId
+                          editingCell.sectionId === sectionId;
 
                         return (
                           <TableCell
@@ -275,7 +275,7 @@ const ClassScheduleTable = () => {
                               </span>
                             )}
                           </TableCell>
-                        )
+                        );
                       })}
                     </TableRow>
                   ))}
@@ -286,7 +286,7 @@ const ClassScheduleTable = () => {
         ))}
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default ClassScheduleTable
+export default ClassScheduleTable;

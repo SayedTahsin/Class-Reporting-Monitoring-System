@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -8,37 +8,37 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { trpc } from "@/utils/trpc"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { useDebounce } from "@uidotdev/usehooks"
-import { useState } from "react"
-import { toast } from "sonner"
+} from "@/components/ui/table";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
+import { useState } from "react";
+import { toast } from "sonner";
 
 type FormData = {
-  name?: string
-  username?: string
-  phone?: string
-  image?: string
-  sectionId?: string
-  roleId?: string
-}
+  name?: string;
+  username?: string;
+  phone?: string;
+  image?: string;
+  sectionId?: string;
+  roleId?: string;
+};
 
-const PAGE_LIMIT = 10
+const PAGE_LIMIT = 10;
 
 const UserForm = () => {
-  const [page, setPage] = useState(1)
-  const [searchTerm, setSearchTerm] = useState("")
-  const debouncedSearchTerm = useDebounce(searchTerm, 300)
-  const [sectionFilter, setSectionFilter] = useState<string>("")
-  const [roleFilter, setRoleFilter] = useState<string>("")
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [sectionFilter, setSectionFilter] = useState<string>("");
+  const [roleFilter, setRoleFilter] = useState<string>("");
   const [editingCell, setEditingCell] = useState<{
-    userId: string
-    field: keyof FormData
-  } | null>(null)
+    userId: string;
+    field: keyof FormData;
+  } | null>(null);
 
-  const { data: sections } = useQuery(trpc.section.getAll.queryOptions())
-  const { data: roles } = useQuery(trpc.role.getAll.queryOptions())
+  const { data: sections } = useQuery(trpc.section.getAll.queryOptions());
+  const { data: roles } = useQuery(trpc.role.getAll.queryOptions());
 
   const queryInput = {
     page,
@@ -46,7 +46,7 @@ const UserForm = () => {
     q: debouncedSearchTerm,
     sectionId: sectionFilter || undefined,
     roleId: roleFilter || undefined,
-  }
+  };
 
   const {
     data: result = { data: [], total: 0, hasNext: false },
@@ -54,29 +54,29 @@ const UserForm = () => {
     isLoading,
     isError,
     error,
-  } = useQuery(trpc.user.filter.queryOptions(queryInput))
+  } = useQuery(trpc.user.filter.queryOptions(queryInput));
 
-  const users = result.data || []
-  const hasNext = result.hasNext || false
+  const users = result.data || [];
+  const hasNext = result.hasNext || false;
 
   const updateUser = useMutation(
     trpc.user.update.mutationOptions({
       onSuccess: () => {
-        toast.success("User updated successfully")
-        refetch()
-        setEditingCell(null)
+        toast.success("User updated successfully");
+        refetch();
+        setEditingCell(null);
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const handleUpdate = (
     id: string,
     field: keyof FormData,
-    value: string | undefined,
+    value: string | undefined
   ) => {
-    updateUser.mutate({ id, [field]: value })
-  }
+    updateUser.mutate({ id, [field]: value });
+  };
 
   return (
     <Card>
@@ -86,8 +86,8 @@ const UserForm = () => {
             placeholder="Search users..."
             value={searchTerm}
             onChange={(e) => {
-              setSearchTerm(e.target.value)
-              setPage(1)
+              setSearchTerm(e.target.value);
+              setPage(1);
             }}
             className="min-w-0 flex-1"
           />
@@ -95,8 +95,8 @@ const UserForm = () => {
           <select
             value={sectionFilter}
             onChange={(e) => {
-              setSectionFilter(e.target.value)
-              setPage(1)
+              setSectionFilter(e.target.value);
+              setPage(1);
             }}
             className="rounded border border-input bg-background px-2 py-1 text-foreground text-sm"
           >
@@ -111,8 +111,8 @@ const UserForm = () => {
           <select
             value={roleFilter}
             onChange={(e) => {
-              setRoleFilter(e.target.value)
-              setPage(1)
+              setRoleFilter(e.target.value);
+              setPage(1);
             }}
             className="rounded border border-input bg-background px-2 py-1 text-foreground text-sm"
           >
@@ -223,8 +223,8 @@ const UserForm = () => {
               min={1}
               value={page}
               onChange={(e) => {
-                const val = Number(e.target.value)
-                if (val > 0) setPage(val)
+                const val = Number(e.target.value);
+                if (val > 0) setPage(val);
               }}
               className="w-16 rounded border border-input p-1 text-center"
             />
@@ -240,7 +240,7 @@ const UserForm = () => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default UserForm
+export default UserForm;

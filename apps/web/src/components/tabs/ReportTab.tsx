@@ -1,17 +1,17 @@
-import { Label } from "@/components/ui/label"
-import { trpc } from "@/utils/trpc"
-import { useQuery } from "@tanstack/react-query"
-import { useState } from "react"
-import type { DateRange } from "react-day-picker"
-import { Card, CardContent } from "../ui/card"
-import { DatePickerWithRange } from "../ui/date-picker-range"
+import { Label } from "@/components/ui/label";
+import { trpc } from "@/utils/trpc";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import type { DateRange } from "react-day-picker";
+import { Card, CardContent } from "../ui/card";
+import { DatePickerWithRange } from "../ui/date-picker-range";
 
-type ReportType = "teacher" | "course" | "section"
+type ReportType = "teacher" | "course" | "section";
 
 const ReportTab = () => {
-  const [reportType, setReportType] = useState<ReportType>("teacher")
-  const [selectedId, setSelectedId] = useState<string>("")
-  const [dateRange, setDateRange] = useState<DateRange | undefined>()
+  const [reportType, setReportType] = useState<ReportType>("teacher");
+  const [selectedId, setSelectedId] = useState<string>("");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   const {
     data: teachersResult = { data: [], total: 0, hasNext: false },
@@ -19,8 +19,8 @@ const ReportTab = () => {
     error: teachersError,
   } = useQuery({
     ...trpc.user.getTeachers.queryOptions(),
-  })
-  const teachers = teachersResult.data || []
+  });
+  const teachers = teachersResult.data || [];
 
   const {
     data: courseResult = { data: [], total: 0, hasNext: false },
@@ -28,27 +28,27 @@ const ReportTab = () => {
     error: coursesError,
   } = useQuery({
     ...trpc.course.getAll.queryOptions(),
-  })
-  const courses = courseResult.data || []
+  });
+  const courses = courseResult.data || [];
 
   const {
     data: sections,
     isLoading: isSectionsLoading,
     error: sectionsError,
-  } = useQuery(trpc.section.getAll.queryOptions())
+  } = useQuery(trpc.section.getAll.queryOptions());
   const {
     data: slots = [],
     isLoading: isSlotsLoading,
     error: slotsError,
-  } = useQuery(trpc.slot.getAll.queryOptions())
+  } = useQuery(trpc.slot.getAll.queryOptions());
 
-  const courseMap = Object.fromEntries(courses.map((c) => [c.id, c.title]))
+  const courseMap = Object.fromEntries(courses.map((c) => [c.id, c.title]));
   const sectionMap = Object.fromEntries(
-    sections?.map((s) => [s.id, s.name]) || [],
-  )
+    sections?.map((s) => [s.id, s.name]) || []
+  );
   const slotMap = Object.fromEntries(
-    slots.map((slot) => [slot.id, `${slot.startTime} - ${slot.endTime}`]),
-  )
+    slots.map((slot) => [slot.id, `${slot.startTime} - ${slot.endTime}`])
+  );
 
   const from = dateRange?.from
     ? Math.floor(
@@ -59,10 +59,10 @@ const ReportTab = () => {
           0,
           0,
           0,
-          0,
-        ) / 1000,
+          0
+        ) / 1000
       ).toString()
-    : undefined
+    : undefined;
 
   const to = dateRange?.to
     ? Math.floor(
@@ -73,10 +73,10 @@ const ReportTab = () => {
           23,
           59,
           59,
-          999,
-        ) / 1000,
+          999
+        ) / 1000
       ).toString()
-    : undefined
+    : undefined;
 
   const {
     data: reportData = {
@@ -95,31 +95,34 @@ const ReportTab = () => {
             teacherId: selectedId,
             from,
             to,
-          })
+          });
         case "course":
           return trpc.classHistory.getByCourseId.queryOptions({
             courseId: selectedId,
             from,
             to,
-          })
+          });
         case "section":
           return trpc.classHistory.getBySectionId.queryOptions({
             sectionId: selectedId,
             from,
             to,
-          })
+          });
         default:
-          throw new Error("Invalid report type")
+          throw new Error("Invalid report type");
       }
     })(),
     enabled: !!selectedId,
-  })
+  });
 
   const isLoadingData =
-    isTeachersLoading || isCoursesLoading || isSectionsLoading || isSlotsLoading
+    isTeachersLoading ||
+    isCoursesLoading ||
+    isSectionsLoading ||
+    isSlotsLoading;
 
   const dependencyError =
-    teachersError || coursesError || sectionsError || slotsError
+    teachersError || coursesError || sectionsError || slotsError;
 
   return (
     <Card>
@@ -137,8 +140,8 @@ const ReportTab = () => {
                 value={type}
                 checked={reportType === type}
                 onChange={() => {
-                  setReportType(type as ReportType)
-                  setSelectedId("")
+                  setReportType(type as ReportType);
+                  setSelectedId("");
                 }}
                 className="accent-primary"
               />
@@ -170,22 +173,22 @@ const ReportTab = () => {
                     reportType === "teacher"
                       ? "teacher"
                       : reportType === "course"
-                        ? "course"
-                        : "section"
+                      ? "course"
+                      : "section"
                   }`}
                 </option>
                 {(reportType === "teacher"
                   ? teachers
                   : reportType === "course"
-                    ? courses
-                    : sections
+                  ? courses
+                  : sections
                 )?.map((item) => (
                   <option key={item.id} value={item.id}>
                     {"name" in item
                       ? item.name
                       : "title" in item
-                        ? item.title
-                        : ""}
+                      ? item.title
+                      : ""}
                   </option>
                 ))}
               </select>
@@ -221,10 +224,10 @@ const ReportTab = () => {
                   notDeliveredCount,
                   rescheduledCount,
                   list,
-                } = reportData
-                const total = list.length || 1
+                } = reportData;
+                const total = list.length || 1;
                 const percent = (count: number) =>
-                  ((count / total) * 100).toFixed(1)
+                  ((count / total) * 100).toFixed(1);
 
                 return (
                   <>
@@ -240,7 +243,7 @@ const ReportTab = () => {
                       {percent(rescheduledCount)}%)
                     </div>
                   </>
-                )
+                );
               })()}
             </div>
           </section>
@@ -296,7 +299,7 @@ const ReportTab = () => {
           )}
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default ReportTab
+export default ReportTab;

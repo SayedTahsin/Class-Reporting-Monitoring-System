@@ -1,33 +1,33 @@
-import { authClient } from "@/lib/auth-client"
-import { trpc } from "@/utils/trpc"
-import { useForm } from "@tanstack/react-form"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
-import { toast } from "sonner"
-import { z } from "zod"
-import Loader from "./loader"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
+import { authClient } from "@/lib/auth-client";
+import { trpc } from "@/utils/trpc";
+import { useForm } from "@tanstack/react-form";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
+import { z } from "zod";
+import Loader from "./loader";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 export default function SignUpForm({
   onSwitchToSignIn,
 }: {
-  onSwitchToSignIn: () => void
+  onSwitchToSignIn: () => void;
 }) {
-  const navigate = useNavigate({ from: "/" })
-  const { isPending } = authClient.useSession()
+  const navigate = useNavigate({ from: "/" });
+  const { isPending } = authClient.useSession();
 
-  const updateUser = useMutation(trpc.user.update.mutationOptions())
+  const updateUser = useMutation(trpc.user.update.mutationOptions());
 
   const { data: role } = useQuery({
     ...trpc.role.getByName.queryOptions({ name: "Student" }),
     enabled: true,
-  })
+  });
 
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -45,18 +45,18 @@ export default function SignUpForm({
         },
         {
           onSuccess: async () => {
-            const newSession = await authClient.getSession()
+            const newSession = await authClient.getSession();
             updateUser.mutate({
               roleId: role?.[0]?.id ?? "",
               id: newSession.data?.user.id || "",
-            })
-            navigate({ to: "/verification" })
+            });
+            navigate({ to: "/verification" });
           },
           onError: (error) => {
-            toast.error(error.error.message)
+            toast.error(error.error.message);
           },
-        },
-      )
+        }
+      );
     },
     validators: {
       onSubmit: z
@@ -71,9 +71,9 @@ export default function SignUpForm({
           message: "Passwords do not match",
         }),
     },
-  })
+  });
 
-  if (isPending) return <Loader />
+  if (isPending) return <Loader />;
 
   return (
     <div className="flex items-center justify-center px-4">
@@ -84,9 +84,9 @@ export default function SignUpForm({
 
         <form
           onSubmit={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            void form.handleSubmit()
+            e.preventDefault();
+            e.stopPropagation();
+            void form.handleSubmit();
           }}
           className="space-y-4"
         >
@@ -222,5 +222,5 @@ export default function SignUpForm({
         </div>
       </div>
     </div>
-  )
+  );
 }

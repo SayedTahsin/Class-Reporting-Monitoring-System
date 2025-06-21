@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -7,79 +7,79 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { trpc } from "@/utils/trpc"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { useState } from "react"
-import type { DateRange } from "react-day-picker"
-import { toast } from "sonner"
-import { DatePickerWithRange } from "./ui/date-picker-range"
+} from "@/components/ui/table";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import type { DateRange } from "react-day-picker";
+import { toast } from "sonner";
+import { DatePickerWithRange } from "./ui/date-picker-range";
 
-type OverviewType = "section" | "teacher" | "room"
+type OverviewType = "section" | "teacher" | "room";
 
 type AdminTabProps = {
-  userRoleName: string
-}
+  userRoleName: string;
+};
 
 const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
-  const isSuperAdmin = userRoleName === "SuperAdmin"
-  const isCR = userRoleName === "CR"
-  const isTeacher = userRoleName === "Teacher"
-  const isChairman = userRoleName === "Chairman"
-  const canEdit = isSuperAdmin || isCR || isTeacher || isChairman
-  const canCreate = isSuperAdmin || isTeacher || isChairman
+  const isSuperAdmin = userRoleName === "SuperAdmin";
+  const isCR = userRoleName === "CR";
+  const isTeacher = userRoleName === "Teacher";
+  const isChairman = userRoleName === "Chairman";
+  const canEdit = isSuperAdmin || isCR || isTeacher || isChairman;
+  const canCreate = isSuperAdmin || isTeacher || isChairman;
 
-  const [overview, setOverview] = useState<OverviewType>("section")
+  const [overview, setOverview] = useState<OverviewType>("section");
 
   const { data: teachersResult = { data: [] } } = useQuery(
-    trpc.user.getTeachers.queryOptions(),
-  )
+    trpc.user.getTeachers.queryOptions()
+  );
   const { data: coursesResult = { data: [] } } = useQuery(
-    trpc.course.getAll.queryOptions(),
-  )
+    trpc.course.getAll.queryOptions()
+  );
   const { data: roomsResult = { data: [] } } = useQuery(
-    trpc.room.getAll.queryOptions(),
-  )
-  const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions())
-  const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions())
+    trpc.room.getAll.queryOptions()
+  );
+  const { data: sections = [] } = useQuery(trpc.section.getAll.queryOptions());
+  const { data: slots = [] } = useQuery(trpc.slot.getAll.queryOptions());
 
-  const teachers = teachersResult.data
-  const courses = coursesResult.data
-  const rooms = roomsResult.data
+  const teachers = teachersResult.data;
+  const courses = coursesResult.data;
+  const rooms = roomsResult.data;
 
   const overviewList =
     overview === "section"
       ? sections
       : overview === "teacher"
-        ? teachers
-        : rooms
+      ? teachers
+      : rooms;
 
   const [selectedId, setSelectedId] = useState<string>(
-    overviewList.length > 0 ? overviewList[0].id : "",
-  )
+    overviewList.length > 0 ? overviewList[0].id : ""
+  );
 
-  const today = new Date()
+  const today = new Date();
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: today,
     to: today,
-  })
+  });
 
   const [editingCell, setEditingCell] = useState<{
-    slotId: string
-    sectionId: string
-    date: string
-    mode: "edit" | "create"
-  } | null>(null)
+    slotId: string;
+    sectionId: string;
+    date: string;
+    mode: "edit" | "create";
+  } | null>(null);
 
   const [newClassData, setNewClassData] = useState<{
-    courseId: string
-    teacherId: string
-    roomId: string
+    courseId: string;
+    teacherId: string;
+    roomId: string;
   }>({
     courseId: "",
     teacherId: "",
     roomId: "",
-  })
+  });
 
   const from = dateRange?.from
     ? Math.floor(
@@ -90,10 +90,10 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
           0,
           0,
           0,
-          0,
-        ) / 1000,
+          0
+        ) / 1000
       ).toString()
-    : undefined
+    : undefined;
 
   const to = dateRange?.to
     ? Math.floor(
@@ -104,10 +104,10 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
           23,
           59,
           59,
-          999,
-        ) / 1000,
+          999
+        ) / 1000
       ).toString()
-    : undefined
+    : undefined;
 
   const {
     data: classHistory = [],
@@ -117,33 +117,33 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
   } = useQuery({
     ...trpc.classHistory.getByDate.queryOptions({ from, to }),
     enabled: !!from && !!to,
-  })
+  });
 
   const filteredHistory = selectedId
     ? classHistory.filter((item) => {
-        if (overview === "section") return item.sectionId === selectedId
-        if (overview === "teacher") return item.teacherId === selectedId
-        if (overview === "room") return item.roomId === selectedId
-        return true
+        if (overview === "section") return item.sectionId === selectedId;
+        if (overview === "teacher") return item.teacherId === selectedId;
+        if (overview === "room") return item.roomId === selectedId;
+        return true;
       })
-    : classHistory
+    : classHistory;
 
   const cellMap: Record<
     string,
     Array<{
-      id: string
-      slotId: string
-      courseId: string
-      teacherId: string
-      sectionId: string
-      roomId: string
-      status: "delivered" | "notdelivered" | "rescheduled"
+      id: string;
+      slotId: string;
+      courseId: string;
+      teacherId: string;
+      sectionId: string;
+      roomId: string;
+      status: "delivered" | "notdelivered" | "rescheduled";
     }>
-  > = {}
+  > = {};
 
   for (const item of filteredHistory) {
-    const date = item.date.split("T")[0]
-    if (!cellMap[date]) cellMap[date] = []
+    const date = item.date.split("T")[0];
+    if (!cellMap[date]) cellMap[date] = [];
     cellMap[date].push({
       id: item.id,
       slotId: item.slotId,
@@ -152,41 +152,41 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
       sectionId: item.sectionId,
       roomId: item.roomId,
       status: item.status,
-    })
+    });
   }
 
   const getName = (
     list: { id: string; name?: string; code?: string; title?: string }[],
-    id?: string,
+    id?: string
   ) =>
     list.find((x) => x.id === id)?.name ??
     list.find((x) => x.id === id)?.code ??
     list.find((x) => x.id === id)?.title ??
-    ""
+    "";
 
   const { mutate: updateClassHistoryStatus, isPending: isStatusUpdating } =
     useMutation(
       trpc.classHistory.update.mutationOptions({
         onSuccess: () => {
-          toast.success("Status updated")
-          setEditingCell(null)
-          refetchHistory()
+          toast.success("Status updated");
+          setEditingCell(null);
+          refetchHistory();
         },
         onError: (err) => toast.error(err.message),
-      }),
-    )
+      })
+    );
 
   const { mutate: createClassHistory, isPending: isClassCreating } =
     useMutation(
       trpc.classHistory.create.mutationOptions({
         onSuccess: () => {
-          toast.success("Class created")
-          setEditingCell(null)
-          refetchHistory()
+          toast.success("Class created");
+          setEditingCell(null);
+          refetchHistory();
         },
         onError: (err) => toast.error(err.message),
-      }),
-    )
+      })
+    );
 
   return (
     <Card>
@@ -203,15 +203,15 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
               id="overview-select"
               value={overview}
               onChange={(e) => {
-                const newOverview = e.target.value as OverviewType
-                setOverview(newOverview)
+                const newOverview = e.target.value as OverviewType;
+                setOverview(newOverview);
                 const newList =
                   newOverview === "section"
                     ? sections
                     : newOverview === "teacher"
-                      ? teachers
-                      : rooms
-                setSelectedId(newList[0]?.id ?? null)
+                    ? teachers
+                    : rooms;
+                setSelectedId(newList[0]?.id ?? null);
               }}
               className="rounded border bg-background px-2 py-1 text-foreground text-sm"
             >
@@ -277,20 +277,20 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                       </TableCell>
 
                       {slots.map((slot) => {
-                        const entry = entries.find((e) => e.slotId === slot.id)
+                        const entry = entries.find((e) => e.slotId === slot.id);
                         const isCreating =
                           !entry &&
                           editingCell?.slotId === slot.id &&
                           editingCell?.sectionId === selectedId &&
                           editingCell?.date === date &&
-                          editingCell?.mode === "create"
+                          editingCell?.mode === "create";
 
                         const isEditing =
                           entry &&
                           editingCell?.slotId === slot.id &&
                           editingCell?.sectionId === entry.sectionId &&
                           editingCell?.date === date &&
-                          editingCell?.mode === "edit"
+                          editingCell?.mode === "edit";
 
                         if (!entry) {
                           return (
@@ -378,9 +378,9 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                                           sectionId: selectedId,
                                           ...newClassData,
                                           status: "delivered",
-                                        })
+                                        });
                                       } else {
-                                        toast.error("All fields are required")
+                                        toast.error("All fields are required");
                                       }
                                     }}
                                     disabled={isClassCreating}
@@ -392,24 +392,26 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                                 "-"
                               )}
                             </TableCell>
-                          )
+                          );
                         }
 
-                        const course = getName(courses, entry.courseId)
-                        const teacher = getName(teachers, entry.teacherId)
-                        const section = getName(sections, entry.sectionId)
-                        const room = getName(rooms, entry.roomId)
+                        const course = getName(courses, entry.courseId);
+                        const teacher = getName(teachers, entry.teacherId);
+                        const section = getName(sections, entry.sectionId);
+                        const room = getName(rooms, entry.roomId);
 
                         const statusBg: Record<typeof entry.status, string> = {
                           delivered: "bg-green-700",
                           rescheduled: "bg-yellow-700",
                           notdelivered: "bg-red-700",
-                        }
+                        };
 
                         return (
                           <TableCell
                             key={slot.id}
-                            className={`px-3 py-2 text-sm text-white ${statusBg[entry.status]} cursor-pointer`}
+                            className={`px-3 py-2 text-sm text-white ${
+                              statusBg[entry.status]
+                            } cursor-pointer`}
                             onDoubleClick={() =>
                               canEdit &&
                               setEditingCell({
@@ -463,7 +465,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
                               </div>
                             )}
                           </TableCell>
-                        )
+                        );
                       })}
                     </TableRow>
                   ))
@@ -474,7 +476,7 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
         )}
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default ClassHistoryTable
+export default ClassHistoryTable;

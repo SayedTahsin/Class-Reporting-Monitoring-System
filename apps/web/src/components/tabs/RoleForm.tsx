@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -9,19 +9,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { trpc } from "@/utils/trpc"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { Trash2 } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
+} from "@/components/ui/table";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type Role = {
-  id: string
-  name: string
-  description: string | null
-}
+  id: string;
+  name: string;
+  description: string | null;
+};
 
 const RoleForm = () => {
   const { register, handleSubmit, reset } = useForm({
@@ -29,73 +29,73 @@ const RoleForm = () => {
       name: "",
       description: "",
     },
-  })
+  });
 
   const { data: roles = [], refetch } = useQuery(
-    trpc.role.getAll.queryOptions(),
-  )
+    trpc.role.getAll.queryOptions()
+  );
 
   const createRole = useMutation(
     trpc.role.create.mutationOptions({
       onSuccess: () => {
-        toast.success("Role created!")
-        reset()
-        refetch()
+        toast.success("Role created!");
+        reset();
+        refetch();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const updateRole = useMutation(
     trpc.role.update.mutationOptions({
       onSuccess: () => {
-        toast.success("Role updated!")
-        refetch()
+        toast.success("Role updated!");
+        refetch();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const deleteRole = useMutation(
     trpc.role.delete.mutationOptions({
       onSuccess: () => {
-        toast.success("Role deleted.")
-        refetch()
+        toast.success("Role deleted.");
+        refetch();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const [editingCell, setEditingCell] = useState<{
-    id: string
-    field: "name" | "description"
-  } | null>(null)
+    id: string;
+    field: "name" | "description";
+  } | null>(null);
 
-  const [editValue, setEditValue] = useState("")
+  const [editValue, setEditValue] = useState("");
 
   const onSubmit = handleSubmit((data) => {
     createRole.mutate({
       name: data.name,
       description: data.description || undefined,
-    })
-  })
+    });
+  });
 
   const handleDoubleClick = (role: Role, field: "name" | "description") => {
-    setEditingCell({ id: role.id, field })
-    setEditValue(role[field] ?? "")
-  }
+    setEditingCell({ id: role.id, field });
+    setEditValue(role[field] ?? "");
+  };
 
   const handleEditBlur = () => {
     if (editingCell && editValue.trim() !== "") {
       const payload = {
         id: editingCell.id,
         [editingCell.field]: editValue,
-      }
-      updateRole.mutate(payload)
+      };
+      updateRole.mutate(payload);
     }
-    setEditingCell(null)
-    setEditValue("")
-  }
+    setEditingCell(null);
+    setEditValue("");
+  };
 
   return (
     <Card>
@@ -148,7 +148,6 @@ const RoleForm = () => {
                       role.name
                     )}
                   </TableCell>
-
                   <TableCell
                     onDoubleClick={() => handleDoubleClick(role, "description")}
                     className="cursor-pointer"
@@ -185,7 +184,7 @@ const RoleForm = () => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default RoleForm
+export default RoleForm;

@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -9,118 +9,118 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { trpc } from "@/utils/trpc"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { Trash2 } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
+} from "@/components/ui/table";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type User = {
-  id: string
-  name: string
-  username: string | null
-  phone: string | null
-  email: string
-}
+  id: string;
+  name: string;
+  username: string | null;
+  phone: string | null;
+  email: string;
+};
 
 type AdminTabProps = {
-  userRoleName: string
-}
+  userRoleName: string;
+};
 
 const SectionForm = ({ userRoleName }: AdminTabProps) => {
-  const isSuperAdmin = userRoleName === "SuperAdmin"
-  const isChairman = userRoleName === "Chairman"
+  const isSuperAdmin = userRoleName === "SuperAdmin";
+  const isChairman = userRoleName === "Chairman";
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       name: "",
     },
-  })
+  });
 
-  const [selectedSectionId, setSelectedSectionId] = useState("")
-  const [selectedSectionName, setSelectedSectionName] = useState("")
+  const [selectedSectionId, setSelectedSectionId] = useState("");
+  const [selectedSectionName, setSelectedSectionName] = useState("");
 
   const { data: sectiones, refetch } = useQuery(
-    trpc.section.getAll.queryOptions(),
-  )
+    trpc.section.getAll.queryOptions()
+  );
 
   const createSection = useMutation(
     trpc.section.create.mutationOptions({
       onSuccess: () => {
-        toast.success("Section created successfully!")
-        reset()
-        refetch()
+        toast.success("Section created successfully!");
+        reset();
+        refetch();
       },
       onError: (err) => {
-        toast.error(err.message)
+        toast.error(err.message);
       },
-    }),
-  )
+    })
+  );
 
   const updateSection = useMutation(
     trpc.section.update.mutationOptions({
       onSuccess: () => {
-        toast.success("Section name updated!")
-        refetch()
+        toast.success("Section name updated!");
+        refetch();
       },
       onError: (err) => {
-        toast.error(err.message)
+        toast.error(err.message);
       },
-    }),
-  )
+    })
+  );
 
   const deleteSection = useMutation(
     trpc.section.delete.mutationOptions({
       onSuccess: () => {
-        toast.success("Section deleted successfully!")
-        setSelectedSectionId("")
-        setSelectedSectionName("")
-        refetch()
+        toast.success("Section deleted successfully!");
+        setSelectedSectionId("");
+        setSelectedSectionName("");
+        refetch();
       },
       onError: (err) => {
-        toast.error(err.message)
+        toast.error(err.message);
       },
-    }),
-  )
+    })
+  );
 
   const { data: users } = useQuery({
     ...trpc.user.getBySection.queryOptions({
       sectionId: selectedSectionId,
     }),
     enabled: !!selectedSectionId,
-  })
+  });
 
   const onSubmit = handleSubmit((data) => {
-    createSection.mutate(data)
-  })
+    createSection.mutate(data);
+  });
 
   const handleSectionSelect = async (
-    e: React.ChangeEvent<HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    const sectionId = e.target.value
-    setSelectedSectionId(sectionId)
+    const sectionId = e.target.value;
+    setSelectedSectionId(sectionId);
 
-    const sectionName = sectiones?.find((b) => b.id === sectionId)?.name ?? ""
-    setSelectedSectionName(sectionName)
+    const sectionName = sectiones?.find((b) => b.id === sectionId)?.name ?? "";
+    setSelectedSectionName(sectionName);
 
-    if (!sectionId) setSelectedSectionName("")
-  }
+    if (!sectionId) setSelectedSectionName("");
+  };
 
   const handleSectionRename = () => {
-    if (!selectedSectionId || !selectedSectionName.trim()) return
-    updateSection.mutate({ id: selectedSectionId, name: selectedSectionName })
-  }
+    if (!selectedSectionId || !selectedSectionName.trim()) return;
+    updateSection.mutate({ id: selectedSectionId, name: selectedSectionName });
+  };
 
   const handleSectionDelete = () => {
-    if (!selectedSectionId) return
+    if (!selectedSectionId) return;
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this section?",
-    )
+      "Are you sure you want to delete this section?"
+    );
     if (confirmDelete) {
-      deleteSection.mutate({ id: selectedSectionId })
+      deleteSection.mutate({ id: selectedSectionId });
     }
-  }
+  };
 
   return (
     <Card>
@@ -203,7 +203,7 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
         )}
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default SectionForm
+export default SectionForm;

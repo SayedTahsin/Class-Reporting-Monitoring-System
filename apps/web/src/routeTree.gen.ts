@@ -10,129 +10,129 @@
 
 // Import Routes
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as VerificationImport } from './routes/verification'
-import { Route as RoutineImport } from './routes/routine'
-import { Route as ProfileImport } from './routes/profile'
-import { Route as LoginImport } from './routes/login'
-import { Route as IndexImport } from './routes/index'
+import { Route as rootRoute } from "./routes/__root";
+import { Route as VerificationImport } from "./routes/verification";
+import { Route as RoutineImport } from "./routes/routine";
+import { Route as ProfileImport } from "./routes/profile";
+import { Route as LoginImport } from "./routes/login";
+import { Route as IndexImport } from "./routes/index";
 
 // Create/Update Routes
 
 const VerificationRoute = VerificationImport.update({
-  id: '/verification',
-  path: '/verification',
+  id: "/verification",
+  path: "/verification",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const RoutineRoute = RoutineImport.update({
-  id: '/routine',
-  path: '/routine',
+  id: "/routine",
+  path: "/routine",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const ProfileRoute = ProfileImport.update({
-  id: '/profile',
-  path: '/profile',
+  id: "/profile",
+  path: "/profile",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const LoginRoute = LoginImport.update({
-  id: '/login',
-  path: '/login',
+  id: "/login",
+  path: "/login",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const IndexRoute = IndexImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 // Populate the FileRoutesByPath interface
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginImport
-      parentRoute: typeof rootRoute
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileImport
-      parentRoute: typeof rootRoute
-    }
-    '/routine': {
-      id: '/routine'
-      path: '/routine'
-      fullPath: '/routine'
-      preLoaderRoute: typeof RoutineImport
-      parentRoute: typeof rootRoute
-    }
-    '/verification': {
-      id: '/verification'
-      path: '/verification'
-      fullPath: '/verification'
-      preLoaderRoute: typeof VerificationImport
-      parentRoute: typeof rootRoute
-    }
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/login": {
+      id: "/login";
+      path: "/login";
+      fullPath: "/login";
+      preLoaderRoute: typeof LoginImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/profile": {
+      id: "/profile";
+      path: "/profile";
+      fullPath: "/profile";
+      preLoaderRoute: typeof ProfileImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/routine": {
+      id: "/routine";
+      path: "/routine";
+      fullPath: "/routine";
+      preLoaderRoute: typeof RoutineImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/verification": {
+      id: "/verification";
+      path: "/verification";
+      fullPath: "/verification";
+      preLoaderRoute: typeof VerificationImport;
+      parentRoute: typeof rootRoute;
+    };
   }
 }
 
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
-  '/routine': typeof RoutineRoute
-  '/verification': typeof VerificationRoute
+  "/": typeof IndexRoute;
+  "/login": typeof LoginRoute;
+  "/profile": typeof ProfileRoute;
+  "/routine": typeof RoutineRoute;
+  "/verification": typeof VerificationRoute;
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
-  '/routine': typeof RoutineRoute
-  '/verification': typeof VerificationRoute
+  "/": typeof IndexRoute;
+  "/login": typeof LoginRoute;
+  "/profile": typeof ProfileRoute;
+  "/routine": typeof RoutineRoute;
+  "/verification": typeof VerificationRoute;
 }
 
 export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
-  '/routine': typeof RoutineRoute
-  '/verification': typeof VerificationRoute
+  __root__: typeof rootRoute;
+  "/": typeof IndexRoute;
+  "/login": typeof LoginRoute;
+  "/profile": typeof ProfileRoute;
+  "/routine": typeof RoutineRoute;
+  "/verification": typeof VerificationRoute;
 }
 
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/profile' | '/routine' | '/verification'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/profile' | '/routine' | '/verification'
-  id: '__root__' | '/' | '/login' | '/profile' | '/routine' | '/verification'
-  fileRoutesById: FileRoutesById
+  fileRoutesByFullPath: FileRoutesByFullPath;
+  fullPaths: "/" | "/login" | "/profile" | "/routine" | "/verification";
+  fileRoutesByTo: FileRoutesByTo;
+  to: "/" | "/login" | "/profile" | "/routine" | "/verification";
+  id: "__root__" | "/" | "/login" | "/profile" | "/routine" | "/verification";
+  fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  LoginRoute: typeof LoginRoute
-  ProfileRoute: typeof ProfileRoute
-  RoutineRoute: typeof RoutineRoute
-  VerificationRoute: typeof VerificationRoute
+  IndexRoute: typeof IndexRoute;
+  LoginRoute: typeof LoginRoute;
+  ProfileRoute: typeof ProfileRoute;
+  RoutineRoute: typeof RoutineRoute;
+  VerificationRoute: typeof VerificationRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -141,11 +141,11 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RoutineRoute: RoutineRoute,
   VerificationRoute: VerificationRoute,
-}
+};
 
 export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();
 
 /* ROUTE_MANIFEST_START
 {

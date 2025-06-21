@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -9,55 +9,55 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { trpc } from "@/utils/trpc"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { useDebounce } from "@uidotdev/usehooks"
-import { Trash2 } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
+} from "@/components/ui/table";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type Room = {
-  id: string
-  name: string
-  description: string | null
-}
+  id: string;
+  name: string;
+  description: string | null;
+};
 type AdminTabProps = {
-  userRoleName: string
-}
+  userRoleName: string;
+};
 
-const PAGE_LIMIT = 10
+const PAGE_LIMIT = 10;
 
 const RoomForm = ({ userRoleName }: AdminTabProps) => {
-  const isSuperAdmin = userRoleName === "SuperAdmin"
-  const isChairman = userRoleName === "Chairman"
+  const isSuperAdmin = userRoleName === "SuperAdmin";
+  const isChairman = userRoleName === "Chairman";
 
-  const [searchTerm, setSearchTerm] = useState("")
-  const debouncedSearchTerm = useDebounce(searchTerm, 300)
-  const [page, setPage] = useState(1)
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [page, setPage] = useState(1);
 
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       name: "",
       description: "",
     },
-  })
+  });
 
   const queryInput = {
     page,
     limit: PAGE_LIMIT,
-  }
+  };
 
   const getCoursesQuery = () => {
     if (debouncedSearchTerm) {
       return trpc.room.search.queryOptions({
         q: debouncedSearchTerm,
         ...queryInput,
-      })
+      });
     }
-    return trpc.room.getAll.queryOptions(queryInput)
-  }
+    return trpc.room.getAll.queryOptions(queryInput);
+  };
 
   const {
     data: result = { data: [], total: 0, hasNext: false },
@@ -67,86 +67,86 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
     error,
   } = useQuery({
     ...getCoursesQuery(),
-  })
-  const rooms = result.data || []
-  const hasNext = result.hasNext || false
+  });
+  const rooms = result.data || [];
+  const hasNext = result.hasNext || false;
 
   const createRoom = useMutation(
     trpc.room.create.mutationOptions({
       onSuccess: () => {
-        toast.success("Room created successfully!")
-        reset()
-        refetch()
+        toast.success("Room created successfully!");
+        reset();
+        refetch();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const updateRoom = useMutation(
     trpc.room.update.mutationOptions({
       onSuccess: () => {
-        toast.success("Room updated!")
-        refetch()
+        toast.success("Room updated!");
+        refetch();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const deleteRoom = useMutation(
     trpc.room.delete.mutationOptions({
       onSuccess: () => {
-        toast.success("Room deleted!")
-        refetch()
+        toast.success("Room deleted!");
+        refetch();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const [editingCell, setEditingCell] = useState<{
-    id: string
-    field: "name" | "description"
-  } | null>(null)
-  const [editValue, setEditValue] = useState("")
+    id: string;
+    field: "name" | "description";
+  } | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   const onSubmit = handleSubmit((data) => {
-    createRoom.mutate(data)
-  })
+    createRoom.mutate(data);
+  });
 
   const handleDoubleClick = (room: Room, field: "name" | "description") => {
-    if (!isChairman && !isSuperAdmin) return
+    if (!isChairman && !isSuperAdmin) return;
 
-    setEditingCell({ id: room.id, field })
-    setEditValue(room[field] ?? "")
-  }
+    setEditingCell({ id: room.id, field });
+    setEditValue(room[field] ?? "");
+  };
 
   const handleEditBlur = () => {
     if (editingCell && editValue.trim() !== "") {
-      updateRoom.mutate({ id: editingCell.id, [editingCell.field]: editValue })
+      updateRoom.mutate({ id: editingCell.id, [editingCell.field]: editValue });
     }
-    setEditingCell(null)
-    setEditValue("")
-  }
+    setEditingCell(null);
+    setEditValue("");
+  };
 
   const handleDelete = (id: string) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this room?",
-    )
+      "Are you sure you want to delete this room?"
+    );
     if (confirmDelete) {
-      deleteRoom.mutate({ id })
+      deleteRoom.mutate({ id });
     }
-  }
+  };
 
   const handleSearchChange = (value: string) => {
-    setSearchTerm(value)
-    setPage(1)
-  }
+    setSearchTerm(value);
+    setPage(1);
+  };
 
   const handlePreviousPage = () => {
-    if (page > 1) setPage(page - 1)
-  }
+    if (page > 1) setPage(page - 1);
+  };
   const handleNextPage = () => {
-    if (hasNext) setPage(page + 1)
-  }
+    if (hasNext) setPage(page + 1);
+  };
 
   return (
     <Card>
@@ -261,8 +261,8 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
               min={1}
               value={page}
               onChange={(e) => {
-                const val = Number(e.target.value)
-                if (val > 0) setPage(val)
+                const val = Number(e.target.value);
+                if (val > 0) setPage(val);
               }}
               className="w-14 text-center"
             />
@@ -278,7 +278,7 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default RoomForm
+export default RoomForm;

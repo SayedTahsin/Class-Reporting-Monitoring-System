@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -9,35 +9,35 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { trpc } from "@/utils/trpc"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { useDebounce } from "@uidotdev/usehooks"
-import { Trash2 } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
+} from "@/components/ui/table";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type Course = {
-  id: string
-  code: string
-  title: string
-  credits: number
-}
+  id: string;
+  code: string;
+  title: string;
+  credits: number;
+};
 type AdminTabProps = {
-  userRoleName: string
-}
+  userRoleName: string;
+};
 
-const PAGE_LIMIT = 10
+const PAGE_LIMIT = 10;
 
 const CourseForm = ({ userRoleName }: AdminTabProps) => {
-  const isSuperAdmin = userRoleName === "SuperAdmin"
-  const isChairman = userRoleName === "Chairman"
+  const isSuperAdmin = userRoleName === "SuperAdmin";
+  const isChairman = userRoleName === "Chairman";
 
-  const [searchTerm, setSearchTerm] = useState("")
-  const debouncedSearchTerm = useDebounce(searchTerm, 300)
-  const [creditFilter, setCreditFilter] = useState<number | null>(null)
-  const [page, setPage] = useState(1)
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [creditFilter, setCreditFilter] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
 
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
@@ -45,12 +45,12 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
       title: "",
       credits: 1,
     },
-  })
+  });
 
   const queryInput = {
     page,
     limit: PAGE_LIMIT,
-  }
+  };
 
   const getCoursesQuery = () => {
     if (debouncedSearchTerm && creditFilter !== null) {
@@ -58,22 +58,22 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         q: debouncedSearchTerm,
         credits: creditFilter,
         ...queryInput,
-      })
+      });
     }
     if (debouncedSearchTerm) {
       return trpc.course.search.queryOptions({
         q: debouncedSearchTerm,
         ...queryInput,
-      })
+      });
     }
     if (creditFilter !== null) {
       return trpc.course.filterByCredits.queryOptions({
         credits: creditFilter,
         ...queryInput,
-      })
+      });
     }
-    return trpc.course.getAll.queryOptions(queryInput)
-  }
+    return trpc.course.getAll.queryOptions(queryInput);
+  };
 
   const {
     data: courseResult = { data: [], total: 0, hasNext: false },
@@ -83,66 +83,66 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
     error,
   } = useQuery({
     ...getCoursesQuery(),
-  })
-  const courses = courseResult.data || []
-  const hasNext = courseResult.hasNext || false
+  });
+  const courses = courseResult.data || [];
+  const hasNext = courseResult.hasNext || false;
 
   const createCourse = useMutation(
     trpc.course.create.mutationOptions({
       onSuccess: () => {
-        toast.success("Course created!")
-        reset()
-        setPage(1)
-        refetch()
+        toast.success("Course created!");
+        reset();
+        setPage(1);
+        refetch();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const updateCourse = useMutation(
     trpc.course.update.mutationOptions({
       onSuccess: () => {
-        toast.success("Course updated!")
-        refetch()
+        toast.success("Course updated!");
+        refetch();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const deleteCourse = useMutation(
     trpc.course.delete.mutationOptions({
       onSuccess: () => {
-        toast.success("Course deleted.")
-        refetch()
+        toast.success("Course deleted.");
+        refetch();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const [editingCell, setEditingCell] = useState<{
-    id: string
-    field: "code" | "title" | "credits"
-  } | null>(null)
+    id: string;
+    field: "code" | "title" | "credits";
+  } | null>(null);
 
-  const [editValue, setEditValue] = useState("")
+  const [editValue, setEditValue] = useState("");
 
   const onSubmit = handleSubmit((data) => {
     createCourse.mutate({
       code: data.code,
       title: data.title,
       credits: Number(data.credits),
-    })
-  })
+    });
+  });
 
   const handleDoubleClick = (
     course: Course,
-    field: "code" | "title" | "credits",
+    field: "code" | "title" | "credits"
   ) => {
-    if (!isChairman && !isSuperAdmin) return
+    if (!isChairman && !isSuperAdmin) return;
 
-    setEditingCell({ id: course.id, field })
-    setEditValue(course[field]?.toString() ?? "")
-  }
+    setEditingCell({ id: course.id, field });
+    setEditValue(course[field]?.toString() ?? "");
+  };
 
   const handleEditBlur = () => {
     if (editingCell && editValue.trim() !== "") {
@@ -150,34 +150,34 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         id: editingCell.id,
         [editingCell.field]:
           editingCell.field === "credits" ? Number(editValue) : editValue,
-      }
-      updateCourse.mutate(payload)
+      };
+      updateCourse.mutate(payload);
     }
-    setEditingCell(null)
-    setEditValue("")
-  }
+    setEditingCell(null);
+    setEditValue("");
+  };
 
   const handleCreditFilterChange = (value: string) => {
     if (value === "") {
-      setCreditFilter(null)
-      setPage(1)
+      setCreditFilter(null);
+      setPage(1);
     } else {
-      setCreditFilter(Number(value))
-      setPage(1)
+      setCreditFilter(Number(value));
+      setPage(1);
     }
-  }
+  };
 
   const handleSearchChange = (value: string) => {
-    setSearchTerm(value)
-    setPage(1)
-  }
+    setSearchTerm(value);
+    setPage(1);
+  };
 
   const handlePreviousPage = () => {
-    if (page > 1) setPage(page - 1)
-  }
+    if (page > 1) setPage(page - 1);
+  };
   const handleNextPage = () => {
-    if (hasNext) setPage(page + 1)
-  }
+    if (hasNext) setPage(page + 1);
+  };
 
   return (
     <Card>
@@ -266,7 +266,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
                         onDoubleClick={() =>
                           handleDoubleClick(
                             course,
-                            field as "code" | "title" | "credits",
+                            field as "code" | "title" | "credits"
                           )
                         }
                         className="cursor-pointer text-sm"
@@ -281,7 +281,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
                             onChange={(e) => setEditValue(e.target.value)}
                             onBlur={handleEditBlur}
                             onKeyDown={(e) => {
-                              if (e.key === "Enter") e.currentTarget.blur()
+                              if (e.key === "Enter") e.currentTarget.blur();
                             }}
                             className="text-sm"
                           />
@@ -330,8 +330,8 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
               min={1}
               value={page}
               onChange={(e) => {
-                const val = Number(e.target.value)
-                if (val > 0) setPage(val)
+                const val = Number(e.target.value);
+                if (val > 0) setPage(val);
               }}
               className="w-14 text-center text-sm"
             />
@@ -346,7 +346,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default CourseForm
+export default CourseForm;

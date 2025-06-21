@@ -1,17 +1,17 @@
-import ClassHistoryTable from "@/components/class-history"
-import { setUser } from "@/store/slices/userSlice"
-import { authGuard } from "@/utils/auth-guard"
-import { trpc } from "@/utils/trpc"
-import { useQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
-import { useDispatch } from "react-redux"
+import ClassHistoryTable from "@/components/class-history";
+import { setUser } from "@/store/slices/userSlice";
+import { authGuard } from "@/utils/auth-guard";
+import { trpc } from "@/utils/trpc";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useDispatch } from "react-redux";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
   beforeLoad: async () => {
-    await authGuard()
+    await authGuard();
   },
-})
+});
 
 function HomeComponent() {
   // const dispatch = useDispatch()
@@ -37,5 +37,5 @@ function HomeComponent() {
   //   }
   // }
 
-  return <ClassHistoryTable userRoleName={"SuperAdmin"} />
+  return <ClassHistoryTable userRoleName={"SuperAdmin"} />;
 }

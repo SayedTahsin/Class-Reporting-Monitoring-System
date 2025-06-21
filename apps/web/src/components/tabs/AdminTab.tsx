@@ -1,22 +1,22 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import ClassScheduleForm from "./ClassScheduleTab"
-import CourseForm from "./CourseForm"
-import PBACForm from "./PbacForm"
-import PermissionForm from "./PermissionForm"
-import ReportTab from "./ReportTab"
-import RoleForm from "./RoleForm"
-import RoomForm from "./RoomForm"
-import SectionForm from "./SectionForm"
-import SlotForm from "./SlotForm"
-import UserForm from "./UserForm"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ClassScheduleForm from "./ClassScheduleTab";
+import CourseForm from "./CourseForm";
+import PBACForm from "./PbacForm";
+import PermissionForm from "./PermissionForm";
+import ReportTab from "./ReportTab";
+import RoleForm from "./RoleForm";
+import RoomForm from "./RoomForm";
+import SectionForm from "./SectionForm";
+import SlotForm from "./SlotForm";
+import UserForm from "./UserForm";
 
 type AdminTabProps = {
-  userRoleName: string
-}
+  userRoleName: string;
+};
 const AdminTab = ({ userRoleName }: AdminTabProps) => {
-  const isSuperAdmin = userRoleName === "SuperAdmin"
-  const isTeacher = userRoleName === "Teacher"
-  const isChairman = userRoleName === "Chairman"
+  const isSuperAdmin = userRoleName === "SuperAdmin";
+  const isTeacher = userRoleName === "Teacher";
+  const isChairman = userRoleName === "Chairman";
   return (
     <Tabs
       defaultValue={isTeacher ? "class_schedule" : "user"}
@@ -27,8 +27,8 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
           isSuperAdmin
             ? "grid-cols-10"
             : isTeacher
-              ? "grid-cols-5"
-              : "grid-cols-7"
+            ? "grid-cols-5"
+            : "grid-cols-7"
         }`}
       >
         {(isSuperAdmin || isChairman) && (
@@ -81,7 +81,6 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
           </TabsContent>
         </>
       )}
-
       <TabsContent value="class_schedule">
         <ClassScheduleForm />
       </TabsContent>
@@ -97,7 +96,6 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
       <TabsContent value="slot">
         <SlotForm userRoleName={userRoleName} />
       </TabsContent>
-
       {isSuperAdmin && (
         <>
           <TabsContent value="role">
@@ -112,7 +110,7 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
         </>
       )}
     </Tabs>
-  )
-}
+  );
+};
 
-export default AdminTab
+export default AdminTab;

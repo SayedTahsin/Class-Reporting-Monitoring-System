@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -9,92 +9,92 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { trpc } from "@/utils/trpc"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { Trash2 } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
+} from "@/components/ui/table";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 type AdminTabProps = {
-  userRoleName: string
-}
+  userRoleName: string;
+};
 const SlotForm = ({ userRoleName }: AdminTabProps) => {
-  const isChairman = userRoleName === "Chairman"
-  const isSuperAdmin = userRoleName === "SuperAdmin"
+  const isChairman = userRoleName === "Chairman";
+  const isSuperAdmin = userRoleName === "SuperAdmin";
   const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       slotNumber: 1,
       startTime: "",
       endTime: "",
     },
-  })
+  });
 
-  const { data: slots, refetch } = useQuery(trpc.slot.getAll.queryOptions())
+  const { data: slots, refetch } = useQuery(trpc.slot.getAll.queryOptions());
 
   const createSlot = useMutation(
     trpc.slot.create.mutationOptions({
       onSuccess: () => {
-        toast.success("Slot created")
-        refetch()
-        reset()
+        toast.success("Slot created");
+        refetch();
+        reset();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const updateSlot = useMutation(
     trpc.slot.update.mutationOptions({
       onSuccess: () => {
-        toast.success("Slot updated")
-        refetch()
+        toast.success("Slot updated");
+        refetch();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const deleteSlot = useMutation(
     trpc.slot.delete.mutationOptions({
       onSuccess: () => {
-        toast.success("Slot deleted")
-        refetch()
+        toast.success("Slot deleted");
+        refetch();
       },
       onError: (err) => toast.error(err.message),
-    }),
-  )
+    })
+  );
 
   const [editing, setEditing] = useState<{
-    id: string
-    field: "slotNumber" | "startTime" | "endTime"
-  } | null>(null)
-  const [editValue, setEditValue] = useState("")
+    id: string;
+    field: "slotNumber" | "startTime" | "endTime";
+  } | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   const handleEdit = (
     id: string,
     field: "slotNumber" | "startTime" | "endTime",
-    value: string | number,
+    value: string | number
   ) => {
-    if (!isChairman && !isSuperAdmin) return
-    setEditing({ id, field })
-    setEditValue(String(value))
-  }
+    if (!isChairman && !isSuperAdmin) return;
+    setEditing({ id, field });
+    setEditValue(String(value));
+  };
 
   const handleEditSubmit = () => {
     if (editing) {
       const value =
-        editing.field === "slotNumber" ? Number(editValue) : editValue
-      updateSlot.mutate({ id: editing.id, [editing.field]: value })
-      setEditing(null)
+        editing.field === "slotNumber" ? Number(editValue) : editValue;
+      updateSlot.mutate({ id: editing.id, [editing.field]: value });
+      setEditing(null);
     }
-  }
+  };
 
   const onSubmit = handleSubmit((data) => {
     createSlot.mutate({
       slotNumber: Number(data.slotNumber),
       startTime: data.startTime,
       endTime: data.endTime,
-    })
-  })
+    });
+  });
 
   return (
     <Card>
@@ -219,7 +219,7 @@ const SlotForm = ({ userRoleName }: AdminTabProps) => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default SlotForm
+export default SlotForm;
