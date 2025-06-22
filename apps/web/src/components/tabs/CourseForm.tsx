@@ -183,8 +183,8 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
     <Card>
       <CardContent className="space-y-6">
         {(isChairman || isSuperAdmin) && (
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="grid grid-cols-3 gap-2">
+          <form onSubmit={onSubmit} className="space-y-3">
+            <div className="grid gap-2 sm:grid-cols-3">
               <div>
                 <Label htmlFor="code">Course Code</Label>
                 <Input id="code" {...register("code", { required: true })} />
@@ -198,6 +198,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
                 <Input
                   id="credits"
                   type="number"
+                  min={1}
                   {...register("credits", {
                     required: true,
                     valueAsNumber: true,
@@ -206,32 +207,34 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
                 />
               </div>
             </div>
-            <Button type="submit">Create Course</Button>
+            <Button type="submit" className="w-full sm:w-fit">
+              Create Course
+            </Button>
           </form>
         )}
 
-        <div className="mb-4 flex items-center space-x-4">
+        <div className="flex items-center gap-2">
           <Input
             placeholder="Search courses..."
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="max-w-full flex-grow basis-4/5"
+            className="w-full"
           />
-
           <select
             value={creditFilter !== null ? creditFilter.toString() : ""}
             onChange={(e) => handleCreditFilterChange(e.target.value)}
-            className="flex-grow basis-1/5 rounded bg-background p-1 text-foreground"
+            className="w-40 rounded-md border bg-background p-2 text-foreground text-sm"
           >
             <option value="">All Credits</option>
-            <option value="1">1 Credit</option>
-            <option value="2">2 Credits</option>
-            <option value="3">3 Credits</option>
-            <option value="4">4 Credits</option>
+            {[1, 2, 3, 4].map((c) => (
+              <option key={c} value={c}>
+                {c} Credit{c > 1 && "s"}
+              </option>
+            ))}
           </select>
         </div>
 
-        <div>
+        <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -243,75 +246,50 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
                 )}
               </TableRow>
             </TableHeader>
-            {isLoading && <div className="text-center">Loading courses...</div>}
+
+            {isLoading && (
+              <div className="py-4 text-center text-sm">Loading courses...</div>
+            )}
             {isError && (
-              <div className="py-4 text-center text-red-500">
+              <div className="py-4 text-center text-red-500 text-sm">
                 Error loading courses: {error?.message}
               </div>
             )}
+
             {!isLoading && !isError && (
               <TableBody>
                 {courses.map((course) => (
                   <TableRow key={course.id}>
-                    <TableCell
-                      onDoubleClick={() => handleDoubleClick(course, "code")}
-                      className="cursor-pointer"
-                    >
-                      {editingCell?.id === course.id &&
-                      editingCell.field === "code" ? (
-                        <Input
-                          value={editValue}
-                          autoFocus
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={handleEditBlur}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.currentTarget.blur()
-                          }}
-                        />
-                      ) : (
-                        course.code
-                      )}
-                    </TableCell>
-                    <TableCell
-                      onDoubleClick={() => handleDoubleClick(course, "title")}
-                      className="cursor-pointer"
-                    >
-                      {editingCell?.id === course.id &&
-                      editingCell.field === "title" ? (
-                        <Input
-                          value={editValue}
-                          autoFocus
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={handleEditBlur}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.currentTarget.blur()
-                          }}
-                        />
-                      ) : (
-                        course.title
-                      )}
-                    </TableCell>
-                    <TableCell
-                      onDoubleClick={() => handleDoubleClick(course, "credits")}
-                      className="cursor-pointer"
-                    >
-                      {editingCell?.id === course.id &&
-                      editingCell.field === "credits" ? (
-                        <Input
-                          type="number"
-                          min={1}
-                          value={editValue}
-                          autoFocus
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={handleEditBlur}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.currentTarget.blur()
-                          }}
-                        />
-                      ) : (
-                        course.credits
-                      )}
-                    </TableCell>
+                    {["code", "title", "credits"].map((field) => (
+                      <TableCell
+                        key={field}
+                        onDoubleClick={() =>
+                          handleDoubleClick(
+                            course,
+                            field as "code" | "title" | "credits",
+                          )
+                        }
+                        className="cursor-pointer text-sm"
+                      >
+                        {editingCell?.id === course.id &&
+                        editingCell.field === field ? (
+                          <Input
+                            type={field === "credits" ? "number" : "text"}
+                            value={editValue}
+                            min={field === "credits" ? 1 : undefined}
+                            autoFocus
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onBlur={handleEditBlur}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") e.currentTarget.blur()
+                            }}
+                            className="text-sm"
+                          />
+                        ) : (
+                          course[field as keyof typeof course]
+                        )}
+                      </TableCell>
+                    ))}
 
                     {isSuperAdmin && (
                       <TableCell className="text-right">
@@ -320,7 +298,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
                           size="sm"
                           onClick={() => deleteCourse.mutate({ id: course.id })}
                         >
-                          <Trash2 className=" text-red-500" />
+                          <Trash2 className="text-red-500" />
                         </Button>
                       </TableCell>
                     )}
@@ -330,7 +308,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
                   <TableRow>
                     <TableCell
                       colSpan={isSuperAdmin ? 4 : 3}
-                      className="text-center"
+                      className="text-center text-muted-foreground text-sm"
                     >
                       No courses found.
                     </TableCell>
@@ -341,12 +319,12 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
           </Table>
         </div>
 
-        <div className="mt-4 flex justify-between">
-          <Button disabled={page === 1} onClick={handlePreviousPage}>
+        <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+          <Button size="sm" disabled={page === 1} onClick={handlePreviousPage}>
             Previous
           </Button>
-          <div className="flex items-center space-x-2">
-            <span>Page</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm">Page</span>
             <Input
               type="number"
               min={1}
@@ -355,10 +333,11 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
                 const val = Number(e.target.value)
                 if (val > 0) setPage(val)
               }}
-              className="w-12 p-0 text-center"
+              className="w-14 text-center text-sm"
             />
           </div>
           <Button
+            size="sm"
             disabled={courses.length === 0 || !hasNext}
             onClick={handleNextPage}
           >

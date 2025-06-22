@@ -3,20 +3,18 @@ import { useForm } from "@tanstack/react-form"
 import { useNavigate } from "@tanstack/react-router"
 import { toast } from "sonner"
 import { z } from "zod"
-import Loader from "./loader"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
-
 export default function SignInForm({
   onSwitchToSignUp,
 }: {
   onSwitchToSignUp: () => void
 }) {
+  const { refetch } = authClient.useSession()
   const navigate = useNavigate({
     from: "/",
   })
-  const { isPending } = authClient.useSession()
 
   const form = useForm({
     defaultValues: {
@@ -39,7 +37,7 @@ export default function SignInForm({
           onError: (error) => {
             toast.error(error.error.message)
           },
-        }
+        },
       )
     },
     validators: {
@@ -52,36 +50,39 @@ export default function SignInForm({
 
   const signWithPasskey = async () => {
     try {
-      await authClient.signIn.passkey()
-      navigate({
-        to: "/",
-      })
-      toast.success("Sign in successful")
+      const result = await authClient.signIn.passkey()
+      if (!result?.error) {
+        refetch()
+        navigate({
+          to: "/",
+        })
+        toast.success("Sign in successful")
+      }
     } catch (error) {
       toast.error("Login failed")
     }
   }
 
-  if (isPending) {
-    return <Loader />
+  const onForgotPassword = () => {
+    toast.success("Coming soon")
   }
 
   return (
-    <div className="mx-auto mt-10 w-full max-w-md p-6">
-      <h1 className="mb-6 text-center font-bold text-3xl">Welcome Back</h1>
+    <div className="flex items-center justify-center px-4">
+      <div className="w-full max-w-sm rounded-xl border p-6 shadow-sm">
+        <h1 className="mb-4 text-center font-semibold text-2xl">Sign In</h1>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          void form.handleSubmit()
-        }}
-        className="space-y-4"
-      >
-        <div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            void form.handleSubmit()
+          }}
+          className="space-y-4"
+        >
           <form.Field name="email">
             {(field) => (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor={field.name}>Email</Label>
                 <Input
                   id={field.name}
@@ -92,20 +93,27 @@ export default function SignInForm({
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
                 {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500">
+                  <p key={error?.message} className="text-red-500 text-sm">
                     {error?.message}
                   </p>
                 ))}
               </div>
             )}
           </form.Field>
-        </div>
 
-        <div>
           <form.Field name="password">
             {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Password</Label>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor={field.name}>Password</Label>
+                  <button
+                    type="button"
+                    className="text-indigo-600 text-sm hover:underline"
+                    onClick={onForgotPassword}
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <Input
                   id={field.name}
                   name={field.name}
@@ -115,44 +123,46 @@ export default function SignInForm({
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
                 {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500">
+                  <p key={error?.message} className="text-red-500 text-sm">
                     {error?.message}
                   </p>
                 ))}
               </div>
             )}
           </form.Field>
-        </div>
 
-        <form.Subscribe>
-          {(state) => (
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={!state.canSubmit || state.isSubmitting}
+          <form.Subscribe>
+            {(state) => (
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={!state.canSubmit || state.isSubmitting}
+              >
+                {state.isSubmitting ? "Signing in..." : "Sign In"}
+              </Button>
+            )}
+          </form.Subscribe>
+        </form>
+
+        <div className="mt-4 space-y-2 text-center">
+          <Button
+            variant="outline"
+            className="w-full text-sm"
+            onClick={signWithPasskey}
+          >
+            Sign in with Passkey
+          </Button>
+          <p className="text-muted-foreground text-sm">
+            Don't have an account?{" "}
+            <button
+              type="button"
+              onClick={onSwitchToSignUp}
+              className="text-indigo-600 hover:underline"
             >
-              {state.isSubmitting ? "Submitting..." : "Sign In"}
-            </Button>
-          )}
-        </form.Subscribe>
-      </form>
-      <div className="mt-4 text-center">
-        <Button
-          variant="link"
-          onClick={signWithPasskey}
-          className="text-indigo-600 hover:text-indigo-800"
-        >
-          Sign in with passkey
-        </Button>
-      </div>
-      <div className="mt-4 text-center">
-        <Button
-          variant="link"
-          onClick={onSwitchToSignUp}
-          className="text-indigo-600 hover:text-indigo-800"
-        >
-          Need an account? Sign Up
-        </Button>
+              Sign Up
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   )
