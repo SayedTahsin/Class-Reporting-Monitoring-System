@@ -55,12 +55,13 @@ const RoutineView = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-8">
-        <Label className="text-2xl">Weekly Routine</Label>
+      <CardContent className="space-y-6">
+        <Label className="font-semibold text-xl">Weekly Routine</Label>
+
         {weekdays.map((day) => (
-          <div key={day} className="flex items-start">
+          <div key={day} className="flex items-start gap-2">
             <div
-              className="flex flex-col items-center justify-center border-gray-300 border-r pr-2 font-bold text-lg"
+              className="flex flex-col items-center justify-center border-border border-r pr-2 font-semibold text-base text-muted-foreground"
               style={{
                 writingMode: "vertical-rl",
                 textOrientation: "upright",
@@ -70,35 +71,46 @@ const RoutineView = () => {
               {day.toUpperCase()}
             </div>
 
-            <div className="flex-1 overflow-x-auto">
+            <div className="flex-1 overflow-x-auto rounded border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="border border-gray-300 px-4 py-2">
+                    <TableHead className="border px-3 py-2 text-sm">
                       Slot / Section
                     </TableHead>
                     {sections.map((section) => (
                       <TableHead
                         key={section.id}
-                        className="border border-gray-300 px-4 py-2"
+                        className="border px-3 py-2 text-sm"
                       >
                         {section.name}
                       </TableHead>
                     ))}
                   </TableRow>
                 </TableHeader>
+
                 <TableBody>
                   {slots.map((slot) => (
                     <TableRow key={slot.id}>
-                      <TableCell className="border border-gray-300 px-4 py-2 font-medium">
+                      <TableCell className="whitespace-nowrap border px-3 py-2 font-medium text-sm">
                         {slot.startTime} - {slot.endTime}
                       </TableCell>
+
                       {sections.map((section) => {
                         const item = getScheduleItem(day, slot.id, section.id)
+                        const courseTitle =
+                          courses.find((c) => c.id === item?.courseId)?.title ||
+                          "-"
+                        const teacherName =
+                          teachers.find((t) => t.id === item?.teacherId)
+                            ?.name || "-"
+                        const roomName =
+                          rooms.find((r) => r.id === item?.roomId)?.name || "-"
+
                         return (
                           <TableCell
                             key={section.id}
-                            className="border border-gray-300 px-4 py-2"
+                            className="whitespace-nowrap border px-3 py-2 text-sm"
                           >
                             {item ? (
                               <div className="space-y-1 whitespace-nowrap text-sm">
@@ -116,7 +128,9 @@ const RoutineView = () => {
                                     ?.name || "-"}
                                 </div>
                               </div>
-                            ) : null}
+                            ) : (
+                              <div className="text-muted-foreground">-</div>
+                            )}
                           </TableCell>
                         )
                       })}

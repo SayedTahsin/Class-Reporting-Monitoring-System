@@ -80,8 +80,8 @@ const UserForm = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-6">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-4">
+      <CardContent className="space-y-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-3">
           <Input
             placeholder="Search users..."
             value={searchTerm}
@@ -89,7 +89,7 @@ const UserForm = () => {
               setSearchTerm(e.target.value)
               setPage(1)
             }}
-            className="flex-1"
+            className="min-w-0 flex-1"
           />
 
           <select
@@ -98,7 +98,7 @@ const UserForm = () => {
               setSectionFilter(e.target.value)
               setPage(1)
             }}
-            className="rounded bg-background p-1 text-foreground"
+            className="rounded border border-input bg-background px-2 py-1 text-foreground text-sm"
           >
             <option value="">All Sections</option>
             {sections?.map((s) => (
@@ -114,7 +114,7 @@ const UserForm = () => {
               setRoleFilter(e.target.value)
               setPage(1)
             }}
-            className="rounded bg-background p-1 text-foreground"
+            className="rounded border border-input bg-background px-2 py-1 text-foreground text-sm"
           >
             <option value="">All Roles</option>
             {roles?.map((r) => (
@@ -125,7 +125,7 @@ const UserForm = () => {
           </select>
         </div>
 
-        <Table>
+        <Table className="text-sm">
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
@@ -138,79 +138,81 @@ const UserForm = () => {
           </TableHeader>
 
           <TableBody>
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={6} className="py-4 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            )}
-            {isError && (
+            {isLoading ? (
               <TableRow>
                 <TableCell
                   colSpan={6}
-                  className="py-4 text-center text-red-500"
+                  className="py-4 text-center text-muted-foreground"
+                >
+                  Loading...
+                </TableCell>
+              </TableRow>
+            ) : isError ? (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="py-4 text-center text-red-600"
                 >
                   Error loading users: {error?.message}
                 </TableCell>
               </TableRow>
-            )}
-
-            {!isLoading && !isError && (
-              <>
-                {users?.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.username ?? "-"}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.phone ?? "-"}</TableCell>
-                    <TableCell>
-                      {sections?.find((b) => b.id === user.sectionId)?.name ??
-                        "-"}
-                    </TableCell>
-
-                    <TableCell
-                      onDoubleClick={() =>
-                        setEditingCell({ userId: user.id, field: "roleId" })
-                      }
-                      className="cursor-pointer"
-                    >
-                      {editingCell?.userId === user.id &&
-                      editingCell.field === "roleId" ? (
-                        <select
-                          defaultValue={user.roleId ?? ""}
-                          onBlur={(e) =>
-                            handleUpdate(user.id, "roleId", e.target.value)
-                          }
-                          className="w-full rounded bg-background p-1 text-foreground"
-                        >
-                          {roles?.map((role) => (
-                            <option key={role.id} value={role.id}>
-                              {role.name}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        (roles?.find((r) => r.id === user.roleId)?.name ?? "-")
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-
-                {users.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center">
-                      No users found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </>
+            ) : users.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="py-4 text-center text-muted-foreground"
+                >
+                  No users found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.username || "-"}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.phone || "-"}</TableCell>
+                  <TableCell>
+                    {sections?.find((s) => s.id === user.sectionId)?.name ||
+                      "-"}
+                  </TableCell>
+                  <TableCell
+                    onDoubleClick={() =>
+                      setEditingCell({ userId: user.id, field: "roleId" })
+                    }
+                    className="cursor-pointer"
+                  >
+                    {editingCell?.userId === user.id &&
+                    editingCell.field === "roleId" ? (
+                      <select
+                        defaultValue={user.roleId ?? ""}
+                        onBlur={(e) =>
+                          handleUpdate(user.id, "roleId", e.target.value)
+                        }
+                        className="w-full rounded border border-input bg-background px-2 py-1 text-foreground text-sm"
+                      >
+                        {roles?.map((role) => (
+                          <option key={role.id} value={role.id}>
+                            {role.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      roles?.find((r) => r.id === user.roleId)?.name || "-"
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>
 
-        <div className="mt-4 flex items-center justify-between">
-          <Button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+        <div className="mt-3 flex items-center justify-between text-sm">
+          <Button
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+            size="sm"
+          >
             Previous
           </Button>
 
@@ -224,13 +226,14 @@ const UserForm = () => {
                 const val = Number(e.target.value)
                 if (val > 0) setPage(val)
               }}
-              className="w-14 p-1 text-center"
+              className="w-16 rounded border border-input p-1 text-center"
             />
           </div>
 
           <Button
             disabled={!hasNext || users.length === 0}
             onClick={() => setPage((p) => p + 1)}
+            size="sm"
           >
             Next
           </Button>

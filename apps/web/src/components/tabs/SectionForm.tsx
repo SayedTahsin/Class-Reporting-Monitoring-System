@@ -125,35 +125,37 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
   return (
     <Card>
       <CardContent className="space-y-6">
-        {(isChairman || isSuperAdmin) && (
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {(isChairman || isSuperAdmin) && (
+            <form onSubmit={onSubmit} className="space-y-2">
               <Label htmlFor="name">Create New Section</Label>
               <Input id="name" {...register("name", { required: true })} />
-            </div>
-            <Button type="submit">Create Section</Button>
-          </form>
-        )}
+              <Button type="submit" className="w-full sm:w-auto">
+                Create
+              </Button>
+            </form>
+          )}
 
-        <div>
-          <Label htmlFor="section-select">Existing Sectiones</Label>
-          <select
-            id="section-select"
-            className="w-full rounded-md border bg-background p-2 text-foreground"
-            onChange={handleSectionSelect}
-            value={selectedSectionId}
-          >
-            <option value="">Select a section</option>
-            {sectiones?.map((section) => (
-              <option key={section.id} value={section.id}>
-                {section.name}
-              </option>
-            ))}
-          </select>
+          <div>
+            <Label htmlFor="section-select">Select Existing Section</Label>
+            <select
+              id="section-select"
+              className="mt-1 w-full rounded-md border border-input bg-background p-2 text-foreground text-sm"
+              onChange={handleSectionSelect}
+              value={selectedSectionId}
+            >
+              <option value="">Select a section</option>
+              {sectiones?.map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {selectedSectionId && (
-          <div className="flex items-end gap-2">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1">
               <Label htmlFor="edit-section-name">Edit Section Name</Label>
               <Input
@@ -168,7 +170,7 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
               )}
               {isSuperAdmin && (
                 <Button variant="ghost" onClick={handleSectionDelete}>
-                  <Trash2 className=" text-red-500" />
+                  <Trash2 className="text-red-500" />
                 </Button>
               )}
             </div>
@@ -176,30 +178,28 @@ const SectionForm = ({ userRoleName }: AdminTabProps) => {
         )}
 
         {Array.isArray(users) && users.length > 0 && (
-          <Card>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Username</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Username</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.username || "-"}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.phone || "-"}</TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.username || "-"}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.phone || "-"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>

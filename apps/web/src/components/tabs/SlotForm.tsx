@@ -98,10 +98,10 @@ const SlotForm = ({ userRoleName }: AdminTabProps) => {
 
   return (
     <Card>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         {(isChairman || isSuperAdmin) && (
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="grid grid-cols-3 gap-2">
+          <form onSubmit={onSubmit} className="space-y-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div>
                 <Label htmlFor="slotNumber">Slot Number</Label>
                 <Input
@@ -128,11 +128,13 @@ const SlotForm = ({ userRoleName }: AdminTabProps) => {
                 />
               </div>
             </div>
-            <Button type="submit">Create Slot</Button>
+            <Button type="submit" className="w-full sm:w-fit">
+              Create Slot
+            </Button>
           </form>
         )}
 
-        <div>
+        <div className="space-y-2">
           <Label>Existing Slots</Label>
           <Table>
             <TableHeader>
@@ -149,14 +151,19 @@ const SlotForm = ({ userRoleName }: AdminTabProps) => {
                     onDoubleClick={() =>
                       handleEdit(slot.id, "slotNumber", slot.slotNumber || "")
                     }
+                    className="cursor-pointer"
                   >
                     {editing?.id === slot.id &&
                     editing.field === "slotNumber" ? (
                       <Input
                         type="number"
                         value={editValue}
+                        autoFocus
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleEditSubmit}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && e.currentTarget.blur()
+                        }
                       />
                     ) : (
                       slot.slotNumber
@@ -167,13 +174,18 @@ const SlotForm = ({ userRoleName }: AdminTabProps) => {
                     onDoubleClick={() =>
                       handleEdit(slot.id, "startTime", slot.startTime)
                     }
+                    className="cursor-pointer"
                   >
                     {editing?.id === slot.id &&
                     editing.field === "startTime" ? (
                       <Input
                         value={editValue}
+                        autoFocus
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleEditSubmit}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && e.currentTarget.blur()
+                        }
                       />
                     ) : (
                       slot.startTime
@@ -184,12 +196,17 @@ const SlotForm = ({ userRoleName }: AdminTabProps) => {
                     onDoubleClick={() =>
                       handleEdit(slot.id, "endTime", slot.endTime)
                     }
+                    className="cursor-pointer"
                   >
                     {editing?.id === slot.id && editing.field === "endTime" ? (
                       <Input
                         value={editValue}
+                        autoFocus
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleEditSubmit}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && e.currentTarget.blur()
+                        }
                       />
                     ) : (
                       slot.endTime

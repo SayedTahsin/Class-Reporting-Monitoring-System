@@ -11,12 +11,19 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as VerificationImport } from './routes/verification'
 import { Route as RoutineImport } from './routes/routine'
 import { Route as ProfileImport } from './routes/profile'
 import { Route as LoginImport } from './routes/login'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
+
+const VerificationRoute = VerificationImport.update({
+  id: '/verification',
+  path: '/verification',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const RoutineRoute = RoutineImport.update({
   id: '/routine',
@@ -74,6 +81,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RoutineImport
       parentRoute: typeof rootRoute
     }
+    '/verification': {
+      id: '/verification'
+      path: '/verification'
+      fullPath: '/verification'
+      preLoaderRoute: typeof VerificationImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -84,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/routine': typeof RoutineRoute
+  '/verification': typeof VerificationRoute
 }
 
 export interface FileRoutesByTo {
@@ -91,6 +106,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/routine': typeof RoutineRoute
+  '/verification': typeof VerificationRoute
 }
 
 export interface FileRoutesById {
@@ -99,14 +115,15 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/routine': typeof RoutineRoute
+  '/verification': typeof VerificationRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/profile' | '/routine'
+  fullPaths: '/' | '/login' | '/profile' | '/routine' | '/verification'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/profile' | '/routine'
-  id: '__root__' | '/' | '/login' | '/profile' | '/routine'
+  to: '/' | '/login' | '/profile' | '/routine' | '/verification'
+  id: '__root__' | '/' | '/login' | '/profile' | '/routine' | '/verification'
   fileRoutesById: FileRoutesById
 }
 
@@ -115,6 +132,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   RoutineRoute: typeof RoutineRoute
+  VerificationRoute: typeof VerificationRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -122,6 +140,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   RoutineRoute: RoutineRoute,
+  VerificationRoute: VerificationRoute,
 }
 
 export const routeTree = rootRoute
@@ -137,7 +156,8 @@ export const routeTree = rootRoute
         "/",
         "/login",
         "/profile",
-        "/routine"
+        "/routine",
+        "/verification"
       ]
     },
     "/": {
@@ -151,6 +171,9 @@ export const routeTree = rootRoute
     },
     "/routine": {
       "filePath": "routine.tsx"
+    },
+    "/verification": {
+      "filePath": "verification.tsx"
     }
   }
 }

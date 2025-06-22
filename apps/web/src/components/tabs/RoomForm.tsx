@@ -160,10 +160,10 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
 
   return (
     <Card>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         {(isChairman || isSuperAdmin) && (
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-2">
+          <form onSubmit={onSubmit} className="space-y-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <Label htmlFor="name">Room Name</Label>
                 <Input id="name" {...register("name", { required: true })} />
@@ -173,7 +173,9 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
                 <Input id="description" {...register("description")} />
               </div>
             </div>
-            <Button type="submit">Create Room</Button>
+            <Button type="submit" className="w-full sm:w-fit">
+              Create Room
+            </Button>
           </form>
         )}
 
@@ -181,99 +183,108 @@ const RoomForm = ({ userRoleName }: AdminTabProps) => {
           placeholder="Search rooms..."
           value={searchTerm}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className="max-w-full"
+          className="w-full"
         />
-        <div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Description</TableHead>
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Description</TableHead>
+              {isSuperAdmin && (
+                <TableHead className="text-right">Actions</TableHead>
+              )}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rooms.map((room) => (
+              <TableRow key={room.id}>
+                <TableCell
+                  onDoubleClick={() => handleDoubleClick(room, "name")}
+                  className="cursor-pointer"
+                >
+                  {editingCell?.id === room.id &&
+                  editingCell.field === "name" ? (
+                    <Input
+                      value={editValue}
+                      autoFocus
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={handleEditBlur}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && e.currentTarget.blur()
+                      }
+                    />
+                  ) : (
+                    room.name
+                  )}
+                </TableCell>
+
+                <TableCell
+                  onDoubleClick={() => handleDoubleClick(room, "description")}
+                  className="cursor-pointer"
+                >
+                  {editingCell?.id === room.id &&
+                  editingCell.field === "description" ? (
+                    <Input
+                      value={editValue}
+                      autoFocus
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={handleEditBlur}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && e.currentTarget.blur()
+                      }
+                    />
+                  ) : (
+                    room.description || "-"
+                  )}
+                </TableCell>
+
                 {isSuperAdmin && (
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(room.id)}
+                    >
+                      <Trash2 className="text-red-500" />
+                    </Button>
+                  </TableCell>
                 )}
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rooms.map((room) => (
-                <TableRow key={room.id}>
-                  <TableCell
-                    onDoubleClick={() => handleDoubleClick(room, "name")}
-                    className="cursor-pointer"
-                  >
-                    {editingCell?.id === room.id &&
-                    editingCell.field === "name" ? (
-                      <Input
-                        value={editValue}
-                        autoFocus
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleEditBlur}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.currentTarget.blur()
-                        }}
-                      />
-                    ) : (
-                      room.name
-                    )}
-                  </TableCell>
-                  <TableCell
-                    onDoubleClick={() => handleDoubleClick(room, "description")}
-                    className="cursor-pointer"
-                  >
-                    {editingCell?.id === room.id &&
-                    editingCell.field === "description" ? (
-                      <Input
-                        value={editValue}
-                        autoFocus
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleEditBlur}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.currentTarget.blur()
-                        }}
-                      />
-                    ) : (
-                      (room.description ?? "-")
-                    )}
-                  </TableCell>
-                  {isSuperAdmin && (
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(room.id)}
-                      >
-                        <Trash2 className=" text-red-500" />
-                      </Button>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <div className="mt-4 flex justify-between">
-            <Button disabled={page === 1} onClick={handlePreviousPage}>
-              Previous
-            </Button>
-            <div className="flex items-center space-x-2">
-              <span>Page</span>
-              <Input
-                type="number"
-                min={1}
-                value={page}
-                onChange={(e) => {
-                  const val = Number(e.target.value)
-                  if (val > 0) setPage(val)
-                }}
-                className="w-12 p-0 text-center"
-              />
-            </div>
-            <Button
-              disabled={rooms.length === 0 || !hasNext}
-              onClick={handleNextPage}
-            >
-              Next
-            </Button>
+            ))}
+          </TableBody>
+        </Table>
+
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === 1}
+            onClick={handlePreviousPage}
+          >
+            Previous
+          </Button>
+          <div className="flex items-center gap-2 text-sm">
+            <span>Page</span>
+            <Input
+              type="number"
+              min={1}
+              value={page}
+              onChange={(e) => {
+                const val = Number(e.target.value)
+                if (val > 0) setPage(val)
+              }}
+              className="w-14 text-center"
+            />
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={rooms.length === 0 || !hasNext}
+            onClick={handleNextPage}
+          >
+            Next
+          </Button>
         </div>
       </CardContent>
     </Card>

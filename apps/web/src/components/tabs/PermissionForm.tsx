@@ -102,9 +102,9 @@ const PermissionForm = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-6">
-        <form onSubmit={onSubmit} className="space-y-2">
-          <div className="grid grid-cols-2 gap-2">
+      <CardContent className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Label htmlFor="name">Permission Name</Label>
               <Input id="name" {...register("name", { required: true })} />
@@ -114,11 +114,13 @@ const PermissionForm = () => {
               <Input id="description" {...register("description")} />
             </div>
           </div>
-          <Button type="submit">Create Permission</Button>
+          <Button type="submit" className="w-full sm:w-fit">
+            Create Permission
+          </Button>
         </form>
 
-        <div>
-          <Label className="mb-2">Existing Permissions</Label>
+        <div className="space-y-2">
+          <Label className="text-base">Existing Permissions</Label>
           <Table>
             <TableHeader>
               <TableRow>
@@ -141,14 +143,15 @@ const PermissionForm = () => {
                         autoFocus
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleEditBlur}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.currentTarget.blur()
-                        }}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && e.currentTarget.blur()
+                        }
                       />
                     ) : (
                       perm.name
                     )}
                   </TableCell>
+
                   <TableCell
                     onDoubleClick={() => handleDoubleClick(perm, "description")}
                     className="cursor-pointer"
@@ -160,21 +163,22 @@ const PermissionForm = () => {
                         autoFocus
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleEditBlur}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.currentTarget.blur()
-                        }}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && e.currentTarget.blur()
+                        }
                       />
                     ) : (
-                      (perm.description ?? "-")
+                      perm.description || "-"
                     )}
                   </TableCell>
+
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => deletePermission.mutate({ id: perm.id })}
                     >
-                      <Trash2 className=" text-red-500" />
+                      <Trash2 className="text-red-500" />
                     </Button>
                   </TableCell>
                 </TableRow>

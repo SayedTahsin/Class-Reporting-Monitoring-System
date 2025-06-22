@@ -105,206 +105,203 @@ const PBACForm = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-10">
-        <div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-4">
-            <Input
-              placeholder="Search users..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
-                setPage(1)
-              }}
-              className="flex-1"
-            />
-          </div>
-
-          <div className="mt-6">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Roles</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading && (
-                  <TableRow>
-                    <TableCell colSpan={3} className="text-center">
-                      Loading users...
-                    </TableCell>
-                  </TableRow>
-                )}
-                {isError && (
-                  <TableRow>
-                    <TableCell colSpan={3} className="text-center text-red-500">
-                      Error loading users: {error?.message}
-                    </TableCell>
-                  </TableRow>
-                )}
-                {!isLoading && !isError && users.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={3} className="text-center">
-                      No users found.
-                    </TableCell>
-                  </TableRow>
-                )}
-                {!isLoading &&
-                  !isError &&
-                  users.map((u) => {
-                    const assignedRoles =
-                      userRoles?.filter((ur) => ur.userId === u.id) || []
-
-                    return (
-                      <TableRow key={u.id}>
-                        <TableCell>{u.name}</TableCell>
-                        <TableCell>{u.email}</TableCell>
-                        <TableCell
-                          onDoubleClick={() => setEditingUserId(u.id)}
-                          className="cursor-pointer space-y-1"
-                        >
-                          {editingUserId === u.id ? (
-                            <select
-                              defaultValue=""
-                              className="w-full rounded bg-background p-1 text-foreground"
-                              onBlur={(e) => {
-                                const newRoleId = e.target.value
-                                if (newRoleId) {
-                                  assignUserRole.mutate({
-                                    userId: u.id,
-                                    roleId: newRoleId,
-                                  })
-                                }
-                                setEditingUserId(null)
-                              }}
-                            >
-                              <option value="">Select role to assign</option>
-                              {roles?.map((r) => (
-                                <option key={r.id} value={r.id}>
-                                  {r.name}
-                                </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <div className="flex flex-wrap gap-1">
-                              {assignedRoles.length > 0 ? (
-                                assignedRoles.map((ur) => {
-                                  const role = roles?.find(
-                                    (r) => r.id === ur.roleId,
-                                  )
-                                  return (
-                                    <span
-                                      key={ur.roleId}
-                                      className="flex items-center rounded bg-muted px-2 py-1 text-sm"
-                                    >
-                                      {role?.name || ur.roleId}
-                                      <button
-                                        type="button"
-                                        className="ml-1 text-red-500 hover:text-red-700"
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          removeUserRole.mutate({
-                                            userId: u.id,
-                                            roleId: ur.roleId,
-                                          })
-                                        }}
-                                      >
-                                        <Trash2 className="h-3 w-3" />
-                                      </button>
-                                    </span>
-                                  )
-                                })
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
-                              )}
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between">
-            <Button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
-              Previous
-            </Button>
-            <div className="flex items-center space-x-2">
-              <span>Page</span>
-              <Input
-                type="number"
-                min={1}
-                value={page}
-                onChange={(e) => {
-                  const val = Number(e.target.value)
-                  if (val > 0) setPage(val)
-                }}
-                className="w-14 p-1 text-center"
-              />
-            </div>
-            <Button
-              disabled={!result.hasNext || users.length === 0}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Next
-            </Button>
-          </div>
+      <CardContent className="space-y-8">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <Input
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value)
+              setPage(1)
+            }}
+            className="flex-1"
+          />
         </div>
 
-        <hr className="my-8 border-muted border-t" />
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Roles</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center">
+                  Loading users...
+                </TableCell>
+              </TableRow>
+            )}
+            {isError && (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center text-red-500">
+                  Error: {error?.message}
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading && !isError && users.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center">
+                  No users found.
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading &&
+              !isError &&
+              users.map((u) => {
+                const assignedRoles =
+                  userRoles?.filter((ur) => ur.userId === u.id) || []
 
-        <div>
-          <h2 className="mb-2 font-semibold text-lg">
-            Assign Permission to Role
-          </h2>
+                return (
+                  <TableRow key={u.id}>
+                    <TableCell>{u.name}</TableCell>
+                    <TableCell>{u.email}</TableCell>
+                    <TableCell
+                      onDoubleClick={() => setEditingUserId(u.id)}
+                      className="cursor-pointer space-y-1"
+                    >
+                      {editingUserId === u.id ? (
+                        <select
+                          defaultValue=""
+                          className="w-full rounded bg-background p-1 text-sm"
+                          onBlur={(e) => {
+                            const newRoleId = e.target.value
+                            if (newRoleId) {
+                              assignUserRole.mutate({
+                                userId: u.id,
+                                roleId: newRoleId,
+                              })
+                            }
+                            setEditingUserId(null)
+                          }}
+                        >
+                          <option value="">Select role to assign</option>
+                          {roles?.map((r) => (
+                            <option key={r.id} value={r.id}>
+                              {r.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <div className="flex flex-wrap gap-1">
+                          {assignedRoles.length > 0 ? (
+                            assignedRoles.map((ur) => {
+                              const role = roles?.find(
+                                (r) => r.id === ur.roleId,
+                              )
+                              return (
+                                <span
+                                  key={ur.roleId}
+                                  className="flex items-center rounded bg-muted px-2 py-1 text-sm"
+                                >
+                                  {role?.name || ur.roleId}
+                                  <button
+                                    type="button"
+                                    className="ml-1 text-red-500 hover:text-red-700"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      removeUserRole.mutate({
+                                        userId: u.id,
+                                        roleId: ur.roleId,
+                                      })
+                                    }}
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                </span>
+                              )
+                            })
+                          ) : (
+                            <span className="text-muted-foreground text-sm">
+                              -
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+          </TableBody>
+        </Table>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between">
+          <Button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+            Previous
+          </Button>
+          <div className="flex items-center gap-2">
+            <span>Page</span>
+            <Input
+              type="number"
+              min={1}
+              value={page}
+              onChange={(e) => {
+                const val = Number(e.target.value)
+                if (val > 0) setPage(val)
+              }}
+              className="w-14 p-1 text-center"
+            />
+          </div>
+          <Button
+            disabled={!result.hasNext || users.length === 0}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
+        </div>
+
+        <hr className="border-muted" />
+
+        <div className="space-y-4">
+          <h2 className="font-semibold text-lg">Assign Permission to Role</h2>
+
           <form
             onSubmit={handleRolePermissionSubmit((data) =>
               assignRolePermission.mutate(data),
             )}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2"
           >
-            <div className="grid grid-cols-2 items-end gap-4">
-              <div>
-                <Label htmlFor="rolePermission-role">Role</Label>
-                <select
-                  id="rolePermission-role"
-                  {...registerRolePermission("roleId", { required: true })}
-                  className="w-full rounded bg-background p-1 text-foreground"
-                >
-                  <option value="">Select role</option>
-                  {roles?.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="permission">Permission</Label>
-                <select
-                  id="permission"
-                  {...registerRolePermission("permissionId", {
-                    required: true,
-                  })}
-                  className="w-full rounded bg-background p-1 text-foreground"
-                >
-                  <option value="">Select permission</option>
-                  {permissions?.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-span-2">
-                <Button type="submit">Assign Permission</Button>
-              </div>
+            <div>
+              <Label htmlFor="rolePermission-role">Role</Label>
+              <select
+                id="rolePermission-role"
+                {...registerRolePermission("roleId", { required: true })}
+                className="w-full rounded bg-background p-1 text-sm"
+              >
+                <option value="">Select role</option>
+                {roles?.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="permission">Permission</Label>
+              <select
+                id="permission"
+                {...registerRolePermission("permissionId", {
+                  required: true,
+                })}
+                className="w-full rounded bg-background p-1 text-sm"
+              >
+                <option value="">Select permission</option>
+                {permissions?.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="sm:col-span-2">
+              <Button type="submit">Assign Permission</Button>
             </div>
           </form>
 
-          <div className="mt-6">
+          <div className="space-y-2">
             <Label>Assigned Role Permissions</Label>
             <Table>
               <TableHeader>

@@ -187,6 +187,16 @@ export const userRouter = router({
     return await db.select().from(user).where(eq(user.id, ctx.session.user.id))
   }),
 
+  getUserRoleName: protectedProcedure.query(async ({ ctx }) => {
+    const result = await db
+      .select({ roleName: role.name })
+      .from(user)
+      .innerJoin(role, eq(user.roleId, role.id))
+      .where(eq(user.id, ctx.session.user.id))
+
+    return { roleName: result[0]?.roleName ?? null }
+  }),
+
   delete: protectedProcedure.mutation(async ({ ctx }) => {
     await checkPermission(ctx.session.user.id, "*")
     const now = new Date()

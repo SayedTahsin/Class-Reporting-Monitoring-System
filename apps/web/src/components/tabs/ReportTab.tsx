@@ -124,119 +124,97 @@ const ReportTab = () => {
   return (
     <Card>
       <CardContent className="space-y-4">
-        <div className="mb-4 flex items-center gap-6">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="reportType"
-              value="teacher"
-              checked={reportType === "teacher"}
-              onChange={() => {
-                setReportType("teacher")
-                setSelectedId("")
-              }}
-            />
-            Teacher
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="reportType"
-              value="course"
-              checked={reportType === "course"}
-              onChange={() => {
-                setReportType("course")
-                setSelectedId("")
-              }}
-            />
-            Course
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="reportType"
-              value="section"
-              checked={reportType === "section"}
-              onChange={() => {
-                setReportType("section")
-                setSelectedId("")
-              }}
-            />
-            Section
-          </label>
+        {/* Report Type Radios */}
+        <div className="mb-3 flex flex-wrap gap-6 text-sm">
+          {["teacher", "course", "section"].map((type) => (
+            <label
+              key={type}
+              className="flex cursor-pointer items-center gap-2"
+            >
+              <input
+                type="radio"
+                name="reportType"
+                value={type}
+                checked={reportType === type}
+                onChange={() => {
+                  setReportType(type as ReportType)
+                  setSelectedId("")
+                }}
+                className="accent-primary"
+              />
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </label>
+          ))}
         </div>
 
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="min-w-[200px] flex-1">
-            <Label className="mb-1 block">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
+          <div className="min-w-[180px] flex-1">
+            <Label className="mb-1 block font-medium text-sm">
               Select {reportType.charAt(0).toUpperCase() + reportType.slice(1)}
             </Label>
 
             {isLoadingData ? (
-              <p>Loading options...</p>
+              <p className="text-muted-foreground text-sm">
+                Loading options...
+              </p>
             ) : dependencyError ? (
-              <p className="text-red-600">Failed to load options.</p>
-            ) : reportType === "teacher" ? (
-              <select
-                value={selectedId}
-                onChange={(e) => setSelectedId(e.target.value)}
-                className="w-full rounded border bg-background p-2 text-sm"
-              >
-                <option value="">Select teacher</option>
-                {teachers?.map((teacher) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            ) : reportType === "course" ? (
-              <select
-                value={selectedId}
-                onChange={(e) => setSelectedId(e.target.value)}
-                className="w-full rounded border bg-background p-2 text-sm"
-              >
-                <option value="">Select course</option>
-                {courses?.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.title}
-                  </option>
-                ))}
-              </select>
+              <p className="text-red-600 text-sm">Failed to load options.</p>
             ) : (
               <select
                 value={selectedId}
                 onChange={(e) => setSelectedId(e.target.value)}
-                className="w-full rounded border bg-background p-2 text-sm"
+                className="w-full rounded border border-input bg-background px-3 py-2 text-foreground text-sm"
               >
-                <option value="">Select section</option>
-                {sections?.map((section) => (
-                  <option key={section.id} value={section.id}>
-                    {section.name}
+                <option value="">
+                  {`Select ${
+                    reportType === "teacher"
+                      ? "teacher"
+                      : reportType === "course"
+                        ? "course"
+                        : "section"
+                  }`}
+                </option>
+                {(reportType === "teacher"
+                  ? teachers
+                  : reportType === "course"
+                    ? courses
+                    : sections
+                )?.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {"name" in item
+                      ? item.name
+                      : "title" in item
+                        ? item.title
+                        : ""}
                   </option>
                 ))}
               </select>
             )}
           </div>
 
-          <div className="min-w-[300px] flex-1">
-            <Label className="mb-1 block">Select Date Range</Label>
+          <div className="min-w-[220px] flex-1">
+            <Label className="mb-1 block font-medium text-sm">
+              Select Date Range
+            </Label>
             <DatePickerWithRange date={dateRange} onDateChange={setDateRange} />
           </div>
         </div>
 
         {isReportLoading && (
-          <p className="py-6 text-center">Loading report...</p>
+          <p className="py-6 text-center text-muted-foreground text-sm">
+            Loading report...
+          </p>
         )}
         {reportError && (
-          <p className="py-6 text-center text-red-600">
+          <p className="py-6 text-center text-red-600 text-sm">
             Error loading report: {reportError.message}
           </p>
         )}
 
         {!isReportLoading && !reportError && reportData.list.length > 0 && (
-          <div className="mt-4 space-y-2">
-            <Label className="text-lg">Summary Report</Label>
-            <div className="flex gap-4 text-sm">
+          <section className="mt-4 space-y-2 text-sm">
+            <Label className="font-semibold text-base">Summary Report</Label>
+            <div className="flex flex-wrap gap-6">
               {(() => {
                 const {
                   deliveredCount,
@@ -245,53 +223,55 @@ const ReportTab = () => {
                   list,
                 } = reportData
                 const total = list.length || 1
-                const getPercent = (count: number) =>
+                const percent = (count: number) =>
                   ((count / total) * 100).toFixed(1)
 
                 return (
                   <>
                     <div className="text-green-600">
-                      Delivered: {deliveredCount} ({getPercent(deliveredCount)}
-                      %)
+                      Delivered: {deliveredCount} ({percent(deliveredCount)}%)
                     </div>
                     <div className="text-orange-500">
                       Not Delivered: {notDeliveredCount} (
-                      {getPercent(notDeliveredCount)}%)
+                      {percent(notDeliveredCount)}%)
                     </div>
                     <div className="text-red-600">
                       Rescheduled: {rescheduledCount} (
-                      {getPercent(rescheduledCount)}%)
+                      {percent(rescheduledCount)}%)
                     </div>
                   </>
                 )
               })()}
             </div>
-          </div>
+          </section>
         )}
 
         {!isReportLoading && !reportError && reportData.list.length > 0 && (
-          <div className="mt-4 overflow-hidden rounded border">
+          <div className="mt-4 overflow-hidden rounded border border-input">
             <div className="max-h-64 overflow-y-auto">
               <table className="min-w-full text-sm">
-                <thead className="sticky top-0 z-10 bg-muted text-muted-foreground">
+                <thead className="sticky top-0 bg-muted text-muted-foreground">
                   <tr>
-                    <th className="p-2 text-left">Date</th>
-                    <th className="p-2 text-left">Slot</th>
-                    <th className="p-2 text-left">Status</th>
-                    <th className="p-2 text-left">Course</th>
-                    <th className="p-2 text-left">Section</th>
+                    <th className="p-2 text-left font-medium">Date</th>
+                    <th className="p-2 text-left font-medium">Slot</th>
+                    <th className="p-2 text-left font-medium">Status</th>
+                    <th className="p-2 text-left font-medium">Course</th>
+                    <th className="p-2 text-left font-medium">Section</th>
                   </tr>
                 </thead>
                 <tbody>
                   {reportData.list.map((entry, i) => (
-                    <tr key={entry.id ?? i} className="border-t">
+                    <tr
+                      key={entry.id ?? i}
+                      className="border-t even:bg-muted/50"
+                    >
                       <td className="p-2">
                         {new Date(entry.date).toLocaleDateString()}
                       </td>
                       <td className="p-2">
                         {slotMap[entry.slotId] || entry.slotId}
                       </td>
-                      <td className="p-2">{entry.status}</td>
+                      <td className="p-2 capitalize">{entry.status}</td>
                       <td className="p-2">
                         {courseMap[entry.courseId] || entry.courseId}
                       </td>
@@ -310,7 +290,7 @@ const ReportTab = () => {
           !isReportLoading &&
           !reportError &&
           reportData.list.length === 0 && (
-            <p className="mt-6 text-center text-muted-foreground">
+            <p className="mt-6 text-center text-muted-foreground text-sm">
               No data found.
             </p>
           )}

@@ -142,59 +142,52 @@ const ClassScheduleTable = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-8">
-        <Label className="text-2xl">Weekly Routine</Label>
-        {weekdays.map((day) => (
-          <div key={day} className="flex items-start">
-            <div
-              className="flex flex-col items-center justify-center border-gray-300 border-r pr-2 font-bold text-lg"
-              style={{
-                writingMode: "vertical-rl",
-                textOrientation: "upright",
-                minHeight: `${Math.max(200, slots.length * 40)}px`,
-              }}
-            >
-              {day.toUpperCase()}
-            </div>
+      <CardContent className="space-y-6">
+        <Label className="font-semibold text-xl">Weekly Routine</Label>
 
+        {weekdays.map((day) => (
+          <div key={day}>
+            <div className="flex font-bold text-lg">{day.toUpperCase()}</div>
             <div className="flex-1 overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="border border-gray-300 px-4 py-2">
+                    <TableHead className="whitespace-nowrap border border-gray-300 px-3 py-2">
                       Slot / Section
                     </TableHead>
-                    {sections.map((section) => (
+                    {sections.map(({ id, name }) => (
                       <TableHead
-                        key={section.id}
-                        className="border border-gray-300 px-4 py-2"
+                        key={id}
+                        className="whitespace-nowrap border border-gray-300 px-3 py-2"
                       >
-                        {section.name}
+                        {name}
                       </TableHead>
                     ))}
                   </TableRow>
                 </TableHeader>
+
                 <TableBody>
-                  {slots.map((slot) => (
-                    <TableRow key={slot.id}>
-                      <TableCell className="border border-gray-300 px-4 py-2 font-medium">
-                        {slot.startTime} - {slot.endTime}
+                  {slots.map(({ id: slotId, startTime, endTime }) => (
+                    <TableRow key={slotId}>
+                      <TableCell className="whitespace-nowrap border border-gray-300 px-3 py-2 font-medium">
+                        {startTime} - {endTime}
                       </TableCell>
-                      {sections.map((section) => {
-                        const item = getScheduleItem(day, slot.id, section.id)
+
+                      {sections.map(({ id: sectionId }) => {
+                        const item = getScheduleItem(day, slotId, sectionId)
                         const isEditing =
-                          editingCell &&
-                          editingCell.day === day &&
-                          editingCell.slotId === slot.id &&
-                          editingCell.sectionId === section.id
+                          editingCell?.day === day &&
+                          editingCell.slotId === slotId &&
+                          editingCell.sectionId === sectionId
 
                         return (
                           <TableCell
-                            key={section.id}
-                            className="border border-gray-300 px-4 py-2"
+                            key={sectionId}
+                            className="cursor-pointer border border-gray-300 px-3 py-2"
                             onDoubleClick={() =>
-                              handleEditStart(day, slot.id, section.id)
+                              handleEditStart(day, slotId, sectionId)
                             }
+                            title={item ? undefined : "Double click to add"}
                           >
                             {isEditing ? (
                               <div className="flex flex-col space-y-1">
@@ -206,15 +199,16 @@ const ClassScheduleTable = () => {
                                       courseId: e.target.value,
                                     }))
                                   }
-                                  className="w-full rounded bg-background p-1 text-sm"
+                                  className="w-full rounded border border-input bg-background p-1 text-sm"
                                 >
                                   <option value="">Select course</option>
-                                  {courses.map((course) => (
-                                    <option key={course.id} value={course.id}>
-                                      {course.title}
+                                  {courses.map(({ id, title }) => (
+                                    <option key={id} value={id}>
+                                      {title}
                                     </option>
                                   ))}
                                 </select>
+
                                 <select
                                   value={editFormData.teacherId}
                                   onChange={(e) =>
@@ -223,15 +217,16 @@ const ClassScheduleTable = () => {
                                       teacherId: e.target.value,
                                     }))
                                   }
-                                  className="w-full rounded bg-background p-1 text-sm"
+                                  className="w-full rounded border border-input bg-background p-1 text-sm"
                                 >
                                   <option value="">Select teacher</option>
-                                  {teachers?.map((teacher) => (
-                                    <option key={teacher.id} value={teacher.id}>
-                                      {teacher.name}
+                                  {teachers?.map(({ id, name }) => (
+                                    <option key={id} value={id}>
+                                      {name}
                                     </option>
                                   ))}
                                 </select>
+
                                 <select
                                   value={editFormData.roomId}
                                   onChange={(e) =>
@@ -240,15 +235,16 @@ const ClassScheduleTable = () => {
                                       roomId: e.target.value,
                                     }))
                                   }
-                                  className="w-full rounded bg-background p-1 text-sm"
+                                  className="w-full rounded border border-input bg-background p-1 text-sm"
                                 >
                                   <option value="">Select room</option>
-                                  {rooms.map((room) => (
-                                    <option key={room.id} value={room.id}>
-                                      {room.name}
+                                  {rooms.map(({ id, name }) => (
+                                    <option key={id} value={id}>
+                                      {name}
                                     </option>
                                   ))}
                                 </select>
+
                                 <Button
                                   size="sm"
                                   className="mt-1 w-full"
@@ -259,22 +255,22 @@ const ClassScheduleTable = () => {
                                 </Button>
                               </div>
                             ) : item ? (
-                              <div className="space-y-1 whitespace-nowrap text-sm">
+                              <div className="space-y-0.5 whitespace-nowrap text-sm">
                                 <div>
                                   {courses.find((c) => c.id === item.courseId)
-                                    ?.title || "-"}
+                                    ?.title ?? "-"}
                                 </div>
                                 <div>
                                   {teachers.find((t) => t.id === item.teacherId)
-                                    ?.name || "-"}
+                                    ?.name ?? "-"}
                                 </div>
                                 <div>
                                   {rooms.find((r) => r.id === item.roomId)
-                                    ?.name || "-"}
+                                    ?.name ?? "-"}
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-muted-foreground text-xs">
+                              <span className="select-none text-muted-foreground text-xs">
                                 Double click to add
                               </span>
                             )}
