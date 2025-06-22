@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { authClient } from "@/lib/auth-client"
-import { getTimeAgo } from "@/utils/daysAgo"
+import { authGuard } from "@/utils/auth-guard"
+import { getTimeAgo } from "@/utils/days-ago"
 import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
@@ -17,23 +18,16 @@ import { toast } from "sonner"
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
+  beforeLoad: async () => {
+    await authGuard()
+  },
 })
 
 function ProfilePage() {
-  const { data: session, isPending } = authClient.useSession()
-  const navigate = Route.useNavigate()
-
-  const { data: user, isFetching } = useQuery(trpc.user.getById.queryOptions())
-  const { data: sectiones } = useQuery(trpc.section.getAll.queryOptions())
+  const { data: session } = authClient.useSession()
 
   const [userRoleName, setUserRoleName] = useState("Student")
-
-  const { data: role } = useQuery({
-    ...trpc.role.getById.queryOptions({
-      id: user?.[0]?.roleId || "",
-    }),
-    enabled: !!user?.[0]?.roleId,
-  })
+  const isAdmin = ["SuperAdmin", "Chairman", "Teacher"].includes(userRoleName)
 
   const { register, handleSubmit, reset, watch } = useForm({
     defaultValues: {
@@ -48,11 +42,39 @@ function ProfilePage() {
     },
   })
 
-  useEffect(() => {
-    if (!session && !isPending) {
-      navigate({ to: "/login" })
-    }
-  }, [session, isPending, navigate])
+  const { data: user, isFetching } = useQuery(trpc.user.getById.queryOptions())
+  const { data: sectiones } = useQuery(trpc.section.getAll.queryOptions())
+  const { data: role } = useQuery({
+    ...trpc.role.getById.queryOptions({
+      id: user?.[0]?.roleId || "",
+    }),
+    enabled: !!user?.[0]?.roleId,
+  })
+
+  const updateUser = useMutation(
+    trpc.user.update.mutationOptions({
+      onSuccess: () => {
+        toast.success("Profile updated successfully.")
+      },
+      onError: (error) => {
+        toast.error(error.message)
+      },
+    }),
+  )
+
+  const onSubmit = handleSubmit((data) => {
+    const updatedData = Object.fromEntries(
+      Object.entries(data).filter(([_, value]) => value !== ""),
+    )
+    updateUser.mutate({
+      ...updatedData,
+      id: session?.user.id || "",
+    })
+  })
+
+  const addPasskey = async () => {
+    await authClient.passkey.addPasskey()
+  }
 
   useEffect(() => {
     if (user) {
@@ -73,45 +95,14 @@ function ProfilePage() {
     }
   }, [user, reset, role])
 
-  const updateUser = useMutation(
-    trpc.user.update.mutationOptions({
-      onSuccess: () => {
-        toast.success("Profile updated successfully.")
-      },
-      onError: (error) => {
-        toast.error(error.message)
-      },
-    })
-  )
-
-  const onSubmit = handleSubmit((data) => {
-    const updatedData = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value !== "")
-    )
-    updateUser.mutate({
-      ...updatedData,
-      id: session?.user.id || "",
-    })
-  })
-
-  const addPasskey = async () => {
-    await authClient.passkey.addPasskey()
-  }
-
-  const handleSendVerification = () => {
-    toast.info("Verification email sent.")
-  }
-
-  if (isPending || isFetching || !user) return <Loader />
+  if (isFetching || !user) return <Loader />
 
   const emailVerified = watch("emailVerified")
   const createdAgo = getTimeAgo(user[0].createdAt)
   const updatedAgo = getTimeAgo(user[0].updatedAt || "")
 
-  const isAdmin = ["SuperAdmin", "Chairman", "Teacher"].includes(userRoleName)
-
   return (
-    <Tabs defaultValue="profile" className="mx-auto mt-2 w-full max-w-5xl">
+    <Tabs defaultValue="profile" className="mx-auto mt-4 w-full max-w-5xl">
       <TabsList>
         <TabsTrigger value="profile">Profile</TabsTrigger>
         {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
@@ -119,14 +110,14 @@ function ProfilePage() {
 
       <TabsContent value="profile">
         <Card>
-          <CardContent>
-            <form onSubmit={onSubmit} className="space-y-4">
-              <div className="flex gap-2">
-                <div className="w-[80%]">
+          <CardContent className="p-6">
+            <form onSubmit={onSubmit} className="space-y-4 text-sm">
+              <div className="grid grid-cols-5 gap-4">
+                <div className="col-span-4">
                   <Label htmlFor="name">Name</Label>
                   <Input id="name" {...register("name")} />
                 </div>
-                <div className="w-[20%]">
+                <div>
                   <Label htmlFor="roleId">Role</Label>
                   <Input id="roleId" value={userRoleName} disabled />
                 </div>
@@ -149,15 +140,14 @@ function ProfilePage() {
                   {!emailVerified ? (
                     <button
                       type="button"
-                      onClick={handleSendVerification}
                       className="text-red-500"
                       title="Click to send verification email"
                     >
-                      <AlertCircle />
+                      <AlertCircle className="h-5 w-5" />
                     </button>
                   ) : (
                     <div className="text-green-600" title="Email is verified">
-                      <BadgeCheck />
+                      <BadgeCheck className="h-5 w-5" />
                     </div>
                   )}
                 </div>
@@ -173,7 +163,7 @@ function ProfilePage() {
                 <select
                   id="sectionId"
                   {...register("sectionId")}
-                  className="w-full rounded-md border border-input bg-background p-2 text-foreground"
+                  className="w-full rounded-md border border-input bg-background p-2 text-foreground text-sm"
                 >
                   <option value="">Select Section</option>
                   {sectiones?.map((section) => (
@@ -184,23 +174,22 @@ function ProfilePage() {
                 </select>
               </div>
 
-              <div>
-                <Button onClick={addPasskey} type="button">
-                  {" "}
+              <div className="flex flex-wrap items-center gap-2 pt-2">
+                <Button type="button" onClick={addPasskey}>
                   Add Passkey
                 </Button>
+                <Button type="submit">Save Changes</Button>
               </div>
 
-              <Button type="submit">Save Changes</Button>
-
-              <p className="pt-4 text-sm">
-                Profile created {createdAgo}{" "}
-                {updatedAgo && <span>and updated {updatedAgo}.</span>}
+              <p className="pt-4 text-muted-foreground text-xs">
+                Profile created {createdAgo}
+                {updatedAgo && <span> and updated {updatedAgo}.</span>}
               </p>
             </form>
           </CardContent>
         </Card>
       </TabsContent>
+
       <TabsContent value="admin">
         {isAdmin && <AdminTab userRoleName={userRoleName} />}
       </TabsContent>

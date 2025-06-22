@@ -23,24 +23,50 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
       className="w-full"
     >
       <TabsList
-        className={`grid w-full ${isSuperAdmin ? "grid-cols-10" : isTeacher ? "grid-cols-5" : "grid-cols-7"}`}
+        className={`grid w-full gap-1 ${
+          isSuperAdmin
+            ? "grid-cols-10"
+            : isTeacher
+              ? "grid-cols-5"
+              : "grid-cols-7"
+        }`}
       >
         {(isSuperAdmin || isChairman) && (
           <>
-            <TabsTrigger value="user">User</TabsTrigger>
-            <TabsTrigger value="report">Report</TabsTrigger>
+            <TabsTrigger value="user" className="px-2 py-1 text-sm">
+              User
+            </TabsTrigger>
+            <TabsTrigger value="report" className="px-2 py-1 text-sm">
+              Report
+            </TabsTrigger>
           </>
         )}
-        <TabsTrigger value="class_schedule">Class Schedule</TabsTrigger>
-        <TabsTrigger value="section">Section</TabsTrigger>
-        <TabsTrigger value="course">Course</TabsTrigger>
-        <TabsTrigger value="room">Room</TabsTrigger>
-        <TabsTrigger value="slot">Slot</TabsTrigger>
+        <TabsTrigger value="class_schedule" className="px-2 py-1 text-sm">
+          Class Schedule
+        </TabsTrigger>
+        <TabsTrigger value="section" className="px-2 py-1 text-sm">
+          Section
+        </TabsTrigger>
+        <TabsTrigger value="course" className="px-2 py-1 text-sm">
+          Course
+        </TabsTrigger>
+        <TabsTrigger value="room" className="px-2 py-1 text-sm">
+          Room
+        </TabsTrigger>
+        <TabsTrigger value="slot" className="px-2 py-1 text-sm">
+          Slot
+        </TabsTrigger>
         {isSuperAdmin && (
           <>
-            <TabsTrigger value="role">Role</TabsTrigger>
-            <TabsTrigger value="permission">Permission</TabsTrigger>
-            <TabsTrigger value="pbac">PBAC</TabsTrigger>
+            <TabsTrigger value="role" className="px-2 py-1 text-sm">
+              Role
+            </TabsTrigger>
+            <TabsTrigger value="permission" className="px-2 py-1 text-sm">
+              Permission
+            </TabsTrigger>
+            <TabsTrigger value="pbac" className="px-2 py-1 text-sm">
+              PBAC
+            </TabsTrigger>
           </>
         )}
       </TabsList>
@@ -55,6 +81,7 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
           </TabsContent>
         </>
       )}
+
       <TabsContent value="class_schedule">
         <ClassScheduleForm />
       </TabsContent>
@@ -70,6 +97,7 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
       <TabsContent value="slot">
         <SlotForm userRoleName={userRoleName} />
       </TabsContent>
+
       {isSuperAdmin && (
         <>
           <TabsContent value="role">

@@ -1,6 +1,8 @@
+import { store } from "@/store"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { RouterProvider, createRouter } from "@tanstack/react-router"
 import ReactDOM from "react-dom/client"
+import { Provider as ReduxProvider } from "react-redux"
 import Loader from "./components/loader"
 import { routeTree } from "./routeTree.gen"
 import { queryClient, trpc } from "./utils/trpc"
@@ -12,7 +14,11 @@ const router = createRouter({
   context: { trpc, queryClient },
   Wrap: function WrapComponent({ children }) {
     return (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <ReduxProvider store={store}>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </ReduxProvider>
     )
   },
 })

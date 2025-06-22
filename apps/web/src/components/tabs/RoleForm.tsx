@@ -99,9 +99,9 @@ const RoleForm = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-6">
-        <form onSubmit={onSubmit} className="space-y-2">
-          <div className="grid grid-cols-2 gap-2">
+      <CardContent className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Label htmlFor="name">Role Name</Label>
               <Input id="name" {...register("name", { required: true })} />
@@ -111,11 +111,13 @@ const RoleForm = () => {
               <Input id="description" {...register("description")} />
             </div>
           </div>
-          <Button type="submit">Create Role</Button>
+          <Button type="submit" className="w-full sm:w-fit">
+            Create Role
+          </Button>
         </form>
 
-        <div>
-          <Label className="mb-2">Existing Roles</Label>
+        <div className="space-y-2">
+          <Label className="text-base">Existing Roles</Label>
           <Table>
             <TableHeader>
               <TableRow>
@@ -138,14 +140,15 @@ const RoleForm = () => {
                         autoFocus
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleEditBlur}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.currentTarget.blur()
-                        }}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && e.currentTarget.blur()
+                        }
                       />
                     ) : (
                       role.name
                     )}
                   </TableCell>
+
                   <TableCell
                     onDoubleClick={() => handleDoubleClick(role, "description")}
                     className="cursor-pointer"
@@ -157,21 +160,22 @@ const RoleForm = () => {
                         autoFocus
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleEditBlur}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.currentTarget.blur()
-                        }}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && e.currentTarget.blur()
+                        }
                       />
                     ) : (
-                      (role.description ?? "-")
+                      role.description || "-"
                     )}
                   </TableCell>
+
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => deleteRole.mutate({ id: role.id })}
                     >
-                      <Trash2 className=" text-red-500" />
+                      <Trash2 className="text-red-500" />
                     </Button>
                   </TableCell>
                 </TableRow>
