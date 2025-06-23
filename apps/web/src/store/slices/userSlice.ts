@@ -4,9 +4,15 @@ export interface User {
   id: string
   name: string
   email: string
+  emailVerified: boolean
   isLoggedIn: boolean
-  section: string
-  role: string
+  username: string
+  sectionId: string
+  roleId: string
+  roleName: string
+  createdAt: string
+  updatedAt: string
+  phone: string
 }
 
 interface UserState {

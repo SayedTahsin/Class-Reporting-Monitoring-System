@@ -8,11 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { authClient } from "@/lib/auth-client"
 import { authGuard } from "@/utils/auth-guard"
 import { getTimeAgo } from "@/utils/days-ago"
+import { useSetUserStore } from "@/utils/set-user-store"
 import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { AlertCircle, BadgeCheck } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
@@ -24,10 +25,11 @@ export const Route = createFileRoute("/profile")({
 })
 
 function ProfilePage() {
-  const { data: session } = authClient.useSession()
+  const user = useSetUserStore()
 
-  const [userRoleName, setUserRoleName] = useState("Student")
+  const userRoleName = user?.roleName || "Student"
   const isAdmin = ["SuperAdmin", "Chairman", "Teacher"].includes(userRoleName)
+  const { data: sectiones } = useQuery(trpc.section.getAll.queryOptions())
 
   const { register, handleSubmit, reset, watch } = useForm({
     defaultValues: {
@@ -42,14 +44,20 @@ function ProfilePage() {
     },
   })
 
-  const { data: user, isFetching } = useQuery(trpc.user.getById.queryOptions())
-  const { data: sectiones } = useQuery(trpc.section.getAll.queryOptions())
-  const { data: role } = useQuery({
-    ...trpc.role.getById.queryOptions({
-      id: user?.[0]?.roleId || "",
-    }),
-    enabled: !!user?.[0]?.roleId,
-  })
+  useEffect(() => {
+    if (user) {
+      reset({
+        name: user?.name,
+        email: user?.email,
+        id: user?.id,
+        emailVerified: user?.emailVerified,
+        username: user?.username || "",
+        sectionId: user?.sectionId || "",
+        phone: user?.phone || "",
+        roleId: user?.roleId || "",
+      })
+    }
+  }, [user, reset])
 
   const updateUser = useMutation(
     trpc.user.update.mutationOptions({
@@ -68,7 +76,7 @@ function ProfilePage() {
     )
     updateUser.mutate({
       ...updatedData,
-      id: session?.user.id || "",
+      id: user?.id || "",
     })
   })
 
@@ -76,30 +84,11 @@ function ProfilePage() {
     await authClient.passkey.addPasskey()
   }
 
-  useEffect(() => {
-    if (user) {
-      const u = user[0]
-      reset({
-        name: u.name,
-        email: u.email,
-        id: u.id,
-        emailVerified: u.emailVerified,
-        username: u.username || "",
-        sectionId: u.sectionId || "",
-        phone: u.phone || "",
-        roleId: u.roleId || "",
-      })
-      if (u.roleId) {
-        setUserRoleName(role?.[0]?.name ?? "Student")
-      }
-    }
-  }, [user, reset, role])
-
-  if (isFetching || !user) return <Loader />
+  if (!user) return <Loader />
 
   const emailVerified = watch("emailVerified")
-  const createdAgo = getTimeAgo(user[0].createdAt)
-  const updatedAgo = getTimeAgo(user[0].updatedAt || "")
+  const createdAgo = getTimeAgo(user.createdAt)
+  const updatedAgo = getTimeAgo(user.updatedAt || "")
 
   return (
     <Tabs defaultValue="profile" className="mx-auto mt-4 w-full max-w-5xl">
