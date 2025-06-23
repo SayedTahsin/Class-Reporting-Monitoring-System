@@ -13,23 +13,21 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import type { DateRange } from "react-day-picker"
 import { toast } from "sonner"
+import type { User } from "../store/slices/userSlice"
 import { DatePickerWithRange } from "./ui/date-picker-range"
-
 type OverviewType = "section" | "teacher" | "room"
 
-type AdminTabProps = {
-  userRoleName: string
-}
-
-const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
-  const isSuperAdmin = userRoleName === "SuperAdmin"
-  const isCR = userRoleName === "CR"
-  const isTeacher = userRoleName === "Teacher"
-  const isChairman = userRoleName === "Chairman"
+const ClassHistoryTable = ({ user }: { user: User }) => {
+  const isSuperAdmin = user.roleName === "SuperAdmin"
+  const isCR = user.roleName === "CR"
+  const isTeacher = user.roleName === "Teacher"
+  const isChairman = user.roleName === "Chairman"
   const canEdit = isSuperAdmin || isCR || isTeacher || isChairman
   const canCreate = isSuperAdmin || isTeacher || isChairman
 
-  const [overview, setOverview] = useState<OverviewType>("section")
+  const [overview, setOverview] = useState<OverviewType>(
+    isTeacher ? "teacher" : "section",
+  )
 
   const { data: teachersResult = { data: [] } } = useQuery(
     trpc.user.getTeachers.queryOptions(),
@@ -55,7 +53,13 @@ const ClassHistoryTable = ({ userRoleName }: AdminTabProps) => {
         : rooms
 
   const [selectedId, setSelectedId] = useState<string>(
-    overviewList.length > 0 ? overviewList[0].id : "",
+    overview === "teacher"
+      ? user.id
+      : user.sectionId
+        ? user.sectionId
+        : overviewList.length > 0
+          ? overviewList[0].id
+          : "",
   )
 
   const today = new Date()
