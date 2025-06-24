@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { handleErrorMsg } from "@/utils/error-msg"
 import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useDebounce } from "@uidotdev/usehooks"
@@ -95,7 +96,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         setPage(1)
         refetch()
       },
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(handleErrorMsg(err)),
     }),
   )
 
@@ -105,7 +106,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         toast.success("Course updated!")
         refetch()
       },
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(handleErrorMsg(err)),
     }),
   )
 
@@ -115,7 +116,7 @@ const CourseForm = ({ userRoleName }: AdminTabProps) => {
         toast.success("Course deleted.")
         refetch()
       },
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(handleErrorMsg(err)),
     }),
   )
 

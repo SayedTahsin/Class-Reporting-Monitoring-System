@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { authClient } from "@/lib/auth-client"
 import { authGuard } from "@/utils/auth-guard"
 import { getTimeAgo } from "@/utils/days-ago"
+import { handleErrorMsg } from "@/utils/error-msg"
 import { useSetUserStore } from "@/utils/set-user-store"
 import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -65,7 +66,7 @@ function ProfilePage() {
         toast.success("Profile updated successfully.")
       },
       onError: (error) => {
-        toast.error(error.message)
+        toast.error(handleErrorMsg(error))
       },
     }),
   )
@@ -81,7 +82,11 @@ function ProfilePage() {
   })
 
   const addPasskey = async () => {
-    await authClient.passkey.addPasskey()
+    try {
+      await authClient.passkey.addPasskey()
+    } catch (error) {
+      toast.error(handleErrorMsg(error))
+    }
   }
 
   if (!user) return <Loader />

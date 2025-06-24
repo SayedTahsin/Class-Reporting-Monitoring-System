@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { handleErrorMsg } from "@/utils/error-msg"
 import { trpc } from "@/utils/trpc"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useDebounce } from "@uidotdev/usehooks"
@@ -68,7 +69,7 @@ const PBACForm = () => {
         refetchUserRoles()
         setEditingUserId(null)
       },
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(handleErrorMsg(err)),
     }),
   )
 
@@ -78,7 +79,7 @@ const PBACForm = () => {
         toast.success("Role removed from user")
         refetchUserRoles()
       },
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(handleErrorMsg(err)),
     }),
   )
 
@@ -89,7 +90,7 @@ const PBACForm = () => {
         refetchRolePermissions()
         resetRolePermission()
       },
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(handleErrorMsg(err)),
     }),
   )
 
@@ -99,7 +100,7 @@ const PBACForm = () => {
         toast.success("Permission removed from role")
         refetchRolePermissions()
       },
-      onError: (err) => toast.error(err.message),
+      onError: (err) => toast.error(handleErrorMsg(err)),
     }),
   )
 
