@@ -5,11 +5,18 @@ import { toast } from "sonner"
 import type { AppRouter } from "../../../server/src/routers"
 
 export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
   queryCache: new QueryCache({
     onError: (error) => {
-      toast.error(error.message, {
+      toast.error(error instanceof Error ? error.message : "Unknown error", {
         action: {
-          label: "retry",
+          label: "Retry",
           onClick: () => {
             queryClient.invalidateQueries()
           },
