@@ -121,7 +121,7 @@ const ClassHistoryTable = ({ user }: { user: User }) => {
     refetch: refetchHistory,
   } = useQuery({
     ...trpc.classHistory.getByDate.queryOptions({ from, to }),
-    enabled: !!from && !!to,
+    enabled: !!from,
   })
 
   const filteredHistory = selectedId
@@ -388,7 +388,6 @@ const ClassHistoryTable = ({ user }: { user: User }) => {
                                           slotId: slot.id,
                                           sectionId: selectedId,
                                           ...newClassData,
-                                          status: "delivered",
                                         })
                                       } else {
                                         toast.error("All fields are required")
