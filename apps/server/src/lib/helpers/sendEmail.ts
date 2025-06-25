@@ -1,24 +1,14 @@
-import dotenv from "dotenv"
 import nodemailer from "nodemailer"
-import type SMTPTransport from "nodemailer/lib/smtp-transport"
-dotenv.config()
 
-function getEnv(name: string): string {
-  const val = process.env[name]
-  if (!val) throw new Error(`Missing env var: ${name}`)
-  return val
-}
-
-const smtpOptions: SMTPTransport.Options = {
-  host: getEnv("SMTP_HOST"),
-  port: Number(getEnv("SMTP_PORT")),
+const transporter = nodemailer.createTransport({
+  host: "smtp.resend.com",
+  secure: true,
+  port: 465,
   auth: {
-    user: getEnv("SMTP_USER"),
-    pass: getEnv("SMTP_PASS"),
+    user: "resend",
+    pass: process.env.RESEND_API_KEY,
   },
-}
-
-export const transporter = nodemailer.createTransport(smtpOptions)
+})
 
 transporter
   .verify()
@@ -32,11 +22,11 @@ export async function sendEmail(opts: {
   html?: string
 }) {
   const info = await transporter.sendMail({
-    from: process.env.SMTP_FROM || "CRMS <no-reply@example.com>",
-    to: opts.to,
+    from: "onboarding@resend.dev",
+    to: "delivered@resend.dev",
     subject: opts.subject,
-    text: opts.text,
     html: opts.html,
   })
-  console.log("📨 Email sent:", info.messageId)
+
+  console.log("Message sent: %s", info.messageId)
 }

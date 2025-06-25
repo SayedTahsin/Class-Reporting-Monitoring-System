@@ -24,8 +24,5 @@
 			"biome check --write ."
 		]
 	},
-	"packageManager": "bun@1.2.10",
-	"dependencies": {
-		"croner": "^9.0.0"
-	}
+	"packageManager": "bun@1.2.10"
 }
