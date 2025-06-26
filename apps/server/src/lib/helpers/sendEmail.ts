@@ -22,8 +22,8 @@ export async function sendEmail(opts: {
   html?: string
 }) {
   const info = await transporter.sendMail({
-    from: "onboarding@resend.dev",
-    to: "delivered@resend.dev",
+    from: process.env.SMTP_FROM,
+    to: process.env.SMTP_TO,
     subject: opts.subject,
     html: opts.html,
   })
