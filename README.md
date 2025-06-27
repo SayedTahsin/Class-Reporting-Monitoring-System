@@ -1,33 +1,99 @@
-# React + Tanstack Router + Hono + Drizzle
+# 🧑‍🏫 Academic Schedule & Analytics Platform – Built with React, Hono, tRPC, and Drizzle ORM
 
-This project was created with a modern TypeScript stack that combines React, TanStack Router, Hono, tRPC, and more.
+A full-stack academic scheduling and analytics platform with inline editable tables, permission-based access control, and role-aware tracking—powered by a modern TypeScript stack: React, TanStack Router, Hono, tRPC, and Drizzle ORM.
 
-## Features
+---
 
-- **TypeScript** - For type safety and improved developer experience
-- **TanStack Router** - File-based routing with full type safety
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **shadcn/ui** - Reusable UI components
-- **Hono** - Lightweight, performant server framework
-- **tRPC** - End-to-end type-safe APIs
-- **Bun** - Runtime environment
-- **Drizzle** - TypeScript-first ORM
-- **SQLite/Turso** - Database engine
-- **Authentication** - Email & password authentication with Better Auth
-- **Biome** - Linting and formatting
-- **Husky** - Git hooks for code quality
+## 🌟 Overview
 
-## Getting Started
+This project is a real-world, production-ready education management platform featuring:
 
-First, install the dependencies:
+- End-to-end typesafe communication via tRPC  
+- Fine-grained permission control (PBAC)  
+- Inline class history editing and creation  
+- Date- and role-based filters for tracking  
+- Fully responsive, component-driven UI  
+- Scheduled cron jobs for weekly analytics  
+- Optimized developer experience with Bun, Biome, and modular structure
+
+Ideal for schools, universities, or teams building robust, role-aware class scheduling and tracking tools.
+
+---
+
+## 💡 Tech Highlights
+
+- 🔄 Typesafe data flow across frontend and backend using tRPC + TypeScript  
+- 🧑‍🏫 Permission-Based Access Control (PBAC) – scoped actions by role  
+- ✏️ Inline editing of schedule entries via double-click  
+- 📅 Slot × Date Matrix – intuitive view of classes and gaps  
+- 📊 Class history analytics – track per teacher, section, or room  
+- 📨 Email verification & password reset via Resend  
+- ⚡ Blazing-fast dev environment with Bun and SQLite  
+- 🧩 Modular architecture – clean, scalable, and maintainable  
+
+---
+
+## 🔧 Tech Stack
+
+### 🧱 Frontend
+
+- **React** – Component-driven, declarative UI  
+- **TypeScript** – Static typing across the stack  
+- **TanStack Router** – Nested, type-safe routing  
+- **TailwindCSS** – Utility-first CSS framework  
+- **shadcn/ui** – Accessible components with Radix UI  
+- **TanStack Query** – Data synchronization with caching  
+- **Redux** – Global state management for auth/user state  
+
+### 🛠 Backend & Infrastructure
+
+- **Hono** – Ultra-light, edge-compatible backend framework  
+- **tRPC** – Typesafe APIs without REST or GraphQL  
+- **Drizzle ORM** – SQL-first, type-safe database access  
+- **SQLite / Turso** – Lightweight, local and edge-friendly database  
+- **Bun** – Fast JavaScript/TypeScript runtime with native TS support  
+
+### 🔐 Authentication & Access Control
+
+- **Better Auth** – Email/password login, passkey, verification, reset  
+- **PBAC** – Permission-based access rules by role and ownership  
+- **Resend** – SMTP email delivery for auth workflows  
+- **Middleware-based Guarding** – Centralized route protection  
+- **Role-Based UI Logic** – UI adjusts to SuperAdmin, Teacher, CR, etc.  
+
+---
+
+## 📊 Functionality
+
+- 🔍 **Date-Range Filtering** – Select and filter class history over time  
+- ✏️ **Inline Table Editing** – Create/edit class info directly in table view  
+- 🧩 **Slot × Date Matrix** – Visually map classes in a clean grid  
+- 🧠 **Teacher / Section / Room Analytics** – Filter data by overview  
+- 🕐 **Weekly Cron Jobs** – Background processing with `Croner`  
+- 🧼 **Zero-Runtime Type Errors** – Through TRPC + TypeScript contracts  
+
+---
+
+## 🧪 Developer Experience
+
+- **Biome** – Built-in linting, formatting, and TypeScript fixing  
+- **Husky** – Git hooks to ensure clean code before commits  
+- **Modular tRPC Routers** – Logical separation by feature/domain  
+- **Shared Utilities and Hooks** – Reusable, composable logic across app  
+- **Environment Config** – `.env` based per-app dev/prod setups  
+
+---
+
+## ⚙️ Getting Started
+
+### Install dependencies
 
 ```bash
 bun install
 ```
 
-## Database Setup
-
-This project uses SQLite with Drizzle ORM.
+### Database setup
+This project uses SQLite (Turso) with Drizzle ORM.
 
 1. Start the local SQLite database:
 
@@ -35,16 +101,20 @@ This project uses SQLite with Drizzle ORM.
 cd apps/server && bun db:local
 ```
 
-2. Update your `.env` file in the `apps/server` directory with the appropriate connection details if needed.
+2. Update your `.env` file in the `apps/server` directory with the appropriate connection details. (see `.env.example` for reference).
 
 3. Apply the schema to your database:
 
 ```bash
+bun db:generate
 bun db:push
 ```
 
-Then, run the development server:
+### SMTP setup
+Go to [resend.com](https://resend.com) and update SMTP credentials in your `.env` file (see `.env.example` for reference).
 
+### Run the development server
+Go to root directory and run: 
 ```bash
 bun dev
 ```
@@ -55,25 +125,8 @@ The API is running at [http://localhost:3000](http://localhost:3000).
 
 ## Environment Variables
 
-Create a `.env` file in both **apps/server** and **apps/web** before starting the app. Below are working examples for local development.
+Create a `.env` file in both **apps/server** and **apps/web** before starting the app. Follow `.env.example` files for both `/server` & `/web` folders.
 
-### Backend (`apps/server/.env`)
-
-```env
-CORS_ORIGIN=http://localhost:3001
-# Generate a fresh 32‑byte secret for production (see next section)
-BETTER_AUTH_SECRET=kgQjeoklizgXI6FdfANg9VNse0m0ma9E
-BETTER_AUTH_URL=http://localhost:3000
-DATABASE_URL=file:./local.db
-```
-
-### Frontend (`apps/web/.env`)
-
-```env
-VITE_SERVER_URL=http://localhost:3000
-# Optional: Comma-separated list of allowed hosts for Vite dev server
-# VITE_ALLOWED_HOSTS=example.com,127.0.0.1
-```
 
 > **Note:** If you specify `VITE_ALLOWED_HOSTS`, you need to explicitly load the `.env` file when running the development server:
 >
@@ -86,7 +139,6 @@ VITE_SERVER_URL=http://localhost:3000
 Generate a cryptographically‑secure secret with **OpenSSL**:
 
 ```bash
-# 32‑byte base64 string (recommended length for production)
 openssl rand -base64 32
 ```
 
@@ -94,41 +146,28 @@ Copy the output and paste it into the `BETTER_AUTH_SECRET` entry in your backend
 
 > **Tip:** Regenerate the secret when deploying to a different environment (staging, production, etc.) to isolate sessions across environments.
 
-### Remote Server Setup (Example)
 
 When deploying to a remote server, update the environment variables accordingly.
-
-**Backend (`apps/server/.env`)**
-
-Replace `example-server.com` with your actual backend domain and `example-frontend.com` with your frontend domain.
-
-```env
-# Allow requests from your frontend domain
-CORS_ORIGIN=https://example-frontend.com
-# Use a secure, unique secret for production
-BETTER_AUTH_SECRET=YOUR_PRODUCTION_SECRET_HERE
-# The public URL of your backend server
-BETTER_AUTH_URL=https://example-server.com
-DATABASE_URL=your_production_database_url
-```
-
-**Frontend (`apps/web/.env`)**
-
-Replace `example-server.com` with your actual backend domain.
-
-```env
-# The public URL of your backend API
-VITE_SERVER_URL=https://example-server.com
-VITE_ALLOWED_HOSTS=example-frontend.com
-```
 
 ## Project Structure
 
 ```
 react-tanstack-router-hono-drizzle/
 ├── apps/
-│   ├── web/         # Frontend application (React + TanStack Router)
-│   └── server/      # Backend API (Hono, tRPC)
+│   ├── web/                   # Frontend application
+│   │   ├── src/
+│   │   │   ├── routers/       # TanStack Router config and routes
+│   │   │   ├── store/         # Redux store for user state
+│   │   │   ├── utils/         # Utility functions
+│   │   │   ├── components/    # UI and app components
+│   │   │   │   └── ui/        # shadcn/ui components
+│   │   │   ├── lib/           # Client-side plugins (e.g., TRPC)
+│   │   │   └── hooks/         # Reusable React hooks
+│   └── server/                # Backend application
+│       └── src/
+│           ├── db/           # Drizzle schema, migrations
+│           ├── lib/          # Plugins, helpers (auth, cron, email)
+│           └── routers/      # Modular TRPC routers per domain
 ```
 
 ## Available Scripts
