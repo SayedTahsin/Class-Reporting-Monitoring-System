@@ -77,10 +77,12 @@ Ideal for schools, universities, or teams building robust, role-aware class sche
 ## 🧪 Developer Experience
 
 - **Biome** – Built-in linting, formatting, and TypeScript fixing  
-- **Husky** – Git hooks to ensure clean code before commits  
 - **Modular tRPC Routers** – Logical separation by feature/domain  
 - **Shared Utilities and Hooks** – Reusable, composable logic across app  
 - **Environment Config** – `.env` based per-app dev/prod setups  
+- **TurboRepo** – Efficient monorepo task running for scalable project workflows  
+- **Lint-Staged + Husky** – Git pre-commit hooks to auto-format staged files with Biome  
+
 
 ---
 
@@ -149,7 +151,8 @@ Copy the output and paste it into the `BETTER_AUTH_SECRET` entry in your backend
 
 When deploying to a remote server, update the environment variables accordingly.
 
-## Project Structure
+## 🧰 Monorepo Structure
+This project uses **TurboRepo** to manage multiple apps in a monorepo:
 
 ```
 react-tanstack-router-hono-drizzle/
