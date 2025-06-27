@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as VerificationImport } from './routes/verification'
 import { Route as RoutineImport } from './routes/routine'
+import { Route as ResetPasswordImport } from './routes/reset-password'
 import { Route as ProfileImport } from './routes/profile'
 import { Route as LoginImport } from './routes/login'
 import { Route as IndexImport } from './routes/index'
@@ -28,6 +29,12 @@ const VerificationRoute = VerificationImport.update({
 const RoutineRoute = RoutineImport.update({
   id: '/routine',
   path: '/routine',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ResetPasswordRoute = ResetPasswordImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -74,6 +81,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileImport
       parentRoute: typeof rootRoute
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordImport
+      parentRoute: typeof rootRoute
+    }
     '/routine': {
       id: '/routine'
       path: '/routine'
@@ -97,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/routine': typeof RoutineRoute
   '/verification': typeof VerificationRoute
 }
@@ -105,6 +120,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/routine': typeof RoutineRoute
   '/verification': typeof VerificationRoute
 }
@@ -114,16 +130,36 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/routine': typeof RoutineRoute
   '/verification': typeof VerificationRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/profile' | '/routine' | '/verification'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/profile'
+    | '/reset-password'
+    | '/routine'
+    | '/verification'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/profile' | '/routine' | '/verification'
-  id: '__root__' | '/' | '/login' | '/profile' | '/routine' | '/verification'
+  to:
+    | '/'
+    | '/login'
+    | '/profile'
+    | '/reset-password'
+    | '/routine'
+    | '/verification'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/profile'
+    | '/reset-password'
+    | '/routine'
+    | '/verification'
   fileRoutesById: FileRoutesById
 }
 
@@ -131,6 +167,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   RoutineRoute: typeof RoutineRoute
   VerificationRoute: typeof VerificationRoute
 }
@@ -139,6 +176,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   RoutineRoute: RoutineRoute,
   VerificationRoute: VerificationRoute,
 }
@@ -156,6 +194,7 @@ export const routeTree = rootRoute
         "/",
         "/login",
         "/profile",
+        "/reset-password",
         "/routine",
         "/verification"
       ]
@@ -168,6 +207,9 @@ export const routeTree = rootRoute
     },
     "/profile": {
       "filePath": "profile.tsx"
+    },
+    "/reset-password": {
+      "filePath": "reset-password.tsx"
     },
     "/routine": {
       "filePath": "routine.tsx"

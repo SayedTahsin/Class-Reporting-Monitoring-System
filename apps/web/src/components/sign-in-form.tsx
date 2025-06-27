@@ -1,11 +1,13 @@
 import { authClient } from "@/lib/auth-client"
 import { useForm } from "@tanstack/react-form"
 import { useNavigate } from "@tanstack/react-router"
+import { useState } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
+
 export default function SignInForm({
   onSwitchToSignUp,
 }: {
@@ -15,6 +17,8 @@ export default function SignInForm({
   const navigate = useNavigate({
     from: "/",
   })
+
+  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm({
     defaultValues: {
@@ -29,9 +33,7 @@ export default function SignInForm({
         },
         {
           onSuccess: () => {
-            navigate({
-              to: "/",
-            })
+            navigate({ to: "/" })
             toast.success("Sign in successful")
           },
           onError: (error) => {
@@ -53,9 +55,7 @@ export default function SignInForm({
       const result = await authClient.signIn.passkey()
       if (!result?.error) {
         refetch()
-        navigate({
-          to: "/",
-        })
+        navigate({ to: "/" })
         toast.success("Sign in successful")
       }
     } catch (error) {
@@ -63,8 +63,18 @@ export default function SignInForm({
     }
   }
 
-  const onForgotPassword = () => {
-    toast.success("Coming soon")
+  const onForgotPassword = async () => {
+    setIsLoading(true)
+    const { data, error } = await authClient.forgetPassword({
+      email: form.getFieldValue("email"),
+      redirectTo: "/reset-password",
+    })
+    if (data?.status) {
+      toast.success("Password reset link sent! Check your email.")
+    } else {
+      toast.error(error?.message || "Failed to send password reset link.")
+    }
+    setIsLoading(false)
   }
 
   return (
@@ -88,6 +98,7 @@ export default function SignInForm({
                   id={field.name}
                   name={field.name}
                   type="email"
+                  disabled={isLoading}
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
@@ -108,7 +119,8 @@ export default function SignInForm({
                   <Label htmlFor={field.name}>Password</Label>
                   <button
                     type="button"
-                    className="text-indigo-600 text-sm hover:underline"
+                    disabled={isLoading}
+                    className="text-indigo-600 text-sm hover:underline disabled:opacity-50"
                     onClick={onForgotPassword}
                   >
                     Forgot password?
@@ -118,6 +130,7 @@ export default function SignInForm({
                   id={field.name}
                   name={field.name}
                   type="password"
+                  disabled={isLoading}
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
@@ -136,7 +149,7 @@ export default function SignInForm({
               <Button
                 type="submit"
                 className="w-full"
-                disabled={!state.canSubmit || state.isSubmitting}
+                disabled={!state.canSubmit || state.isSubmitting || isLoading}
               >
                 {state.isSubmitting ? "Signing in..." : "Sign In"}
               </Button>
@@ -149,6 +162,7 @@ export default function SignInForm({
             variant="outline"
             className="w-full text-sm"
             onClick={signWithPasskey}
+            disabled={isLoading}
           >
             Sign in with Passkey
           </Button>
@@ -157,7 +171,8 @@ export default function SignInForm({
             <button
               type="button"
               onClick={onSwitchToSignUp}
-              className="text-indigo-600 hover:underline"
+              className="text-indigo-600 hover:underline disabled:opacity-50"
+              disabled={isLoading}
             >
               Sign Up
             </button>
