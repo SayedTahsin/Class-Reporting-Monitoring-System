@@ -5,7 +5,10 @@ import UserMenu from "./user-menu"
 
 export default function Header() {
   const location = useRouterState({ select: (s) => s.location.pathname })
-  const links = [{ to: "/routine", label: "Routine" }]
+  const links = [
+    { to: "/routine", label: "Routine" },
+    { to: "/resources", label: "Resources" },
+  ]
 
   const shouldHideLinks =
     location === "/login" ||
