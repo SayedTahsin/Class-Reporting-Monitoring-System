@@ -10,7 +10,8 @@ This project is a real-world, production-ready education management platform fea
 
 - End-to-end typesafe communication via tRPC  
 - Fine-grained permission control (PBAC)  
-- Inline class history editing and creation  
+- Inline class history editing and creation
+- Upload, view, and manage files (PDFs, images, etc.) with Supabase Storage
 - Date- and role-based filters for tracking  
 - Fully responsive, component-driven UI  
 - Scheduled cron jobs for weekly analytics  
@@ -28,6 +29,7 @@ Ideal for schools, universities, or teams building robust, role-aware class sche
 - 📅 Slot × Date Matrix – intuitive view of classes and gaps  
 - 📊 Class history analytics – track per teacher, section, or room  
 - 📨 Email verification & password reset via Resend  
+- 🗂️ Resource Management – Upload, view, and delete files with secure Supabase Storage
 - ⚡ Blazing-fast dev environment with Bun and SQLite  
 - 🧩 Modular architecture – clean, scalable, and maintainable  
 
@@ -51,6 +53,7 @@ Ideal for schools, universities, or teams building robust, role-aware class sche
 - **tRPC** – Typesafe APIs without REST or GraphQL  
 - **Drizzle ORM** – SQL-first, type-safe database access  
 - **SQLite / Turso** – Lightweight, local and edge-friendly database  
+- **Supabase Storage** – Secure, signed file uploads per user and course
 - **Bun** – Fast JavaScript/TypeScript runtime with native TS support  
 
 ### 🔐 Authentication & Access Control
@@ -71,6 +74,7 @@ Ideal for schools, universities, or teams building robust, role-aware class sche
 - 🧠 **Teacher / Section / Room Analytics** – Filter data by overview  
 - 🕐 **Weekly Cron Jobs** – Background processing with `Croner`  
 - 🧼 **Zero-Runtime Type Errors** – Through TRPC + TypeScript contracts  
+- 🗃️ **Resource Uploads** – Upload PDFs or images scoped to a course
 
 ---
 
@@ -82,7 +86,6 @@ Ideal for schools, universities, or teams building robust, role-aware class sche
 - **Environment Config** – `.env` based per-app dev/prod setups  
 - **TurboRepo** – Efficient monorepo task running for scalable project workflows  
 - **Lint-Staged + Husky** – Git pre-commit hooks to auto-format staged files with Biome  
-
 
 ---
 
@@ -115,11 +118,17 @@ bun db:push
 ### SMTP setup
 Go to [resend.com](https://resend.com) and update SMTP credentials in your `.env` file (see `.env.example` for reference).
 
+### Supabse setup
+- Go to Supbase and create an new project.
+- Create a new bucket in the storage tab. and name it `pdf`
+- Get service role key and upadate `.env` file (see `.env.example` for reference)
+
 ### Run the development server
 Go to root directory and run: 
 ```bash
 bun dev
 ```
+
 
 Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
 
