@@ -8,6 +8,7 @@ import { rolePermissionRouter } from "./role_permission"
 import { roomRouter } from "./room"
 import { sectionRouter } from "./section"
 import { slotRouter } from "./slot"
+import { supabaseRouter } from "./supabase_storage"
 import { userRouter } from "./user"
 import { userRoleRouter } from "./user_role"
 
@@ -23,5 +24,6 @@ export const appRouter = router({
   classHistory: classHistoryRouter,
   userRole: userRoleRouter,
   rolePermission: rolePermissionRouter,
+  supabase: supabaseRouter,
 })
 export type AppRouter = typeof appRouter

@@ -4,6 +4,7 @@ import CourseForm from "./CourseForm"
 import PBACForm from "./PbacForm"
 import PermissionForm from "./PermissionForm"
 import ReportTab from "./ReportTab"
+import ResourcesTab from "./ResourcesTab"
 import RoleForm from "./RoleForm"
 import RoomForm from "./RoomForm"
 import SectionForm from "./SectionForm"
@@ -25,10 +26,10 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
       <TabsList
         className={`grid w-full gap-1 ${
           isSuperAdmin
-            ? "grid-cols-10"
+            ? "grid-cols-11"
             : isTeacher
-              ? "grid-cols-5"
-              : "grid-cols-7"
+              ? "grid-cols-6"
+              : "grid-cols-8"
         }`}
       >
         {(isSuperAdmin || isChairman) && (
@@ -42,7 +43,10 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
           </>
         )}
         <TabsTrigger value="class_schedule" className="px-2 py-1 text-sm">
-          Class Schedule
+          Schedule
+        </TabsTrigger>
+        <TabsTrigger value="resources" className="px-2 py-1 text-sm">
+          Resources
         </TabsTrigger>
         <TabsTrigger value="section" className="px-2 py-1 text-sm">
           Section
@@ -84,6 +88,9 @@ const AdminTab = ({ userRoleName }: AdminTabProps) => {
 
       <TabsContent value="class_schedule">
         <ClassScheduleForm />
+      </TabsContent>
+      <TabsContent value="resources">
+        <ResourcesTab />
       </TabsContent>
       <TabsContent value="section">
         <SectionForm userRoleName={userRoleName} />
