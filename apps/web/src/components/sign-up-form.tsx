@@ -19,7 +19,7 @@ export default function SignUpForm({
   const navigate = useNavigate({ from: "/" })
   const { isPending } = authClient.useSession()
 
-  const updateUser = useMutation(trpc.user.update.mutationOptions())
+  const updateUser = useMutation(trpc.user.updateRole.mutationOptions())
 
   const { data: role } = useQuery({
     ...trpc.role.getByName.queryOptions({ name: "Student" }),
@@ -44,18 +44,17 @@ export default function SignUpForm({
           name: value.name,
         },
         {
-          onSuccess: async () => {
-            const newSession = await authClient.getSession()
+          onSuccess: async (newUse) => {
             updateUser.mutate({
               roleId: role?.[0]?.id ?? "",
-              id: newSession.data?.user.id || "",
+              id: newUse.data?.user.id || "",
             })
             navigate({ to: "/verification" })
           },
           onError: (error) => {
             toast.error(error.error.message)
           },
-        },
+        }
       )
     },
     validators: {

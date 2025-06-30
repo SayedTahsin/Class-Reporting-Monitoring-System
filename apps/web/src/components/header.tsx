@@ -6,6 +6,7 @@ import UserMenu from "./user-menu"
 export default function Header() {
   const location = useRouterState({ select: (s) => s.location.pathname })
   const links = [
+    { to: "/", label: "Home" },
     { to: "/routine", label: "Routine" },
     { to: "/resources", label: "Resources" },
   ]
@@ -20,9 +21,6 @@ export default function Header() {
       <div className="flex flex-row items-center justify-between px-2 py-1">
         {
           <nav className="flex gap-4 text-lg">
-            <Link key="/" to="/">
-              Home
-            </Link>
             {!shouldHideLinks &&
               links.map(({ to, label }) => (
                 <Link key={to} to={to}>
