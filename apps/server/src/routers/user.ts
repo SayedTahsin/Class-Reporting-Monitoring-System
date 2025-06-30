@@ -4,7 +4,7 @@ import { type SQL, and, eq, isNull, or, sql } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "../db"
 import { user } from "../db/schema/auth"
-import { protectedProcedure, router } from "../lib/trpc"
+import { protectedProcedure, publicProcedure, router } from "../lib/trpc"
 
 const paginationSchema = z.object({
   page: z.number().min(1).optional(),
@@ -195,6 +195,25 @@ export const userRouter = router({
 
       const hasNext = offset + data.length < total
       return { data, total, hasNext }
+    }),
+
+  updateRole: publicProcedure
+    .input(z.object({ roleId: z.string(), id: z.string() }))
+    .mutation(async ({ input }) => {
+      const now = new Date()
+
+      const userObject = await db
+        .select({ roleId: user.roleId })
+        .from(user)
+        .where(eq(user.id, input.id))
+      if (!userObject[0].roleId)
+        await db
+          .update(user)
+          .set({
+            roleId: input.roleId,
+            updatedAt: now,
+          })
+          .where(eq(user.id, input.id))
     }),
 
   update: protectedProcedure
