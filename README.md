@@ -114,17 +114,17 @@ cd apps/server && bun db:local
 bun db:generate
 bun db:push
 ```
-4. Populate `role` , `role_permission` & `permission` tables with the JSON's inside `/apps/server/src/db/important-data` folder. 
+4. Populate `role`, `role_permission` & `permission` tables with the JSON's inside `/apps/server/src/db/important-data` folder. 
 
-5. Assing `SuperAdmin` role to the user you want to make SuperAdmin in `user_role` table. And update that user's roleId in `user` Table to `SuperAdmin`.
+5. Assign `SuperAdmin` role to the user you want to make SuperAdmin in `user_role` table. And update that user's roleId in `user` Table to `SuperAdmin`.
 
 6. Read the API_PERMISSION Doc `/apps/server/src/routers/API_PERMISSION_REQUIREMENTS.md` for understanding the permissions.
 
 ### SMTP setup
 Go to [resend.com](https://resend.com) and update SMTP credentials in your `.env` file (see `.env.example` for reference).
 
-### Supabse setup
-- Go to Supbase and create an new project.
+### Supabase setup
+- Go to Supbase and create a new project.
 - Create a new bucket in the storage tab. and name it `pdf`
 - Get service role key and upadate `.env` file (see `.env.example` for reference)
 
